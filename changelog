@@ -1,0 +1,6 @@
+not rounding 3d poses
+using a different optimizer (Adam)
+checkpoints and info file
+euclidian distance accuracy correccted
+cumulative loss and accuracy calculation erroneous
+2 layers
