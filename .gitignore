@@ -165,3 +165,6 @@ ProcessedPanopticDataset.zip
 
 #trained_models
 trained_models/
+
+#desktop.ini
+desktop.ini
