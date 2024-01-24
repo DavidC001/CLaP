@@ -110,6 +110,8 @@ files.sort(key=lambda f: int(re.sub('\D', '', f)))
 #get last file
 path = "trained_models/sim/" + files[-1]
 
+print("Loading model from: " + path)
+
 #load model
 
 simclr_model = get_linear_evaluation_model(simclr_path, simclr, False)
