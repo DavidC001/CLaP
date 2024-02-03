@@ -1,5 +1,3 @@
-connections = [(7,8),(6,7),(2,6),(2,12),(12,13),(13,14),(2,0),(0,3),(0,9),(3,4),(4,5),(9,10),(10,11),(0,16)]
-
 import re
 from torchvision.models import resnet50, ResNet50_Weights
 import torch.nn as nn
@@ -10,8 +8,15 @@ import torch
 from torchvision import transforms
 import matplotlib.pyplot as plt
 
+from matplotlib.animation import FuncAnimation
 
 
+connections = [(7,8),(6,7),(2,6),(2,12),(12,13),(13,14),(2,0),(0,3),(0,9),(3,4),(4,5),(9,10),(10,11),(0,16)]
+
+
+'''
+Define the SimCLR base model with encoder and projection head
+'''
 class MLP(nn.Module):
     def __init__(self, input_dim, hidden_dim, out_dim):
         super().__init__()
@@ -23,14 +28,29 @@ class MLP(nn.Module):
 
     def forward(self, x):
         return x, self.layers(x)
+    
+from torchvision.models import resnet50, ResNet50_Weights
+
 
 def get_simclr_net():
+    """
+    Returns the SimCLR network model.
+
+    This function creates a SimCLR network model by using a pre-trained ResNet50 model
+    as the backbone and replacing the fully connected layer with a custom MLP layer.
+
+    Returns:
+        model (nn.Module): SimCLR network model.
+    """
     weights = ResNet50_Weights.DEFAULT
     model = resnet50(weights=weights)
     model.fc = MLP(2048, 2048, 128)
 
     return model
 
+'''
+Define the SimSiam projector and predictor
+'''
 class Projector(nn.Module):
     def __init__(self, input_dim, out_dim, hidder_proj):
         super().__init__()
@@ -73,6 +93,10 @@ class SiamMLP(nn.Module):
 
         return x, projections.detach(), predictions
 
+
+'''
+    Define the linear regression last layers for the pose estimation task
+'''
 class Linear(nn.Module):
     def __init__(self):
         super(Linear, self).__init__()
@@ -85,6 +109,17 @@ class Linear(nn.Module):
 
 
 def get_linear_evaluation_model(path, base, siam=True):
+    """
+    Returns a linear evaluation model based on the given path and base model.
+
+    Args:
+        path (str): The path to the saved model state dictionary.
+        base (torch.nn.Module): The base model.
+        siam (bool, optional): Whether the base model is SimSiam network. Defaults to True.
+
+    Returns:
+        torch.nn.Module: The linear evaluation model.
+    """
 
     base.load_state_dict(torch.load(path, map_location=torch.device('cuda')))
 
@@ -96,19 +131,20 @@ def get_linear_evaluation_model(path, base, siam=True):
 
     return base
 
+#load simclr model
 simclr_path = 'trained_models/ver1.pt'
 simclr = get_simclr_net()
 
 #get last model epoch in trained_models/sim/ folder
 
 #get list of files in directory
-files = os.listdir("trained_models/sim")
+files = os.listdir("trained_models/sim_2layer")
 files = [f for f in files if re.match(r'sim_linear_epoch\d+.pt', f)]
 
 #sort files by epoch number
 files.sort(key=lambda f: int(re.sub('\D', '', f)))
 #get last file
-path = "trained_models/sim/" + files[-1]
+path = "trained_models/sim_2layer/" + files[-1]
 
 print("Loading model from: " + path)
 
@@ -131,8 +167,16 @@ transform = transforms.Compose([
 
 
 
-# Function to preprocess the webcam frame and get SimCLR predictions
 def get_simclr_predictions(frame):
+    """
+    Applies the SimCLR model to a given frame and returns the predicted coordinates.
+
+    Args:
+        frame (numpy.ndarray): The input frame.
+
+    Returns:
+        torch.Tensor: The predicted coordinates after applying SimCLR preprocessing and transformations.
+    """
     # Convert the frame to RGB
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
@@ -173,6 +217,15 @@ def get_simclr_predictions(frame):
     return pred_coords
 
 def update(num, scatter, lines, texts):
+    """
+    Update function for live_demo.
+
+    Args:
+        num (int): The frame number.
+        scatter (matplotlib.collections.PathCollection): The scatter plot object.
+        lines (List[matplotlib.lines.Line3D]): The list of line objects.
+        texts (List[matplotlib.text.Text]): The list of text objects.
+    """
     # Capture frame-by-frame
     ret, frame = cap.read()
 
@@ -196,6 +249,7 @@ def update(num, scatter, lines, texts):
         line.set_data_3d([start_point[0], end_point[0]], [start_point[2], end_point[2]], [start_point[1], end_point[1]])
 
 
+# Set up the plot
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 
@@ -208,19 +262,19 @@ ax.set_xlim(-100, 100)
 ax.set_ylim(-100, 100)
 ax.set_zlim(-100, 100)
 
+# Initialize the scatter plot
 scatter = ax.scatter([], [], [])
 
 # Initialize the lines
 lines = [ax.plot([], [], [], color='blue')[0] for _ in range(len(connections))]
 
-# numbers on points
+# Initialize the texts
 texts = [ax.text(0, 0, 0, i, color='red') for i in range(19)]
 
-from matplotlib.animation import FuncAnimation
 # Set up the animation
 ani = FuncAnimation(fig, update, frames=None, fargs=(scatter,lines, texts), interval=20)
 
-# Show the plot
+# Show the plot and start the animation
 plt.show()
 
 # Release the webcam and close all windows
