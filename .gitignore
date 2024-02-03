@@ -169,6 +169,6 @@ trained_models/
 #desktop.ini
 desktop.ini
 
-pred_images/
+images/
 
 mid_out_*.png
