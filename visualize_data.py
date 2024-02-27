@@ -156,7 +156,12 @@ def kmeans_algorithm(features, n_clusters=8):
     Returns:
         array-like: The cluster labels assigned to each data point.
     """
-    kmeans = KMeans(n_clusters=n_clusters)
+    kmeans = KMeans(n_clusters=n_clusters, random_state=3)
+    # 1 is good
+    # 2 3 is less visually appealing, but more similar to one on slides
+    # 5 is close to slides
+    # 4 shows green cluster
+    # 6 is the one used in slide to show green cluster
     kmeans.fit(features)
 
     return kmeans.labels_
@@ -178,6 +183,10 @@ def reduce_dim(features, labels):
     """
     lda = LDA(n_components=3)
     lda.fit(features, labels)
+
+    #save transformation matrix to file for later use
+    with open('lda_transform.npy', 'wb') as f:
+        np.save(f, lda.scalings_)
 
     return lda.transform(features)
 
@@ -228,6 +237,40 @@ def plot_clusters(dataset, clusters, features, title):
 
 from sklearn.metrics import silhouette_score
 
+#save pointcloud as mesh with spheres for each point with color corresponding to cluster
+def save_pointcloud(features, clusters, path):
+    """
+    Save a point cloud as a mesh with spheres for each point and color corresponding to the cluster.
+
+    Parameters:
+    - features (ndarray): The features for each data point.
+    - clusters (list): The cluster labels for each data point.
+    - path (str): The path to save the mesh.
+
+    Returns:
+    None
+    """
+    from pyntcloud import PyntCloud
+    import pandas as pd
+
+    colors = {
+        0: [248, 82, 46], 1: [248, 248, 46],
+        2: [64, 248, 46], 3: [46, 193, 248],
+        4: [107, 46, 248], 5: [217, 46, 248],
+        6: [115, 22, 66], 7: [9, 32, 64]
+    }
+
+    color_list = [colors[c] for c in clusters]
+    color_list = np.array(color_list) / 255.0
+
+    df = pd.DataFrame(features, columns=['x', 'y', 'z'])
+    df['red'] = color_list[:, 0]
+    df['green'] = color_list[:, 1]
+    df['blue'] = color_list[:, 2]
+
+    cloud = PyntCloud(df)
+
+    cloud.to_file(path)
 
 def cluster(model_path, load=True):
     """
@@ -266,6 +309,9 @@ def cluster(model_path, load=True):
     plot_clusters(cluster_set, labels_base, lda_base, "Encoder features")
     plot_clusters(cluster_set, labels_proj, lda_proj, "Projection head features")
 
+    save_pointcloud(lda_base, labels_base, "base_features.ply")
+    save_pointcloud(lda_proj, labels_proj, "proj_features.ply")
+
     return cluster_set, base_features, proj_features, labels_base, labels_proj, lda_base, lda_proj
 
 #get the latest model
@@ -277,6 +323,7 @@ for file in os.listdir(path):
         if e > epoch:
             epoch = e
 
+epoch = 22
 path = path + 'simclr_epoch_{:d}.pth'.format(epoch)
 
 #path = 'trained_models/ver1.pt'
