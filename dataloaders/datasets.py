@@ -1,0 +1,1 @@
+datasets = ["skii","kinect","panoptic"]
