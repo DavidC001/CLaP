@@ -8,10 +8,14 @@ import matplotlib.pyplot as plt
 import torchvision.transforms as T
 
 
-class SkiiDataset(Dataset):
+class ContrastiveSkiDataset(Dataset):
     def __init__(self, transform):
         print("SkiiDataset")
 
-class ClusterSkiiDataset(Dataset):
+class ClusterSkiDataset(Dataset):
     def __init__(self, transform, data_set='training'):
         print("ClusterSkiiDataset")
+
+class PoseSkiDataset(Dataset):
+    def __init__(self, transform, data_set='training'):
+        print("PoseSkiiDataset")

@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import torchvision.transforms as T
 
 
-class PanopticDataset(Dataset):
+class ContrastivePanopticDataset(Dataset):
     def __init__(self, transform, data_set='training'):
 
         # change this to the path where the dataset is stored
@@ -127,5 +127,76 @@ class ClusterPanopticDataset(Dataset):
         image = self.transform(image)
 
         sample['image'] = image
+
+        return sample
+
+class PosePanopticDataset(Dataset):
+    def __init__(self, transform):
+
+        # change this to the path where the dataset is stored
+        self.data_path = "datasets/ProcessedPanopticDataset/171204_pose3/hdImages"
+        self.training_dir = []
+
+        self.transform = transform
+
+        paths = []
+
+        motion_seq = os.listdir(self.data_path)
+        no_dir = ['scripts','python','matlab','.git','glViewer.py','README.md','matlab',
+                'README_kinoptic.md']
+
+        for dir in motion_seq:
+            if dir not in no_dir:
+                if 'haggling' in dir:
+                    continue
+                elif dir == '171204_pose2' or dir =='171204_pose5' or dir =='171026_cello3':
+                    joint_path = os.path.join(self.data_path,dir,'hdJoints').replace('\\', '/')
+                    if os.path.exists(joint_path):
+                        for lists in (os.listdir(joint_path)):
+                            paths.append(os.path.join(joint_path,lists.split('.json')[0]).replace('\\', '/'))
+                elif 'ian' in dir:
+                    continue
+                else:
+                    joint_path = os.path.join(self.data_path,dir,'hdJoints').replace('\\', '/')
+                    if os.path.exists(joint_path):
+                        for lists in (os.listdir(joint_path)):
+                            paths.append(os.path.join(joint_path,lists.split('.json')[0]).replace('\\', '/'))
+
+        self.data = {'paths': paths}
+
+    def __len__(self):
+        return len(self.data['paths'])
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        sample = dict()
+
+        path_split = self.data['paths'][idx].split('/hdJoints')
+        image_path = path_split[0] + '/hdImages' + path_split[-1] + '.jpg'
+
+        image = cv2.imread(image_path)
+        image =cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = self.transform(image)
+
+        sample['image'] = image
+
+        joints_path = self.data['paths'][idx]+'.json'
+
+        with open(joints_path) as dfile:
+            bframe = json.load(dfile)
+
+        poses_3d = torch.tensor(np.array(bframe['poses_3d']), dtype=torch.float32)
+        #remove every 4th element of one dimensional array poses_3d
+        poses_3d = poses_3d.reshape(-1, 4)[:, :3].reshape(-1)
+
+        sample['poses_3d'] =  poses_3d
+
+        cam = bframe['cam']
+        # Replace 'array' with 'list' in the cam string
+        cam = cam.replace('array', 'list')
+
+        sample['cam'] = cam
 
         return sample
