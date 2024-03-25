@@ -19,16 +19,12 @@ import torchvision.transforms as T
 
 from contrastive_training.simclr.model import get_simclr_net
 
-from dataloaders.kinect import KinectDataset
-from dataloaders.skii import SkiiDataset
-from dataloaders.panoptic import PanopticDataset
-
-from dataloaders.datasets import datasets
-dataset = datasets[2]
+from dataloaders.datasets import contrastive_datasets
 
 from torch.utils.tensorboard import SummaryWriter
 
-def get_dataset(batch_size):
+def get_dataset(batch_size, dataset="panoptic"):
+    print("simclr dataload")
     transforms = T.Compose(
         [
             T.ToTensor(),
@@ -36,12 +32,11 @@ def get_dataset(batch_size):
         ]
     )
 
-    dataset = PanopticDataset(transforms)
+    dataset = contrastive_datasets[dataset](transforms)
     train_loader = torch.utils.data.DataLoader(dataset, batch_size, shuffle=True)
 
     return dataset, train_loader
 
-data, loader = get_dataset(443)
 
 
 from flash.core.optimizers import LARS
@@ -119,8 +114,8 @@ def train_step(net, data_loader, optimizer, cost_function, t, device='cuda'):
 
     return cumulative_loss / samples
 
-def main(name = "simclr", batch_size=1024, device='cuda:0', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, t=0.6, epochs=100):
-    _, train_loader = get_dataset(batch_size)
+def train_simclr(name = "simclr", batch_size=1024, device='cuda:0', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, t=0.6, epochs=100, dataset="panoptic"):
+    _, train_loader = get_dataset(batch_size, dataset)
 
     net = get_simclr_net()
     net.to(device)
@@ -161,8 +156,8 @@ def main(name = "simclr", batch_size=1024, device='cuda:0', learning_rate=0.01, 
         print('Epoch: {:d}'.format(e+1))
         print('\tTraining loss {:.5f}'.format(train_loss))
 
-        writer.add_scalar("simclr/loss", train_loss, e+1) 
-        writer.add_scalar("simclr/lr", scheduler.get_last_lr()[0], e+1) 
+        writer.add_scalar(name+"/loss", train_loss, e+1) 
+        writer.add_scalar(name+"/lr", scheduler.get_last_lr()[0], e+1) 
         writer.flush()
 
         torch.save(net.state_dict(), 'trained_models/'+name+'/epoch_{:d}.pth'.format(e+1))
@@ -171,4 +166,5 @@ def main(name = "simclr", batch_size=1024, device='cuda:0', learning_rate=0.01, 
 
         writer.close()
 
-main(name = "simclr", batch_size=180, epochs=100, learning_rate=0.3)
+if __name__ == "__main__":
+    train_simclr(name = "simclr", batch_size=180, epochs=100, learning_rate=0.3)
