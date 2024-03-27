@@ -7,11 +7,8 @@
 #SBATCH -N 1
 #SBATCH -t 0-18:00
 
-module load cuda
+module load cuda/12.1
 
-python --version
-
-##source /home/davide.cavicchini/SIV/conda.sh
-##source /home/davide.cavicchini/anaconda3/bin/activate SIV_hpe
-
+source /home/davide.cavicchini/SIV/.bashrc
+source conda activate SIV_hpe
 
