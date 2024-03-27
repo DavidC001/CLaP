@@ -10,6 +10,6 @@
 module load cuda/12.1
 
 source /home/davide.cavicchini/.bashrc
-source conda activate SIV_hpe
+conda activate SIV_hpe
 
 python3 contrastive_HPE.py
