@@ -1,6 +1,6 @@
 {
     "device": "cuda",
-    "dataset": "panoptic",
+    "dataset": "skiPose",
     "models_dir": "trained_models",
     "contrastive":{
         "skip": false,
