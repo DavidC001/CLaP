@@ -26,11 +26,11 @@ class ContrastiveSkiDataset(Dataset):
         for dir in motion_seq:
           if dir not in no_dir:
             #seq_000 type of directory
-            for seq in (os.listdir(os.path.join(self.data_path, dir))):
-              if os.path.exists(os.path.join(self.data_path, dir, seq, 'cam_00')):
-                        data_path = os.path.join(self.data_path, dir, seq, 'cam_00')
+            for seq in (os.listdir(os.path.join(self.data_path, dir).replace('\\', '/'))):
+              if os.path.exists(os.path.join(self.data_path, dir, seq, 'cam_00').replace('\\', '/')):
+                        data_path = os.path.join(self.data_path, dir, seq, 'cam_00').replace('\\', '/')
                         for lists in (os.listdir(data_path)):
-                            paths.append(os.path.join(data_path, lists))
+                            paths.append(os.path.join(data_path, lists).replace('\\', '/'))
 
         self.data = {'paths': paths}
 
@@ -41,10 +41,9 @@ class ContrastiveSkiDataset(Dataset):
     def get_second_view(self, image_path):
         """Randomly gets another camera view"""
         split = image_path.split('/cam_00')
-        random = random.randint(1, 5)
-        split[2] = 'cam_0' + str(random)
+        random_num = random.randint(1, 5)
 
-        second_path = split[0] + '/cam_0' + str(random) + split[1]
+        second_path = split[0] + '/cam_0' + str(random_num) + split[1]
 
         return second_path
 
