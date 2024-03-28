@@ -133,9 +133,10 @@ def train_simsiam(model_dir="trained_models", name = "simsiam", batch_size=1024,
         writer.add_scalar("simclr/lr", scheduler.get_last_lr()[0], e+1) 
         writer.flush()
 
-        torch.save(net.state_dict(), model_dir+'/'+name+'/epoch_{:d}.pth'.format(e+1))
-        torch.save(optimizer.state_dict(), model_dir+'/'+name+'/epoch_{:d}_optimizer.pth'.format(e+1))
-        torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pth'.format(e+1))
+        if e % 20 == 0:
+            torch.save(net.state_dict(), model_dir+'/'+name+'/epoch_{:d}.pth'.format(e+1))
+            torch.save(optimizer.state_dict(), model_dir+'/'+name+'/epoch_{:d}_optimizer.pth'.format(e+1))
+            torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pth'.format(e+1))
 
         writer.close()
 
