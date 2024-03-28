@@ -51,7 +51,7 @@ def get_optimizer(model, lr, wd, momentum, epochs):
         {'params': model.predictor.parameters()}
     ], lr=lr, weight_decay=wd, momentum=momentum)
 
-    scheduler = CosineAnnealingLR(optimizer, T_max=epochs)
+    scheduler = CosineAnnealingLR(optimizer, T_max=epochs, eta_min=1e-6)
 
     return optimizer, scheduler
 

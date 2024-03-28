@@ -59,7 +59,7 @@ def get_optimizer(model, lr, wd, momentum, epochs):
         {'params': final_layer_weights, 'lr': lr}
     ], weight_decay=wd, momentum=momentum)
 
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=1e-6)
 
     return optimizer, scheduler
 
