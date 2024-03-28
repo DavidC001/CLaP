@@ -2,6 +2,7 @@
     "device": "cuda",
     "dataset": "skiPose",
     "models_dir": "trained_models",
+    "datasets_dir": "datasets",
     "contrastive":{
         "skip": false,
         "simclr":{

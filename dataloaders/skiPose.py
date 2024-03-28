@@ -42,7 +42,6 @@ class ContrastiveSkiDataset(Dataset):
         """Randomly gets another camera view"""
         split = image_path.split('/cam_00')
         random_num = random.randint(1, 5)
-        print(random_num)
 
         second_path = split[0] + '/cam_0' + str(random_num) + split[1]
 

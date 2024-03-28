@@ -25,8 +25,11 @@ def main(args):
     models_dir = data['models_dir']
     if models_dir == None:
         models_dir = 'trained_models'
+    datasets_dir = data['datasets_dir']
+    if datasets_dir == None:
+        datasets_dir = 'datasets'
 
-    contrastive_pretraining(args=data["contrastive"], device=device, dataset=dataset, models_dir=models_dir)
+    contrastive_pretraining(args=data["contrastive"], device=device, dataset=dataset, models_dir=models_dir, datasets_dir=datasets_dir)
 
     
 

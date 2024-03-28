@@ -5,11 +5,12 @@ from contrastive_training.simsiam.train import train_simsiam
 from contrastive_training.simclr.train import train_simclr
 
 
-def contrastive_train(simsiam, simclr, device='cuda', dataset="panoptic", models_dir="trained_models"):
+def contrastive_train(simsiam, simclr, device='cuda', dataset="panoptic", models_dir="trained_models", datasets_dir="datasets"):
     if simclr["train"]:
         print("Training SimCLR")
         train_simclr(
             model_dir=models_dir,
+            dataset_dir=datasets_dir,
             name = simclr["name"], 
             batch_size=simclr["batch_size"],
             device=device,
@@ -26,6 +27,7 @@ def contrastive_train(simsiam, simclr, device='cuda', dataset="panoptic", models
         print("Training SimSiam")
         train_simsiam(
             model_dir=models_dir,
+            dataset_dir=datasets_dir,
             name = simsiam["name"],
             batch_size=simsiam["batch_size"],
             device=device,
@@ -58,7 +60,7 @@ def check_arguments_contrastive(args):
     
     return args
 
-def contrastive_pretraining(args, device='cuda', dataset="panoptic", models_dir="trained_models"):
+def contrastive_pretraining(args, device='cuda', dataset="panoptic", models_dir="trained_models", datasets_dir="datasets"):
     #skip if specified
     if args['skip']:
         print("Skipping contrastive training")
@@ -74,7 +76,7 @@ def contrastive_pretraining(args, device='cuda', dataset="panoptic", models_dir=
     simclr = check_arguments_contrastive(simclr)
 
     contrastive_train(
-        device=device, dataset=dataset, models_dir=models_dir,
+        device=device, dataset=dataset, models_dir=models_dir, datasets_dir=datasets_dir,
         simsiam=simsiam,
         simclr=simclr
     )

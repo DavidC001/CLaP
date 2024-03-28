@@ -23,7 +23,7 @@ from dataloaders.datasets import contrastive_datasets
 
 from torch.utils.tensorboard import SummaryWriter
 
-def get_dataset(batch_size, dataset="panoptic"):
+def get_dataset(batch_size, dataset="panoptic", dataset_dir="datasets"):
     transforms = T.Compose(
         [
             T.ToTensor(),
@@ -31,7 +31,7 @@ def get_dataset(batch_size, dataset="panoptic"):
         ]
     )
 
-    dataset = contrastive_datasets[dataset](transforms)
+    dataset = contrastive_datasets[dataset](transforms, dataset_dir=dataset_dir)
     train_loader = torch.utils.data.DataLoader(dataset, batch_size, shuffle=True)
 
     return dataset, train_loader
@@ -113,8 +113,9 @@ def train_step(net, data_loader, optimizer, cost_function, t, device='cuda'):
 
     return cumulative_loss / samples
 
-def train_simclr(model_dir= "trained_models",name = "simclr", batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, t=0.6, epochs=100, dataset="panoptic"):
-    _, train_loader = get_dataset(batch_size, dataset)
+def train_simclr(model_dir= "trained_models",name = "simclr", dataset_dir="datasets",
+                  batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, t=0.6, epochs=100, dataset="panoptic"):
+    _, train_loader = get_dataset(batch_size, dataset, dataset_dir)
 
     net = get_simclr_net()
     net.to(device)
