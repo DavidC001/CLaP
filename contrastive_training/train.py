@@ -32,7 +32,6 @@ def contrastive_train(simsiam, simclr, device='cuda', dataset="panoptic", models
             learning_rate=simsiam["learning_rate"],
             weight_decay=simsiam["weight_decay"],
             momentum=simsiam["momentum"],
-            t=simsiam["temperature"],
             epochs=simsiam["epochs"],
             dataset=dataset
         )

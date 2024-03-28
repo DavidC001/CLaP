@@ -27,57 +27,40 @@ def get_dataset(batch_size, dataset="panoptic"):
     return dataset, train_loader
 
 
-from flash.core.optimizers import LARS
+from torch.optim import SGD
+from torch.optim.lr_scheduler import CosineAnnealingLR
+
 
 def get_optimizer(model, lr, wd, momentum, epochs):
-    final_layer_weights = []
-    rest_of_the_net_weights = []
 
-    for name, param in model.named_parameters():
-        if name.startswith('fc'):
-            final_layer_weights.append(param)
-        else:
-            rest_of_the_net_weights.append(param)
+    optimizer = SGD([
+        {'params': model.base.parameters(), 'fix_lr': False},
+        {'params': model.predictor.parameters(), 'fix_lr': True}
+    ], lr=lr, weight_decay=wd, momentum=momentum)
 
-    optimizer = LARS([
-        {'params': rest_of_the_net_weights},
-        {'params': final_layer_weights, 'lr': lr}
-    ], lr=lr / 2, weight_decay=wd, momentum=momentum)
-
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
+    scheduler = CosineAnnealingLR(optimizer, T_max=epochs)
 
     return optimizer, scheduler
 
-import torch.nn.functional as F
+from torch import nn
 
+def get_loss(p1, z2, p2, z1):
 
-def get_loss(geom_encoddings, app_encoddings, t):
-    geom_encoddings = F.normalize(geom_encoddings, p=2, dim=1)
-    app_encoddings = F.normalize(app_encoddings, p=2, dim=1)
+    def D(p, z):
 
-    def get_sim(zi, zj, t):
-        cosi = torch.nn.CosineSimilarity(dim=1)
-        return torch.exp(cosi(zi, zj) / t)
+        cos = nn.CosineSimilarity(dim=1)
+        sim = cos(p, z)
 
-    num = get_sim(geom_encoddings, app_encoddings, t)
-    num = torch.cat([num, num])
+        return sim.mean()
 
-    batch = torch.cat([geom_encoddings, app_encoddings])
-    batch = batch / batch.norm(dim=1)[:, None]
-    sim = torch.mm(batch, batch.transpose(0,1))
-    sim = torch.exp(sim / t)
-
-    denom = torch.sum(sim, dim=1) - torch.diagonal(sim, 0)
-    loss_vec = - torch.log(num / denom)
-
-    loss = loss_vec.sum() / batch.size()[0]
+    loss = - (1/2 * D(p1, z2) + 1/2 * D(p2, z1))
 
     return loss
 
+
 from tqdm import tqdm
 
-
-def train_step(net, data_loader, optimizer, cost_function, t, device='cuda'):
+def train_step(net, data_loader, optimizer, cost_function, device='cuda'):
     samples = 0.
     cumulative_loss = 0.
     net.train()
@@ -87,10 +70,10 @@ def train_step(net, data_loader, optimizer, cost_function, t, device='cuda'):
         image1 = batch['image1'].to(device)
         image2 = batch['image2'].to(device)
 
-        _, image1_encoddings = net(image1)
-        _, image2_encoddings = net(image2)
+        x1, z1, p1 = net(image1)
+        x2, z2, p2 = net(image2)
 
-        loss = cost_function(image1_encoddings, image2_encoddings, t)
+        loss = cost_function(p1, z2, p2, z1)
         loss.backward()
 
         optimizer.step()
@@ -98,11 +81,13 @@ def train_step(net, data_loader, optimizer, cost_function, t, device='cuda'):
         optimizer.zero_grad()
 
         cumulative_loss += loss.item()
+
         samples += image1.shape[0]
 
     return cumulative_loss / samples
 
-def train_simsiam(model_dir="trained_models", name = "simsiam", batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, t=0.6, epochs=100, dataset="panoptic"):
+
+def train_simsiam(model_dir="trained_models", name = "simsiam", batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, epochs=100, dataset="panoptic"):
     _, train_loader = get_dataset(batch_size, dataset)
 
     net = get_siam_net()
@@ -137,7 +122,7 @@ def train_simsiam(model_dir="trained_models", name = "simsiam", batch_size=1024,
         scheduler.load_state_dict(torch.load(model_dir+'/'+name+'/epoch_{:d}_scheduler.pth'.format(epoch)))
 
     for e in range(epoch, epochs):
-        train_loss = train_step(net, train_loader, optimizer, cost_function, t, device)
+        train_loss = train_step(net, train_loader, optimizer, cost_function, device)
 
         scheduler.step()
 
