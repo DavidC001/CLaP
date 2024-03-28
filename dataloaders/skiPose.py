@@ -88,23 +88,27 @@ class ClusterSkiDataset(Dataset):
         # change this to the path where the dataset is stored
         self.data_path = dataset_dir+"/Ski-PosePTZ-CameraDataset-png"
 
-        f = '/train'
-        images = [os.path.join(self.data_path, f).replace('\\','/') 
-                      for a in os.listdir(os.path.join(self.data_path, f).replace('\\','/')) #directory seq
-                        for b in os.listdir(os.path.join(self.data_path, f, a).replace('\\','/')) #directory cam
-                          if os.path.isfile(os.path.join(self.data_path, f, a, b).replace('\\','/'))]
-        
-        f = '/test'
-        images1 = [os.path.join(self.data_path, f).replace('\\','/') 
-                      for a in os.listdir(os.path.join(self.data_path, f).replace('\\','/')) #directory seq
-                        for b in os.listdir(os.path.join(self.data_path, f, a).replace('\\','/')) #directory cam
-                          if os.path.isfile(os.path.join(self.data_path, f, a, b).replace('\\','/'))]
+        paths = []
 
-        images = images + images1
+        motion_seq = os.listdir(self.data_path)
+        no_dir = ['license.txt', 'load_h5_example.py', 'README.txt', 'load_h5_example.m']
+
+        #train and test
+        for dir in motion_seq:
+          if dir not in no_dir:
+            #seq_000 type of directory
+            for seq in (os.listdir(os.path.join(self.data_path, dir).replace('\\', '/'))):
+                #if seq is a directory
+                if os.path.exists(os.path.join(self.data_path, dir, seq, 'cam_00').replace('\\', '/')):
+                    for cams in range(6):
+                        data_path = os.path.join(self.data_path, dir, seq, 'cam_0'+str(cams)).replace('\\', '/')
+                        for lists in (os.listdir(data_path)):
+                            paths.append(os.path.join(data_path, lists).replace('\\', '/'))
+
 
         self.transform = transform
 
-        self.data = {'paths': images}
+        self.data = {'paths': paths}
 
     def __len__(self):
         return len(self.data['paths'])
