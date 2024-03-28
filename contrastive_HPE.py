@@ -7,6 +7,8 @@ import torch
 
 from contrastive_training.train import contrastive_pretraining
 
+import random
+random.seed(0)
 
 def main(args):
     #read experiment json file
