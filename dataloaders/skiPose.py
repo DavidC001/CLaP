@@ -88,16 +88,23 @@ class ClusterSkiDataset(Dataset):
         # change this to the path where the dataset is stored
         self.data_path = dataset_dir+"/Ski-PosePTZ-CameraDataset-png"
 
+        f = '/train'
         images = [os.path.join(self.data_path, f).replace('\\','/') 
-                    for f in os.listdir(self.data_path) #test and train
                       for a in os.listdir(os.path.join(self.data_path, f).replace('\\','/')) #directory seq
                         for b in os.listdir(os.path.join(self.data_path, f, a).replace('\\','/')) #directory cam
                           if os.path.isfile(os.path.join(self.data_path, f, a, b).replace('\\','/'))]
         
+        f = '/test'
+        images1 = [os.path.join(self.data_path, f).replace('\\','/') 
+                      for a in os.listdir(os.path.join(self.data_path, f).replace('\\','/')) #directory seq
+                        for b in os.listdir(os.path.join(self.data_path, f, a).replace('\\','/')) #directory cam
+                          if os.path.isfile(os.path.join(self.data_path, f, a, b).replace('\\','/'))]
+
+        images = images + images1
+
         self.transform = transform
 
         self.data = {'paths': images}
-
 
     def __len__(self):
         return len(self.data['paths'])
