@@ -13,6 +13,8 @@ from dataloaders.datasets import contrastive_datasets
 
 from torch.utils.tensorboard import SummaryWriter
 
+generator = torch.Generator().manual_seed(42)
+
 def get_dataset(batch_size, dataset="panoptic", dataset_dir="datasets"):
     transforms = T.Compose(
         [
@@ -21,10 +23,21 @@ def get_dataset(batch_size, dataset="panoptic", dataset_dir="datasets"):
         ]
     )
 
-    dataset = contrastive_datasets[dataset](transforms, dataset_dir=dataset_dir)
-    train_loader = torch.utils.data.DataLoader(dataset, batch_size, shuffle=True)
+    data = contrastive_datasets[dataset](transforms, dataset_dir=dataset_dir)
 
-    return dataset, train_loader
+    num_samples = len(data)
+
+    training_samples = int(num_samples * 0.8 + 1)
+    val_samples = num_samples - training_samples
+
+    training_data, val_data, = torch.utils.data.random_split(
+        data, [training_samples, val_samples], generator=generator
+    )
+
+    train_loader = torch.utils.data.DataLoader(training_data, batch_size, shuffle=True)
+    val_loader = torch.utils.data.DataLoader(val_data, batch_size, shuffle=False)
+
+    return training_data, val_data, train_loader, val_loader
 
 
 from torch.optim import SGD
@@ -34,8 +47,8 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 def get_optimizer(model, lr, wd, momentum, epochs):
 
     optimizer = SGD([
-        {'params': model.base.parameters(), 'fix_lr': False},
-        {'params': model.predictor.parameters(), 'fix_lr': True}
+        {'params': model.base.parameters()},
+        {'params': model.predictor.parameters()}
     ], lr=lr, weight_decay=wd, momentum=momentum)
 
     scheduler = CosineAnnealingLR(optimizer, T_max=epochs)
@@ -86,10 +99,32 @@ def train_step(net, data_loader, optimizer, cost_function, device='cuda'):
 
     return cumulative_loss / samples
 
+def val_step(net, data_loader, cost_function, device='cuda'):
+    samples = 0.
+    cumulative_loss = 0.
+    net.eval()
+
+    for batch_idx, batch in enumerate(tqdm(data_loader)):
+
+        image1 = batch['image1'].to(device)
+        image2 = batch['image2'].to(device)
+
+        x1, z1, p1 = net(image1)
+        x2, z2, p2 = net(image2)
+
+        loss = cost_function(p1, z2, p2, z1)
+
+        cumulative_loss += loss.item()
+
+        samples += image1.shape[0]
+
+    return cumulative_loss / samples
+
 
 def train_simsiam(model_dir="trained_models", name = "simsiam",  dataset_dir="datasets",
                   batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, epochs=100, dataset="panoptic"):
-    _, train_loader = get_dataset(batch_size, dataset, dataset_dir)
+    
+    _, _, train_loader, val_loader = get_dataset(batch_size, dataset, dataset_dir)
 
     net = get_siam_net()
     net.to(device)
@@ -124,17 +159,19 @@ def train_simsiam(model_dir="trained_models", name = "simsiam",  dataset_dir="da
 
     for e in range(epoch, epochs):
         train_loss = train_step(net, train_loader, optimizer, cost_function, device)
+        val_loss = val_step(net, val_loader, cost_function, device)
 
         scheduler.step()
 
         print('Epoch: {:d}'.format(e+1))
         print('\tTraining loss {:.5f}'.format(train_loss))
 
-        writer.add_scalar("simclr/loss", train_loss, e+1) 
-        writer.add_scalar("simclr/lr", scheduler.get_last_lr()[0], e+1) 
+        writer.add_scalar(name+"/train_loss", train_loss, e+1) 
+        writer.add_scalar(name+"/lr", scheduler.get_last_lr()[0], e+1) 
+        writer.add_scalar(name+"/val_loss", val_loss, e+1)
         writer.flush()
 
-        if e+1 % 20 == 0:
+        if (e+1) % 20 == 0:
             torch.save(net.state_dict(), model_dir+'/'+name+'/epoch_{:d}.pth'.format(e+1))
             torch.save(optimizer.state_dict(), model_dir+'/'+name+'/epoch_{:d}_optimizer.pth'.format(e+1))
             torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pth'.format(e+1))
