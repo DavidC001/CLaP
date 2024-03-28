@@ -9,15 +9,13 @@ import torchvision.transforms as T
 
 
 class ContrastivePanopticDataset(Dataset):
-    def __init__(self, transform, data_set='training'):
+    def __init__(self, transform, dataset_dir="datasets"):
 
         # change this to the path where the dataset is stored
-        self.data_path = "datasets/ProcessedPanopticDataset/"
+        self.data_path = dataset_dir+"/ProcessedPanopticDataset/"
         self.training_dir = []
 
         self.transform = transform
-
-        self.set = data_set
 
         paths = []
 
@@ -98,10 +96,10 @@ class ContrastivePanopticDataset(Dataset):
         return sample
 
 class ClusterPanopticDataset(Dataset):
-    def __init__(self, transform, data_set='training'):
+    def __init__(self, transform, dataset_dir="datasets"):
 
         # change this to the path where the dataset is stored
-        self.data_path = "datasets/ProcessedPanopticDataset/171204_pose3/hdImages"
+        self.data_path = dataset_dir+"/ProcessedPanopticDataset/171204_pose3/hdImages"
 
         images = [os.path.join(self.data_path, f.replace('\\','/')) for f in os.listdir(self.data_path) 
                     if os.path.isfile(os.path.join(self.data_path, f.replace('\\','/')))][0:6000]
@@ -131,10 +129,10 @@ class ClusterPanopticDataset(Dataset):
         return sample
 
 class PosePanopticDataset(Dataset):
-    def __init__(self, transform):
+    def __init__(self, transform, dataset_dir="datasets"):
 
         # change this to the path where the dataset is stored
-        self.data_path = "datasets/ProcessedPanopticDataset/171204_pose3/hdImages"
+        self.data_path = dataset_dir+"/ProcessedPanopticDataset/171204_pose3/hdImages"
         self.training_dir = []
 
         self.transform = transform

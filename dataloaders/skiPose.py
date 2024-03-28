@@ -9,10 +9,10 @@ import torchvision.transforms as T
 
 
 class ContrastiveSkiDataset(Dataset):
-    def __init__(self, transform):
+    def __init__(self, transform, dataset_dir="datasets"):
 
         # change this to the path where the dataset is stored
-        self.data_path = "datasets/Ski-PosePTZ-CameraDataset-png"
+        self.data_path = dataset_dir+"/Ski-PosePTZ-CameraDataset-png"
         self.training_dir = []
 
         self.transform = transform
@@ -42,6 +42,7 @@ class ContrastiveSkiDataset(Dataset):
         """Randomly gets another camera view"""
         split = image_path.split('/cam_00')
         random_num = random.randint(1, 5)
+        print(random_num)
 
         second_path = split[0] + '/cam_0' + str(random_num) + split[1]
 
@@ -83,9 +84,9 @@ class ContrastiveSkiDataset(Dataset):
 
 
 class ClusterSkiDataset(Dataset):
-    def __init__(self, transform, data_set='training'):
+    def __init__(self, transform, dataset_dir="datasets"):
         print("ClusterSkiiDataset")
 
 class PoseSkiDataset(Dataset):
-    def __init__(self, transform, data_set='training'):
+    def __init__(self, transform, dataset_dir="datasets"):
         print("PoseSkiiDataset")

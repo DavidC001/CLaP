@@ -9,13 +9,13 @@ import torchvision.transforms as T
 
 
 class ContrastiveKinectDataset(Dataset):
-    def __init__(self, transform):
+    def __init__(self, transform, dataset_dir="datasets"):
         print("KinectDataset")
 
 class ClusterKinectDataset(Dataset):
-    def __init__(self, transform):
+    def __init__(self, transform, dataset_dir="datasets"):
         print("ClusterKinectDataset")
 
 class PoseKinectDataset(Dataset):
-    def __init__(self, transform):
+    def __init__(self, transform, dataset_dir="datasets"):
         print("PoseKinectDataset")
