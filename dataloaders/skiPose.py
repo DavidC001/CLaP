@@ -84,8 +84,40 @@ class ContrastiveSkiDataset(Dataset):
 
 class ClusterSkiDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets"):
-        print("ClusterSkiiDataset")
 
+        # change this to the path where the dataset is stored
+        self.data_path = dataset_dir+"/Ski-PosePTZ-CameraDataset-png"
+
+        images = [os.path.join(self.data_path, f.replace('\\','/')) 
+                    for f in os.listdir(self.data_path) #test and train
+                      for a in os.listdir(os.path.join(self.data_path, f)) #directory seq
+                        for b in os.listdir(os.path.join(self.data_path, f, a)) #directory cam
+                          if os.path.isfile(os.path.join(self.data_path, f.replace('\\','/'), a.replace('\\','/'), b.replace('\\','/')))]
+        
+        self.transform = transform
+
+        self.data = {'paths': images}
+
+
+    def __len__(self):
+        return len(self.data['paths'])
+
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        sample = dict()
+
+        image_path = self.data['paths'][idx]
+
+        image = cv2.imread(image_path)
+        image =cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = self.transform(image)
+
+        sample['image'] = image
+
+        return sample
 class PoseSkiDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets"):
         print("PoseSkiiDataset")
