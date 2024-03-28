@@ -1,0 +1,41 @@
+{
+    "device": "cuda",
+    "dataset": "panoptic",
+    "models_dir": "trained_models",
+    "contrastive":{
+        "skip": false,
+        "simclr":{
+            "name": "simclr",
+            "train": true,
+            "batch_size": 64,
+            "learning_rate": 0.01,
+            "weight_decay": 0.000001,
+            "momentum": 0.9,
+            "temperature": 0.5,
+            "epochs": 100
+        },
+        "simsiam":{
+            "name": "simsiam",
+            "train": true,
+            "batch_size": 64,
+            "learning_rate": 0.01,
+            "weight_decay": 0.000001,
+            "momentum": 0.9,
+            "temperature": 0.5,
+            "epochs": 100
+        }
+    },
+    "pose_estimation":{
+        "skip": false,
+        "simclr":{
+            "name": "simclr_estimator",
+            "pretrained_model": "simclr",
+            "train": true
+        },
+        "simsiam":{
+            "name": "simsiam_estimator",
+            "pretrained_model": "simsiam",
+            "train": true
+        }
+    }
+}
