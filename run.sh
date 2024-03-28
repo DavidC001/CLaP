@@ -12,4 +12,4 @@ module load cuda/12.1
 source /home/davide.cavicchini/.bashrc
 conda activate SIV_hpe
 
-python3 contrastive_HPE.py
+python3 contrastive_HPE.py --experiment experiments/cluster.json
