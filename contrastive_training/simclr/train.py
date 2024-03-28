@@ -24,7 +24,6 @@ from dataloaders.datasets import contrastive_datasets
 from torch.utils.tensorboard import SummaryWriter
 
 def get_dataset(batch_size, dataset="panoptic"):
-    print("simclr dataload")
     transforms = T.Compose(
         [
             T.ToTensor(),
