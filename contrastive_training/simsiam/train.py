@@ -102,7 +102,7 @@ def train_step(net, data_loader, optimizer, cost_function, t, device='cuda'):
 
     return cumulative_loss / samples
 
-def train_simsiam(name = "simsiam", batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, t=0.6, epochs=100, dataset="panoptic"):
+def train_simsiam(model_dir="trained_models", name = "simsiam", batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, t=0.6, epochs=100, dataset="panoptic"):
     _, train_loader = get_dataset(batch_size, dataset)
 
     net = get_siam_net()
@@ -112,15 +112,15 @@ def train_simsiam(name = "simsiam", batch_size=1024, device='cuda', learning_rat
 
     cost_function = get_loss
 
-    writer = SummaryWriter(log_dir="trained_models/tensorboard/"+name)
+    writer = SummaryWriter(log_dir=model_dir+"/tensorboard/"+name)
 
     #create folder for model
-    if not os.path.exists('trained_models/' + name):
-        os.makedirs('trained_models/' + name)
+    if not os.path.exists(model_dir+'/' + name):
+        os.makedirs(model_dir+'/' + name)
 
     #get latest epoch
     epoch = 0
-    for file in os.listdir('trained_models/' + name):
+    for file in os.listdir(model_dir+'/' + name):
         if 'epoch' in file:
             e = int(re.findall(r'\d+', file)[0])
             if e > epoch:
@@ -130,11 +130,11 @@ def train_simsiam(name = "simsiam", batch_size=1024, device='cuda', learning_rat
 
     #load latest model
     if epoch > 0:
-        net.load_state_dict(torch.load('trained_models/'+name+'/epoch_{:d}.pth'.format(epoch)))
+        net.load_state_dict(torch.load(model_dir+'/'+name+'/epoch_{:d}.pth'.format(epoch)))
         #load optimizer
-        optimizer.load_state_dict(torch.load('trained_models/'+name+'/epoch_{:d}_optimizer.pth'.format(epoch)))
+        optimizer.load_state_dict(torch.load(model_dir+'/'+name+'/epoch_{:d}_optimizer.pth'.format(epoch)))
         #load scheduler
-        scheduler.load_state_dict(torch.load('trained_models/'+name+'/epoch_{:d}_scheduler.pth'.format(epoch)))
+        scheduler.load_state_dict(torch.load(model_dir+'/'+name+'/epoch_{:d}_scheduler.pth'.format(epoch)))
 
     for e in range(epoch, epochs):
         train_loss = train_step(net, train_loader, optimizer, cost_function, t, device)
@@ -148,9 +148,9 @@ def train_simsiam(name = "simsiam", batch_size=1024, device='cuda', learning_rat
         writer.add_scalar("simclr/lr", scheduler.get_last_lr()[0], e+1) 
         writer.flush()
 
-        torch.save(net.state_dict(), 'trained_models/'+name+'/epoch_{:d}.pth'.format(e+1))
-        torch.save(optimizer.state_dict(), 'trained_models/'+name+'/epoch_{:d}_optimizer.pth'.format(e+1))
-        torch.save(scheduler.state_dict(), 'trained_models/'+name+'/epoch_{:d}_scheduler.pth'.format(e+1))
+        torch.save(net.state_dict(), model_dir+'/'+name+'/epoch_{:d}.pth'.format(e+1))
+        torch.save(optimizer.state_dict(), model_dir+'/'+name+'/epoch_{:d}_optimizer.pth'.format(e+1))
+        torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pth'.format(e+1))
 
         writer.close()
 
