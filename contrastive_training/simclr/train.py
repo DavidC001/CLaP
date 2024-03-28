@@ -160,12 +160,18 @@ def train_simclr(model_dir= "trained_models",name = "simclr", dataset_dir="datas
         writer.add_scalar(name+"/lr", scheduler.get_last_lr()[0], e+1) 
         writer.flush()
 
-        if e%20 == 0:
+        if e+1%20 == 0:
             torch.save(net.state_dict(), model_dir+ '/'+name+'/epoch_{:d}.pth'.format(e+1))
             torch.save(optimizer.state_dict(), model_dir+'/'+name+'/epoch_{:d}_optimizer.pth'.format(e+1))
             torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pth'.format(e+1))
 
         writer.close()
+    
+    #save final model (if not saved already)
+    if epochs%20 != 0:
+        torch.save(net.state_dict(), model_dir+ '/'+name+'/epoch_{:d}.pth'.format(epochs))
+        torch.save(optimizer.state_dict(), model_dir+'/'+name+'/epoch_{:d}_optimizer.pth'.format(epochs))
+        torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pth'.format(epochs))
 
 if __name__ == "__main__":
     train_simclr(name = "simclr", batch_size=180, epochs=100, learning_rate=0.3)
