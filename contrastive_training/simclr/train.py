@@ -5,6 +5,11 @@ import os
 import torch
 import re
 import torchvision.transforms as T
+import torch.nn.functional as F
+
+from flash.core.optimizers import LARS
+
+from tqdm import tqdm
 
 from contrastive_training.simclr.model import get_simclr_net
 
@@ -39,9 +44,6 @@ def get_dataset(batch_size, dataset="panoptic", dataset_dir="datasets"):
     return training_data, val_data, train_loader, val_loader
 
 
-
-from flash.core.optimizers import LARS
-
 def get_optimizer(model, lr, wd, momentum, epochs):
     final_layer_weights = []
     rest_of_the_net_weights = []
@@ -60,8 +62,6 @@ def get_optimizer(model, lr, wd, momentum, epochs):
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
     return optimizer, scheduler
-
-import torch.nn.functional as F
 
 
 def get_loss(geom_encoddings, app_encoddings, t):
@@ -86,8 +86,6 @@ def get_loss(geom_encoddings, app_encoddings, t):
     loss = loss_vec.sum() / batch.size()[0]
 
     return loss
-
-from tqdm import tqdm
 
 
 def train_step(net, data_loader, optimizer, cost_function, t, device='cuda'):
@@ -134,6 +132,7 @@ def val_step(net, data_loader, cost_function, t, device='cuda'):
         samples += image1.shape[0]
 
     return cumulative_loss / samples
+
 
 def train_simclr(model_dir= "trained_models",name = "simclr", dataset_dir="datasets",
                   batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, t=0.6, epochs=100, dataset="panoptic"):

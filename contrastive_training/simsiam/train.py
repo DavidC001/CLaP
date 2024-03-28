@@ -6,6 +6,10 @@ import torch
 import re
 
 import torchvision.transforms as T
+from torch.optim import SGD
+from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch import nn
+from tqdm import tqdm
 
 from contrastive_training.simsiam.model import get_siam_net
 
@@ -40,10 +44,6 @@ def get_dataset(batch_size, dataset="panoptic", dataset_dir="datasets"):
     return training_data, val_data, train_loader, val_loader
 
 
-from torch.optim import SGD
-from torch.optim.lr_scheduler import CosineAnnealingLR
-
-
 def get_optimizer(model, lr, wd, momentum, epochs):
 
     optimizer = SGD([
@@ -55,7 +55,6 @@ def get_optimizer(model, lr, wd, momentum, epochs):
 
     return optimizer, scheduler
 
-from torch import nn
 
 def get_loss(p1, z2, p2, z1):
 
@@ -70,8 +69,6 @@ def get_loss(p1, z2, p2, z1):
 
     return loss
 
-
-from tqdm import tqdm
 
 def train_step(net, data_loader, optimizer, cost_function, device='cuda'):
     samples = 0.
