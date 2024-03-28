@@ -5,7 +5,7 @@ from contrastive_training.simsiam.train import train_simsiam
 from contrastive_training.simclr.train import train_simclr
 
 
-def contrastive_train(device='cuda:0', dataset="panoptic",
+def contrastive_train(device='cuda', dataset="panoptic",
                       simsiam=True, name_siam = "simsiam",
                       batch_size_siam=1024, lr_siam=0.01, wd_siam=0.000001, momentum_siam=0.9, t_siam=0.6, epochs_siam=100,
                       simclr=True, name_clr = "simclr",

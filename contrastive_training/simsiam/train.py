@@ -102,7 +102,7 @@ def train_step(net, data_loader, optimizer, cost_function, t, device='cuda'):
 
     return cumulative_loss / samples
 
-def train_simsiam(name = "simsiam", batch_size=1024, device='cuda:0', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, t=0.6, epochs=100, dataset="panoptic"):
+def train_simsiam(name = "simsiam", batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, t=0.6, epochs=100, dataset="panoptic"):
     _, train_loader = get_dataset(batch_size, dataset)
 
     net = get_siam_net()
