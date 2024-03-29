@@ -162,6 +162,7 @@ def train_simsiam(model_dir="trained_models", name = "simsiam",  dataset_dir="da
 
         print('Epoch: {:d}'.format(e+1))
         print('\tTraining loss {:.5f}'.format(train_loss))
+        print('\tValidation loss {:.5f}'.format(val_loss))
 
         writer.add_scalar(name+"/train_loss", train_loss, e+1) 
         writer.add_scalar(name+"/lr", scheduler.get_last_lr()[0], e+1) 
