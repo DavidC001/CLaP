@@ -8,23 +8,23 @@
         "simclr":{
             "train": true,
             "name": "simclr_both",
-            "batch_size": 512,
-            "learning_rate": 0.01,
+            "batch_size": 650,
+            "learning_rate": 0.1,
             "weight_decay": 0.000001,
             "momentum": 0.9,
             "temperature": 0.5,
             "epochs": 20,
-            "save_every": 5
+            "save_every": 1
         },
         "simsiam":{
             "train": true,
             "name": "simsiam_both",
-            "batch_size": 512,
-            "learning_rate": 0.01,
+            "batch_size": 650,
+            "learning_rate": 0.1,
             "weight_decay": 0.000001,
             "momentum": 0.9,
             "epochs": 20,
-            "save_every": 5
+            "save_every": 1
         }
     },
     "pose_estimation":{
