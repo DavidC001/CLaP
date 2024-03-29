@@ -11,6 +11,7 @@ def contrastive_train(simsiam, simclr, device='cuda', datasets=["panoptic"], mod
         train_simclr(
             model_dir=models_dir,
             dataset_dir=datasets_dir,
+            datasets=datasets,
             name = simclr["name"], 
             batch_size=simclr["batch_size"],
             device=device,
@@ -19,7 +20,7 @@ def contrastive_train(simsiam, simclr, device='cuda', datasets=["panoptic"], mod
             momentum=simclr["momentum"],
             t=simclr["temperature"],
             epochs=simclr["epochs"],
-            datasets=datasets
+            save_every = simclr["save_every"]
         )
         print("SimCLR training done")
     
@@ -28,6 +29,7 @@ def contrastive_train(simsiam, simclr, device='cuda', datasets=["panoptic"], mod
         train_simsiam(
             model_dir=models_dir,
             dataset_dir=datasets_dir,
+            datasets=datasets,
             name = simsiam["name"],
             batch_size=simsiam["batch_size"],
             device=device,
@@ -35,7 +37,7 @@ def contrastive_train(simsiam, simclr, device='cuda', datasets=["panoptic"], mod
             weight_decay=simsiam["weight_decay"],
             momentum=simsiam["momentum"],
             epochs=simsiam["epochs"],
-            datasets=datasets
+            save_every = simsiam["save_every"]
         )
         print("SimSiam training done")
 
@@ -57,6 +59,8 @@ def check_arguments_contrastive(args):
         args['temperature'] = 0.6
     if 'epochs' not in args:
         args['epochs'] = 100
+    if 'save_every' not in args:
+        args['save_every'] = 10
     
     return args
 

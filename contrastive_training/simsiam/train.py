@@ -120,7 +120,7 @@ def val_step(net, data_loader, cost_function, device='cuda'):
 
 
 def train_simsiam(model_dir="trained_models", name = "simsiam",  dataset_dir="datasets", datasets="panoptic",
-                  batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, epochs=100):
+                  batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, epochs=100, save_every=10):
     
     _, _, train_loader, val_loader = get_dataset(batch_size, datasets, dataset_dir)
 
@@ -170,7 +170,7 @@ def train_simsiam(model_dir="trained_models", name = "simsiam",  dataset_dir="da
         writer.add_scalar(name+"/val_loss", val_loss, e+1)
         writer.flush()
 
-        if (e+1) % 20 == 0:
+        if (e+1) % save_every == 0:
             torch.save(net.state_dict(), model_dir+'/'+name+'/epoch_{:d}.pth'.format(e+1))
             torch.save(optimizer.state_dict(), model_dir+'/'+name+'/epoch_{:d}_optimizer.pth'.format(e+1))
             torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pth'.format(e+1))
@@ -178,7 +178,7 @@ def train_simsiam(model_dir="trained_models", name = "simsiam",  dataset_dir="da
         writer.close()
     
     # save the final model (if not saved already)
-    if epochs % 20 != 0:
+    if epochs % save_every != 0:
         torch.save(net.state_dict(), model_dir+'/'+name+'/epoch_{:d}.pth'.format(epochs))
         torch.save(optimizer.state_dict(), model_dir+'/'+name+'/epoch_{:d}_optimizer.pth'.format(epochs))
         torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pth'.format(epochs))
