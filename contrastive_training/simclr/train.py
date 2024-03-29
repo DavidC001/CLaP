@@ -14,12 +14,13 @@ from tqdm import tqdm
 from contrastive_training.simclr.model import get_simclr_net
 
 from dataloaders.datasets import contrastive_datasets
+from dataloaders.datasets import combineDataSets
 
 from torch.utils.tensorboard import SummaryWriter
 
 generator = torch.Generator().manual_seed(42)
 
-def get_dataset(batch_size, dataset="panoptic", dataset_dir="datasets"):
+def get_dataset(batch_size, datasets=["panoptic"], dataset_dir="datasets"):
     transforms = T.Compose(
         [
             T.ToTensor(),
@@ -27,7 +28,7 @@ def get_dataset(batch_size, dataset="panoptic", dataset_dir="datasets"):
         ]
     )
 
-    data = contrastive_datasets[dataset](transforms, dataset_dir=dataset_dir)
+    data = combineDataSets(*[contrastive_datasets[dataset](transforms, dataset_dir=dataset_dir) for dataset in datasets])
 
     num_samples = len(data)
 
@@ -134,11 +135,11 @@ def val_step(net, data_loader, cost_function, t, device='cuda'):
     return cumulative_loss / samples
 
 
-def train_simclr(model_dir= "trained_models",name = "simclr", dataset_dir="datasets",
-                  batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, t=0.6, epochs=100, dataset="panoptic"):
+def train_simclr(model_dir= "trained_models",name = "simclr", dataset_dir="datasets", datasets=["panoptic"],
+                  batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, t=0.6, epochs=100):
     
     
-    _, _, train_loader, val_loader = get_dataset(batch_size, dataset, dataset_dir)
+    _, _, train_loader, val_loader = get_dataset(batch_size, datasets, dataset_dir)
 
     net = get_simclr_net()
     net.to(device)

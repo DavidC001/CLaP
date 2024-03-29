@@ -16,20 +16,16 @@ def main(args):
         data = json.load(f)
     
     #get the required parameters
-    device = data['device']
-    if device == None:
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    dataset = data['dataset']
-    if dataset == None:
-        dataset = 'panoptic'
-    models_dir = data['models_dir']
-    if models_dir == None:
-        models_dir = 'trained_models'
-    datasets_dir = data['datasets_dir']
-    if datasets_dir == None:
-        datasets_dir = 'datasets'
-
-    contrastive_pretraining(args=data["contrastive"], device=device, dataset=dataset, models_dir=models_dir, datasets_dir=datasets_dir)
+    if 'device' not in data: device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    else: device = data['device']
+    
+    if 'models_dir' not in data: models_dir = 'trained_models'
+    else: models_dir = data['models_dir']
+    
+    if 'datasets_dir' not in data: datasets_dir = 'datasets'
+    else: datasets_dir = data['datasets_dir']
+    
+    contrastive_pretraining(args=data["contrastive"], device=device, models_dir=models_dir, datasets_dir=datasets_dir)
 
     
 

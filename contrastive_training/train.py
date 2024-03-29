@@ -5,7 +5,7 @@ from contrastive_training.simsiam.train import train_simsiam
 from contrastive_training.simclr.train import train_simclr
 
 
-def contrastive_train(simsiam, simclr, device='cuda', dataset="panoptic", models_dir="trained_models", datasets_dir="datasets"):
+def contrastive_train(simsiam, simclr, device='cuda', datasets=["panoptic"], models_dir="trained_models", datasets_dir="datasets"):
     if simclr["train"]:
         print("Training SimCLR")
         train_simclr(
@@ -19,7 +19,7 @@ def contrastive_train(simsiam, simclr, device='cuda', dataset="panoptic", models
             momentum=simclr["momentum"],
             t=simclr["temperature"],
             epochs=simclr["epochs"],
-            dataset=dataset
+            datasets=datasets
         )
         print("SimCLR training done")
     
@@ -35,7 +35,7 @@ def contrastive_train(simsiam, simclr, device='cuda', dataset="panoptic", models
             weight_decay=simsiam["weight_decay"],
             momentum=simsiam["momentum"],
             epochs=simsiam["epochs"],
-            dataset=dataset
+            datasets=datasets
         )
         print("SimSiam training done")
 
@@ -60,12 +60,15 @@ def check_arguments_contrastive(args):
     
     return args
 
-def contrastive_pretraining(args, device='cuda', dataset="panoptic", models_dir="trained_models", datasets_dir="datasets"):
+def contrastive_pretraining(args, device='cuda', models_dir="trained_models", datasets_dir="datasets"):
     #skip if specified
     if args['skip']:
         print("Skipping contrastive training")
         return
     
+    if 'datasets' not in args:
+        args['datasets'] = ["panoptic"]
+
     print("Contrastive training")
 
     simsiam = args['simsiam']
@@ -76,7 +79,7 @@ def contrastive_pretraining(args, device='cuda', dataset="panoptic", models_dir=
     simclr = check_arguments_contrastive(simclr)
 
     contrastive_train(
-        device=device, dataset=dataset, models_dir=models_dir, datasets_dir=datasets_dir,
+        device=device, datasets=args['datasets'], models_dir=models_dir, datasets_dir=datasets_dir,
         simsiam=simsiam,
         simclr=simclr
     )

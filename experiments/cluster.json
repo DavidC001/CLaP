@@ -1,13 +1,13 @@
 {
     "device": "cuda",
-    "dataset": "skiPose",
     "models_dir": "trained_models",
     "datasets_dir": "datasets",
     "contrastive":{
         "skip": false,
+        "datasets": ["skiPose", "panoptic"],
         "simclr":{
-            "name": "simclr",
             "train": true,
+            "name": "simclr_both",
             "batch_size": 320,
             "learning_rate": 0.01,
             "weight_decay": 0.000001,
@@ -16,8 +16,8 @@
             "epochs": 100
         },
         "simsiam":{
-            "name": "simsiam",
             "train": true,
+            "name": "simsiam_both",
             "batch_size": 320,
             "learning_rate": 0.01,
             "weight_decay": 0.000001,
@@ -27,15 +27,16 @@
     },
     "pose_estimation":{
         "skip": false,
+        "dataset": "skiPose",
         "simclr":{
+            "train": true,
             "name": "simclr_estimator",
-            "pretrained_model": "simclr",
-            "train": true
+            "pretrained_name": "simclr"
         },
         "simsiam":{
+            "train": true,
             "name": "simsiam_estimator",
-            "pretrained_model": "simsiam",
-            "train": true
+            "pretrained_name": "simsiam"
         }
     }
 }
