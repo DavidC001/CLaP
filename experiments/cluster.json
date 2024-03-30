@@ -8,7 +8,7 @@
         "simclr":{
             "train": true,
             "name": "simclr_both",
-            "batch_size": 650,
+            "batch_size": 512,
             "learning_rate": 0.8,
             "weight_decay": 0.000001,
             "momentum": 0.9,
@@ -19,7 +19,7 @@
         "simsiam":{
             "train": true,
             "name": "simsiam_both",
-            "batch_size": 650,
+            "batch_size": 512,
             "learning_rate": 0.8,
             "weight_decay": 0.000001,
             "momentum": 0.9,
