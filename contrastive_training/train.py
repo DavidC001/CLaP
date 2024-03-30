@@ -24,7 +24,7 @@ def contrastive_train(simsiam, simclr, device='cuda', datasets=["panoptic"], mod
         )
         print("SimCLR training done")
     
-    if simsiam:
+    if simsiam["train"]:
         print("Training SimSiam")
         train_simsiam(
             model_dir=models_dir,

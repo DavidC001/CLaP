@@ -118,20 +118,19 @@ def train_step(net, data_loader, optimizer, cost_function, t, device='cuda'):
 def val_step(net, data_loader, cost_function, t, device='cuda'):
     samples = 0.
     cumulative_loss = 0.
-    net.eval()
+    with torch.no_grad():
+        for batch_idx, batch in enumerate(tqdm(data_loader)):
 
-    for batch_idx, batch in enumerate(tqdm(data_loader)):
+            image1 = batch['image1'].to(device)
+            image2 = batch['image2'].to(device)
 
-        image1 = batch['image1'].to(device)
-        image2 = batch['image2'].to(device)
+            _, image1_encoddings = net(image1)
+            _, image2_encoddings = net(image2)
 
-        _, image1_encoddings = net(image1)
-        _, image2_encoddings = net(image2)
+            loss = cost_function(image1_encoddings, image2_encoddings, t)
 
-        loss = cost_function(image1_encoddings, image2_encoddings, t)
-
-        cumulative_loss += loss.item()
-        samples += image1.shape[0]
+            cumulative_loss += loss.item()
+            samples += image1.shape[0]
 
     return cumulative_loss / samples
 
