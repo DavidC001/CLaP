@@ -128,7 +128,9 @@ def train_simsiam(model_dir="trained_models", name = "simsiam",  dataset_dir="da
     net= nn.DataParallel(net)
     net.to(device)
 
-    optimizer, scheduler = get_optimizer(net, lr=learning_rate, wd=weight_decay, momentum=momentum, epochs=epochs)
+
+
+    optimizer, scheduler = get_optimizer(net.module, lr=learning_rate, wd=weight_decay, momentum=momentum, epochs=epochs)
 
     cost_function = get_loss
 
