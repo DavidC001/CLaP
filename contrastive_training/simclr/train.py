@@ -142,7 +142,6 @@ def train_simclr(model_dir= "trained_models",name = "simclr", dataset_dir="datas
     _, _, train_loader, val_loader = get_dataset(batch_size, datasets, dataset_dir)
 
     net = get_simclr_net()
-    net= nn.DataParallel(net)
     net.to(device)
 
     optimizer, scheduler = get_optimizer(net, lr=learning_rate, wd=weight_decay, momentum=momentum, epochs=epochs)

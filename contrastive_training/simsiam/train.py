@@ -125,7 +125,6 @@ def train_simsiam(model_dir="trained_models", name = "simsiam",  dataset_dir="da
     _, _, train_loader, val_loader = get_dataset(batch_size, datasets, dataset_dir)
 
     net = get_siam_net()
-    net= nn.DataParallel(net)
     net.to(device)
 
 

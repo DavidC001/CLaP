@@ -63,6 +63,7 @@ def get_siam_net():
     weights = ResNet50_Weights.DEFAULT
     model = resnet50(weights=weights)
     model = SiamMLP(model, 2048, 2048, 2048, 512)
+    model = nn.DataParallel(model)
 
     return model
 

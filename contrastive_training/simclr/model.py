@@ -19,5 +19,6 @@ def get_simclr_net():
     weights = ResNet50_Weights.DEFAULT
     model = resnet50(weights=weights)
     model.fc = MLP(2048, 2048, 128)
+    model = nn.DataParallel(model)
 
     return model
