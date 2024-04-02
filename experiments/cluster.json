@@ -17,7 +17,7 @@
             "save_every": 1
         },
         "simsiam":{
-            "train": true,
+            "train": false,
             "name": "simsiam_both",
             "batch_size": 512,
             "learning_rate": 0.8,
@@ -29,7 +29,7 @@
     },
     "pose_estimation":{
         "skip": false,
-        "dataset": "skiPose",
+        "datasets": ["skiPose"],
         "simclr":{
             "train": true,
             "name": "simclr_estimator",
