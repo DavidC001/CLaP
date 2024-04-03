@@ -78,8 +78,43 @@ class ClusterKinectDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets"):
         print("ClusterKinectDataset")
 
-        self.data_path = dataset_dir+"/ClusterKinectDataset"
+        self.data_path = dataset_dir+"/KinectDataset/"
+        self.transform = transform
+
+        paths = []
+
+        motion_seq = os.listdir(self.data_path)
+
+        for dir in motion_seq:
+            data_path = os.path.join(self.data_path, dir).replace('\\', '/')
+            for lists in (os.listdir(data_path)):
+                if lists.endswith('.jpg'):
+                    paths.append(os.path.join(data_path, lists).replace('\\', '/'))
         
+        self.data = {'paths': paths}
+
+        
+    def __len__(self):
+        return len(self.data['paths'])
+    
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        sample = dict()
+
+        image_path = self.data['paths'][idx]
+
+        image = cv2.imread(image_path)
+        image =cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = self.transform(image)
+
+        sample['image'] = image
+
+        return sample
+
+
 class PoseKinectDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets", mode="train"):
         print("PoseKinectDataset")
