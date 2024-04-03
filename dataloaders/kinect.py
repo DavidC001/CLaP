@@ -90,6 +90,9 @@ class ClusterKinectDataset(Dataset):
             for lists in (os.listdir(data_path)):
                 if lists.endswith('.jpg'):
                     paths.append(os.path.join(data_path, lists).replace('\\', '/'))
+
+        #randoml select up to 6000 images
+        paths = random.sample(paths, min(6000, len(paths)))
         
         self.data = {'paths': paths}
 
