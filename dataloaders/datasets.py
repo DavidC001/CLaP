@@ -1,9 +1,9 @@
 import sys
 sys.path.append(".")
 
-from dataloaders.kinect import ContrastiveKinectDataset, ClusterKinectDataset, PoseKinectDataset
-from dataloaders.skiPose import ContrastiveSkiDataset, ClusterSkiDataset, PoseSkiDataset
-from dataloaders.panoptic import ContrastivePanopticDataset, ClusterPanopticDataset, PosePanopticDataset
+from dataloaders.kinect import getContrastiveDatasetKinect, ClusterKinectDataset, getPoseDatasetKinect
+from dataloaders.skiPose import getContrastiveDatasetSki, ClusterSkiDataset, getPoseDatasetSki
+from dataloaders.panoptic import getClusterDatasetPanoptic, ClusterPanopticDataset, getPoseDatasetPanoptic
 
 import torch
 
@@ -23,6 +23,6 @@ class combineDataSets(torch.utils.data.Dataset):
             idx -= length
         raise IndexError
 
-contrastive_datasets = {'kinect': ContrastiveKinectDataset, 'skiPose': ContrastiveSkiDataset, 'panoptic': ContrastivePanopticDataset}
+contrastive_datasets = {'kinect': getContrastiveDatasetKinect, 'skiPose': getContrastiveDatasetSki, 'panoptic': getClusterDatasetPanoptic}
 cluster_datasets = {'kinect': ClusterKinectDataset, 'skiPose': ClusterSkiDataset, 'panoptic': ClusterPanopticDataset}
-pose_datasets = {'kinect': PoseKinectDataset, 'skiPose': PoseSkiDataset, 'panoptic': PosePanopticDataset}
+pose_datasets = {'kinect': getPoseDatasetKinect, 'skiPose': getPoseDatasetSki, 'panoptic': getPoseDatasetPanoptic}

@@ -8,6 +8,9 @@ import matplotlib.pyplot as plt
 import torchvision.transforms as T
 
 
+generator = torch.Generator().manual_seed(42)
+
+
 class ContrastivePanopticDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets"):
 
@@ -94,6 +97,35 @@ class ContrastivePanopticDataset(Dataset):
         sample['image2'] = image2
 
         return sample
+
+
+def getClusterDatasetPanoptic(transform, dataset_dir="datasets", batch_size=1, shuffle=False):
+    """
+    Returns training and validation datasets for clustering in the Panoptic dataset.
+
+    Args:
+        transform (callable): A function/transform that takes in an image and its annotations and returns a transformed version.
+        dataset_dir (str, optional): The directory where the dataset is located. Defaults to "datasets".
+        batch_size (int, optional): The batch size for the dataloaders. Defaults to 1.
+        shuffle (bool, optional): Whether to shuffle the data. Defaults to False.
+
+    Returns:
+        training_data (torch.utils.data.Dataset): The training dataset.
+        val_data (torch.utils.data.Dataset): The validation dataset.
+    """
+    dataset = ClusterPanopticDataset(transform, dataset_dir)
+
+    num_samples = len(dataset)
+
+    training_samples = int(num_samples * 0.8 + 1)
+    val_samples = num_samples - training_samples
+
+    training_data, val_data, = torch.utils.data.random_split(
+        dataset, [training_samples, val_samples], generator=generator
+    )
+
+    return training_data, val_data
+
 
 class ClusterPanopticDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets"):
@@ -198,3 +230,30 @@ class PosePanopticDataset(Dataset):
         sample['cam'] = cam
 
         return sample
+    
+def getPoseDatasetPanoptic(transform, dataset_dir="datasets", batch_size=1, shuffle=False):
+    """
+    Returns training and validation datasets for pose estimation in the Panoptic dataset.
+
+    Args:
+        transform (callable): A function/transform that takes in an image and its annotations and returns a transformed version.
+        dataset_dir (str, optional): The directory where the dataset is located. Defaults to "datasets".
+        batch_size (int, optional): The batch size for the dataloaders. Defaults to 1.
+        shuffle (bool, optional): Whether to shuffle the data. Defaults to False.
+
+    Returns:
+        training_data (torch.utils.data.Dataset): The training dataset.
+        val_data (torch.utils.data.Dataset): The validation dataset.
+    """
+    dataset = PosePanopticDataset(transform, dataset_dir)
+
+    num_samples = len(dataset)
+
+    training_samples = int(num_samples * 0.8 + 1)
+    val_samples = num_samples - training_samples
+
+    training_data, val_data, = torch.utils.data.random_split(
+        dataset, [training_samples, val_samples], generator=generator
+    )
+
+    return training_data, val_data
