@@ -9,7 +9,7 @@ import torchvision.transforms as T
 
 
 class ContrastiveSkiDataset(Dataset):
-    def __init__(self, transform, dataset_dir="datasets"):
+    def __init__(self, transform, dataset_dir="datasets", mode="train"):
 
         # change this to the path where the dataset is stored
         self.data_path = dataset_dir+"/Ski-PosePTZ-CameraDataset-png"
@@ -81,6 +81,21 @@ class ContrastiveSkiDataset(Dataset):
 
         return sample
 
+def getContrastiveDatasetSki(transform, dataset_dir="datasets"):
+    """
+    Returns a tuple of train and test datasets for contrastive learning using Ski data.
+
+    Args:
+        transform (torchvision.transforms.Transform): The data transformation to be applied to the dataset.
+        dataset_dir (str, optional): The directory where the datasets are stored. Defaults to "datasets".
+
+    Returns:
+        tuple: A tuple containing the train and test datasets.
+    """
+    train = ContrastiveSkiDataset(transform, dataset_dir, mode="train")
+    test = ContrastiveSkiDataset(transform, dataset_dir, mode="test")
+    return train, test
+
 
 class ClusterSkiDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets"):
@@ -129,6 +144,23 @@ class ClusterSkiDataset(Dataset):
         sample['image'] = image
 
         return sample
+
+
 class PoseSkiDataset(Dataset):
-    def __init__(self, transform, dataset_dir="datasets"):
+    def __init__(self, transform, dataset_dir="datasets", mode="train"):
         print("PoseSkiiDataset")
+
+def getPoseDatasetSki(transform, dataset_dir="datasets"):
+    """
+    Returns a tuple of train and test datasets for pose estimation using Ski data.
+
+    Args:
+        transform (torchvision.transforms.Transform): The data transformation to be applied to the dataset.
+        dataset_dir (str, optional): The directory where the datasets are stored. Defaults to "datasets".
+
+    Returns:
+        tuple: A tuple containing the train and test datasets.
+    """
+    train = PoseSkiDataset(transform, dataset_dir, mode="train")
+    test = PoseSkiDataset(transform, dataset_dir, mode="test")
+    return train, test

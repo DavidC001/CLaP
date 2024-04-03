@@ -28,21 +28,20 @@ def get_dataset(batch_size, datasets=["panoptic"], dataset_dir="datasets"):
         ]
     )
 
-    data = combineDataSets(*[contrastive_datasets[dataset](transforms, dataset_dir=dataset_dir) for dataset in datasets])
+    train, val = [], []
 
-    num_samples = len(data)
+    for dataset in datasets:
+        train_data, val_data = contrastive_datasets[dataset](transforms, dataset_dir=dataset_dir)
+        train.append(train_data)
+        val.append(val_data)
+    
+    train_data = combineDataSets(*train)
+    val_data = combineDataSets(*val)
 
-    training_samples = int(num_samples * 0.8 + 1)
-    val_samples = num_samples - training_samples
-
-    training_data, val_data, = torch.utils.data.random_split(
-        data, [training_samples, val_samples], generator=generator
-    )
-
-    train_loader = torch.utils.data.DataLoader(training_data, batch_size, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size, shuffle=True)
     val_loader = torch.utils.data.DataLoader(val_data, batch_size, shuffle=False)
 
-    return training_data, val_data, train_loader, val_loader
+    return train_data, val_data, train_loader, val_loader
 
 
 def get_optimizer(model, lr, wd, momentum, epochs):
