@@ -22,18 +22,19 @@ class ContrastiveSkiDataset(Dataset):
         motion_seq = os.listdir(self.data_path)
         no_dir = ['license.txt', 'load_h5_example.py', 'README.txt', 'load_h5_example.m']
 
-        #train and test
-        for dir in motion_seq:
-          if dir not in no_dir:
-            #seq_000 type of directory
-            for seq in (os.listdir(os.path.join(self.data_path, dir).replace('\\', '/'))):
-              if os.path.exists(os.path.join(self.data_path, dir, seq, 'cam_00').replace('\\', '/')):
-                        data_path = os.path.join(self.data_path, dir, seq, 'cam_00').replace('\\', '/')
-                        for lists in (os.listdir(data_path)):
-                            paths.append(os.path.join(data_path, lists).replace('\\', '/'))
+        #train or test
+        if mode == 'train':
+          dir = '/train'
+        else:
+          dir = '/test'
+
+        for seq in (os.listdir(os.path.join(self.data_path, dir).replace('\\', '/'))):
+          if os.path.exists(os.path.join(self.data_path, dir, seq, 'cam_00').replace('\\', '/')):
+            data_path = os.path.join(self.data_path, dir, seq, 'cam_00').replace('\\', '/')
+          for lists in (os.listdir(data_path)):
+            paths.append(os.path.join(data_path, lists).replace('\\', '/'))
 
         self.data = {'paths': paths}
-
 
     def __len__(self):
         return len(self.data['paths'])
@@ -41,9 +42,9 @@ class ContrastiveSkiDataset(Dataset):
     def get_second_view(self, image_path):
         """Randomly gets another camera view"""
         split = image_path.split('/cam_00')
-        random_num = random.randint(1, 5)
+        random = random.randint(0, 5)
 
-        second_path = split[0] + '/cam_0' + str(random_num) + split[1]
+        second_path = split[0] + '/cam_0' + str(random) + split[1]
 
         return second_path
 
@@ -56,6 +57,13 @@ class ContrastiveSkiDataset(Dataset):
 
         image1_path = self.data['paths'][idx]
         image2_path = self.get_second_view(image1_path)
+
+        #make the first image random
+        while True:
+          image1_path = self.get_second_view(image1_path)
+          if image1_path != image2_path:
+            break
+
 
         for i in range(0, 10):
             if os.path.isfile(image2_path):
@@ -80,6 +88,7 @@ class ContrastiveSkiDataset(Dataset):
         sample['image2'] = image2
 
         return sample
+
 
 def getContrastiveDatasetSki(transform, dataset_dir="datasets"):
     """
