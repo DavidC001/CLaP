@@ -7,6 +7,8 @@ import random
 import matplotlib.pyplot as plt
 import torchvision.transforms as T
 
+generator = torch.Generator().manual_seed(42)
+
 
 class ContrastiveSkiDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets", mode="train"):
@@ -101,9 +103,19 @@ def getContrastiveDatasetSki(transform, dataset_dir="datasets"):
     Returns:
         tuple: A tuple containing the train and test datasets.
     """
-    train = ContrastiveSkiDataset(transform, dataset_dir, mode="train")
+    dataset = ContrastiveSkiDataset(transform, dataset_dir, mode="train")
     test = ContrastiveSkiDataset(transform, dataset_dir, mode="test")
-    return train, test
+
+    num_samples = len(dataset)
+
+    training_samples = int(num_samples * 0.8 + 1)
+    val_samples = num_samples - training_samples
+
+    train, val, = torch.utils.data.random_split(
+        dataset, [training_samples, val_samples], generator=generator
+    )
+
+    return train, val, test
 
 
 class ClusterSkiDataset(Dataset):
