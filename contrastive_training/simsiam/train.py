@@ -140,9 +140,9 @@ def train_simsiam(model_dir="trained_models", name = "simsiam",  dataset_dir="da
         print('\tTraining loss {:.5f}'.format(train_loss))
         print('\tValidation loss {:.5f}'.format(val_loss))
 
-        writer.add_scalar(name+"/train_loss", train_loss, e+1) 
-        writer.add_scalar(name+"/lr", scheduler.get_last_lr()[0], e+1) 
-        writer.add_scalar(name+"/val_loss", val_loss, e+1)
+        writer.add_scalar("loss/train", train_loss, e+1) 
+        writer.add_scalar("lr", scheduler.get_last_lr()[0], e+1) 
+        writer.add_scalar("loss/val", val_loss, e+1)
         writer.flush()
 
         if (e+1) % save_every == 0:
@@ -153,7 +153,7 @@ def train_simsiam(model_dir="trained_models", name = "simsiam",  dataset_dir="da
     #calculate test loss
     test_loss = val_step(net, test_loader, cost_function, device)
     print('Test loss {:.5f}'.format(test_loss))
-    writer.add_scalar(name+"/test_loss", test_loss, epochs)
+    writer.add_scalar("loss/test", test_loss, 0)
 
     writer.close()
     
