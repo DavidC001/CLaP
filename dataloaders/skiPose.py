@@ -227,9 +227,12 @@ class PoseSkiDataset(Dataset):
         sample['poses_3d'] =  poses_3d
 
         #camera param
-        #TO DO
+        intrinsic = h5_label_file['cam_intrinsic'][idx].reshape([-1,3])
+        traslation = h5_label_file['cam_position'][idx]
+        rotation = h5_label_file ['R_cam_2_world'][idx].reshape([3,3])
+        cam = {'K':intrinsic, 'R':rotation, 't':traslation}
 
-        #sample['cam'] = cam
+        sample['cam'] = cam
 
         return sample
 
