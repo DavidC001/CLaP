@@ -5,33 +5,16 @@ import cv2
 import random
 import matplotlib.pyplot as plt
 import torchvision.transforms as T
+import h5py 
 
 
 class ContrastiveKinectDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets", mode="train"):
-        print("KinectDataset")
-        self.data_path = dataset_dir+"/KinectDataset/side_"
-        self.training_dir = []
-
-        if mode == "train":
-            self.data_path += "train_images"
-        elif mode == "test":
-            self.data_path += "test_images"
+        #print("KinectDataset")
         
+        data = h5py.File(dataset_dir+"/ITOP/ITOP_side_" + mode + "_images.h5", 'r')
 
-        self.transform = transform
-
-        paths = []
-
-        motion_seq = os.listdir(self.data_path)
-
-        for dir in motion_seq:
-            data_path = os.path.join(self.data_path, dir).replace('\\', '/')
-            for lists in (os.listdir(data_path)):
-                paths.append(os.path.join(data_path, lists).replace('\\', '/'))
-            
-        self.data = {'paths': paths}
-
+        print(data.keys())
         
     def __len__(self):
         return len(self.data['paths'])
@@ -56,6 +39,7 @@ class ContrastiveKinectDataset(Dataset):
         sample['image2'] = image_top
 
         return sample
+    
 
 def getContrastiveDatasetKinect(transform, dataset_dir="datasets"):
     """
@@ -119,6 +103,28 @@ class PoseKinectDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets", mode="train"):
         print("PoseKinectDataset")
 
+        self.data_path = dataset_dir+"/KinectDataset/"
+        self.transform = transform
+
+        paths = []
+
+        motion_seq = os.listdir(self.data_path)
+
+        path_file = dataset_dir + "/KinectDataset/labels.h5"
+        h5_label_file = h5py.File(path_file, 'r')
+
+        for dir in range(0, len(h5_label_file['seq'])):
+            seq = int(h5_label_file['seq'][dir])
+            cam = int(h5_label_file['cam'][dir])
+            frame = int(h5_label_file['frame'][dir])
+            subj = int(h5_label_file['subj'][dir])
+            pose_3D = h5_label_file['3D'][dir].reshape([-1,3])
+            pose_2D = h5_label_file['2D'][dir].reshape([-1,2])
+        self.data = {'paths': paths}
+
+        
+    
+
 def getPoseDatasetKinect(transform, dataset_dir="datasets"):
     """
     Returns a tuple of train and test datasets for pose estimation using Kinect data.
@@ -133,3 +139,14 @@ def getPoseDatasetKinect(transform, dataset_dir="datasets"):
     train = PoseKinectDataset(transform, dataset_dir, mode="train")
     test = PoseKinectDataset(transform, dataset_dir, mode="test")
     return train, test
+
+
+if __name__ == "__main__":
+    transform = T.Compose([
+        T.ToPILImage(),
+        T.Resize((224, 224)),
+        T.ToTensor()
+    ])
+
+    dataset = ContrastiveKinectDataset(transform)
+    
