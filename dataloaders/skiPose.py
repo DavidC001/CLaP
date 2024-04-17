@@ -7,6 +7,11 @@ import random
 import matplotlib.pyplot as plt
 import torchvision.transforms as T
 
+import h5py
+import imageio
+
+generator = torch.Generator().manual_seed(42)
+
 
 class ContrastiveSkiDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets", mode="train"):
@@ -22,18 +27,19 @@ class ContrastiveSkiDataset(Dataset):
         motion_seq = os.listdir(self.data_path)
         no_dir = ['license.txt', 'load_h5_example.py', 'README.txt', 'load_h5_example.m']
 
-        #train and test
-        for dir in motion_seq:
-          if dir not in no_dir:
-            #seq_000 type of directory
-            for seq in (os.listdir(os.path.join(self.data_path, dir).replace('\\', '/'))):
-              if os.path.exists(os.path.join(self.data_path, dir, seq, 'cam_00').replace('\\', '/')):
-                        data_path = os.path.join(self.data_path, dir, seq, 'cam_00').replace('\\', '/')
-                        for lists in (os.listdir(data_path)):
-                            paths.append(os.path.join(data_path, lists).replace('\\', '/'))
+        #train or test
+        if mode == 'train':
+          dir = '/train'
+        else:
+          dir = '/test'
+
+        for seq in (os.listdir(os.path.join(self.data_path, dir).replace('\\', '/'))):
+          if os.path.exists(os.path.join(self.data_path, dir, seq, 'cam_00').replace('\\', '/')):
+            data_path = os.path.join(self.data_path, dir, seq, 'cam_00').replace('\\', '/')
+          for lists in (os.listdir(data_path)):
+            paths.append(os.path.join(data_path, lists).replace('\\', '/'))
 
         self.data = {'paths': paths}
-
 
     def __len__(self):
         return len(self.data['paths'])
@@ -41,9 +47,9 @@ class ContrastiveSkiDataset(Dataset):
     def get_second_view(self, image_path):
         """Randomly gets another camera view"""
         split = image_path.split('/cam_00')
-        random_num = random.randint(1, 5)
+        random = random.randint(0, 5)
 
-        second_path = split[0] + '/cam_0' + str(random_num) + split[1]
+        second_path = split[0] + '/cam_0' + str(random) + split[1]
 
         return second_path
 
@@ -56,6 +62,13 @@ class ContrastiveSkiDataset(Dataset):
 
         image1_path = self.data['paths'][idx]
         image2_path = self.get_second_view(image1_path)
+
+        #make the first image random
+        while True:
+          image1_path = self.get_second_view(image1_path)
+          if image1_path != image2_path:
+            break
+
 
         for i in range(0, 10):
             if os.path.isfile(image2_path):
@@ -81,6 +94,7 @@ class ContrastiveSkiDataset(Dataset):
 
         return sample
 
+
 def getContrastiveDatasetSki(transform, dataset_dir="datasets"):
     """
     Returns a tuple of train and test datasets for contrastive learning using Ski data.
@@ -92,9 +106,19 @@ def getContrastiveDatasetSki(transform, dataset_dir="datasets"):
     Returns:
         tuple: A tuple containing the train and test datasets.
     """
-    train = ContrastiveSkiDataset(transform, dataset_dir, mode="train")
+    dataset = ContrastiveSkiDataset(transform, dataset_dir, mode="train")
     test = ContrastiveSkiDataset(transform, dataset_dir, mode="test")
-    return train, test
+
+    num_samples = len(dataset)
+
+    training_samples = int(num_samples * 0.8 + 1)
+    val_samples = num_samples - training_samples
+
+    train, val, = torch.utils.data.random_split(
+        dataset, [training_samples, val_samples], generator=generator
+    )
+
+    return train, val, test
 
 
 class ClusterSkiDataset(Dataset):
@@ -145,10 +169,72 @@ class ClusterSkiDataset(Dataset):
 
         return sample
 
-
 class PoseSkiDataset(Dataset):
-    def __init__(self, transform, dataset_dir="datasets", mode="train"):
-        print("PoseSkiiDataset")
+
+    def __init__(self, transform, dataset_dir="datasets", mode = "train"):
+
+        # change this to the path where the dataset is stored
+        self.data_path = dataset_dir+"/Ski-PosePTZ-CameraDataset-png"
+        self.training_dir = []
+
+        self.transform = transform
+
+        paths = []
+
+        motion_seq = os.listdir(self.data_path)
+        no_dir = ['license.txt', 'load_h5_example.py', 'README.txt', 'load_h5_example.m']
+
+        #train or test
+        if mode == 'train':
+          dir = '/train'
+        else:
+          dir = '/test'
+
+        path_file = '/content/Ski-PosePTZ-CameraDataset-png'+dir+'/labels.h5'
+        h5_label_file = h5py.File(path_file, 'r')
+
+        #load image's path in order
+        for index in range(0,len(h5_label_file['cam'])):
+          seq   = int(h5_label_file['seq'][index])
+          cam   = int(h5_label_file['cam'][index])
+          frame = int(h5_label_file['frame'][index])
+          image_path = dataset_dir+dir+'/seq_{:03d}/cam_{:02d}/image_{:06d}.png'.format(seq,cam,frame)
+          paths.append(image_path.replace('\\','/'))
+
+        self.data = {'paths': paths, 'mode':mode}
+
+    def __len__(self):
+        return len(self.data['paths'])
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        sample = dict()
+
+        #read the image
+        image = imageio.imread(self.data['paths'][idx])
+
+        sample['image'] = image
+
+        dir = self.data['mode']
+        
+        #load the joints position
+        path_file = '/content/Ski-PosePTZ-CameraDataset-png'+dir+'/labels.h5'
+        h5_label_file = h5py.File(path_file, 'r')
+        poses_3d = (h5_label_file['3D'][idx].reshape([-1,3]))
+
+        sample['poses_3d'] =  poses_3d
+
+        #camera param
+        intrinsic = h5_label_file['cam_intrinsic'][idx].reshape([-1,3])
+        traslation = h5_label_file['cam_position'][idx]
+        rotation = h5_label_file ['R_cam_2_world'][idx].reshape([3,3])
+        cam = {'K':intrinsic, 'R':rotation, 't':traslation}
+
+        sample['cam'] = cam
+
+        return sample
 
 def getPoseDatasetSki(transform, dataset_dir="datasets"):
     """

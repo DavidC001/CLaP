@@ -12,37 +12,11 @@ from torch import nn
 from tqdm import tqdm
 
 from contrastive_training.simsiam.model import get_siam_net
-
-from dataloaders.datasets import contrastive_datasets
-from dataloaders.datasets import combineDataSets
+from contrastive_training.utils import get_dataset
 
 from torch.utils.tensorboard import SummaryWriter
 
 generator = torch.Generator().manual_seed(42)
-
-def get_dataset(batch_size, datasets=["panoptic"], dataset_dir="datasets"):
-    transforms = T.Compose(
-        [
-            T.ToTensor(),
-            T.Resize(size=(128, 128)),
-        ]
-    )
-
-    train, val = [], []
-
-    for dataset in datasets:
-        train_data, val_data = contrastive_datasets[dataset](transforms, dataset_dir=dataset_dir)
-        train.append(train_data)
-        val.append(val_data)
-    
-    train_data = combineDataSets(*train)
-    val_data = combineDataSets(*val)
-
-    train_loader = torch.utils.data.DataLoader(train_data, batch_size, shuffle=True)
-    val_loader = torch.utils.data.DataLoader(val_data, batch_size, shuffle=False)
-
-    return train_data, val_data, train_loader, val_loader
-
 
 def get_optimizer(model, lr, wd, momentum, epochs):
 
@@ -121,7 +95,7 @@ def val_step(net, data_loader, cost_function, device='cuda'):
 def train_simsiam(model_dir="trained_models", name = "simsiam",  dataset_dir="datasets", datasets="panoptic",
                   batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, epochs=100, save_every=10):
     
-    _, _, train_loader, val_loader = get_dataset(batch_size, datasets, dataset_dir)
+    _, _, _, train_loader, val_loader, test_loader = get_dataset(batch_size, datasets, dataset_dir)
 
     net = get_siam_net()
     net.to(device)
@@ -166,9 +140,9 @@ def train_simsiam(model_dir="trained_models", name = "simsiam",  dataset_dir="da
         print('\tTraining loss {:.5f}'.format(train_loss))
         print('\tValidation loss {:.5f}'.format(val_loss))
 
-        writer.add_scalar(name+"/train_loss", train_loss, e+1) 
-        writer.add_scalar(name+"/lr", scheduler.get_last_lr()[0], e+1) 
-        writer.add_scalar(name+"/val_loss", val_loss, e+1)
+        writer.add_scalar("loss/train", train_loss, e+1) 
+        writer.add_scalar("lr", scheduler.get_last_lr()[0], e+1) 
+        writer.add_scalar("loss/val", val_loss, e+1)
         writer.flush()
 
         if (e+1) % save_every == 0:
@@ -176,7 +150,12 @@ def train_simsiam(model_dir="trained_models", name = "simsiam",  dataset_dir="da
             torch.save(optimizer.state_dict(), model_dir+'/'+name+'/epoch_{:d}_optimizer.pth'.format(e+1))
             torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pth'.format(e+1))
 
-        writer.close()
+    #calculate test loss
+    test_loss = val_step(net, test_loader, cost_function, device)
+    print('Test loss {:.5f}'.format(test_loss))
+    writer.add_scalar("loss/test", test_loss, 0)
+
+    writer.close()
     
     # save the final model (if not saved already)
     if epochs % save_every != 0:

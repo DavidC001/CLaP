@@ -1,18 +1,18 @@
 import os
 import torch
-import math
 import torch.nn as nn
-from torch.utils.data import Dataset
-import numpy as np
-import json
 import cv2
 import re
-import random
-import torchvision.transforms as transforms
-from torchvision.io import read_image
 
 import matplotlib.pyplot as plt
 import torchvision.transforms as T
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+dataset = "panoptic"
+path = 'trained_models/simclr_both_biggerBatch/'
+#both_bigger batch huge bias on skin color!
+
 
 '''
 Define the SimCLR base model with encoder and projection head
@@ -45,43 +45,16 @@ def get_simclr_net():
     weights = ResNet50_Weights.DEFAULT
     model = resnet50(weights=weights)
     model.fc = MLP(2048, 2048, 128)
+    model = nn.DataParallel(model)
 
     return model
 
 '''
 Define the dataloader for the clustering task
 '''
-class ClusterDataset(Dataset):
-    def __init__(self, transform, data_set='training'):
-
-        # change this to the path where the dataset is stored
-        self.data_path = "ProcessedPanopticDataset/171204_pose3/hdImages"
-
-        images = [os.path.join(self.data_path, f) for f in os.listdir(self.data_path) if os.path.isfile(os.path.join(self.data_path, f))][0:6000]
-        self.transform = transform
-
-        self.data = {'paths': images}
-
-
-    def __len__(self):
-        return len(self.data['paths'])
-
-
-    def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-
-        sample = dict()
-
-        image_path = self.data['paths'][idx]
-
-        image = cv2.imread(image_path)
-        image =cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image = self.transform(image)
-
-        sample['image'] = image
-
-        return sample
+import sys
+sys.path.append('.')
+from dataloaders.datasets import cluster_datasets
 
 def get_cluster_data(batch_size):
     """
@@ -101,7 +74,7 @@ def get_cluster_data(batch_size):
         ]
     )
 
-    cluster_dataset = ClusterDataset(transforms)
+    cluster_dataset = cluster_datasets[dataset](transform=transforms)
     cluster_loader = torch.utils.data.DataLoader(cluster_dataset, batch_size)
 
     return cluster_dataset, cluster_loader
@@ -124,9 +97,9 @@ def extract_representations(path, cluster_loader, load=True):
     net = get_simclr_net()
 
     if load:
-        net.load_state_dict(torch.load(path, map_location=torch.device('cpu')))
+        net.load_state_dict(torch.load(path, map_location=torch.device(device)))
 
-    net.to('cpu')
+    net.to(device)
     net.eval()
 
     proj_repr = []
@@ -135,12 +108,12 @@ def extract_representations(path, cluster_loader, load=True):
     with torch.no_grad():
         for batch_idx, inputs in enumerate(cluster_loader):
             images = inputs['image']
-            images.to('cpu')
+            images.to(device)
             base, proj = net(images)
             proj_repr.append(proj)
             base_repr.append(base)
 
-    return torch.cat(base_repr).numpy(), torch.cat(proj_repr).numpy()
+    return torch.cat(base_repr).cpu().numpy(), torch.cat(proj_repr).cpu().numpy()
 
 
 from sklearn.cluster import KMeans
@@ -169,6 +142,8 @@ def kmeans_algorithm(features, n_clusters=8):
 
 #import LDA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+#import PCA
+from sklearn.decomposition import PCA
 
 def reduce_dim(features, labels):
     """
@@ -184,9 +159,8 @@ def reduce_dim(features, labels):
     lda = LDA(n_components=3)
     lda.fit(features, labels)
 
-    #save transformation matrix to file for later use
-    with open('lda_transform.npy', 'wb') as f:
-        np.save(f, lda.scalings_)
+    #pca = PCA(n_components=3)
+    #pca.fit(features)
 
     return lda.transform(features)
 
@@ -237,40 +211,6 @@ def plot_clusters(dataset, clusters, features, title):
 
 from sklearn.metrics import silhouette_score
 
-#save pointcloud as mesh with spheres for each point with color corresponding to cluster
-def save_pointcloud(features, clusters, path):
-    """
-    Save a point cloud as a mesh with spheres for each point and color corresponding to the cluster.
-
-    Parameters:
-    - features (ndarray): The features for each data point.
-    - clusters (list): The cluster labels for each data point.
-    - path (str): The path to save the mesh.
-
-    Returns:
-    None
-    """
-    from pyntcloud import PyntCloud
-    import pandas as pd
-
-    colors = {
-        0: [248, 82, 46], 1: [248, 248, 46],
-        2: [64, 248, 46], 3: [46, 193, 248],
-        4: [107, 46, 248], 5: [217, 46, 248],
-        6: [115, 22, 66], 7: [9, 32, 64]
-    }
-
-    color_list = [colors[c] for c in clusters]
-    color_list = np.array(color_list) / 255.0
-
-    df = pd.DataFrame(features, columns=['x', 'y', 'z'])
-    df['red'] = color_list[:, 0]
-    df['green'] = color_list[:, 1]
-    df['blue'] = color_list[:, 2]
-
-    cloud = PyntCloud(df)
-
-    cloud.to_file(path)
 
 def cluster(model_path, load=True):
     """
@@ -309,22 +249,18 @@ def cluster(model_path, load=True):
     plot_clusters(cluster_set, labels_base, lda_base, "Encoder features")
     plot_clusters(cluster_set, labels_proj, lda_proj, "Projection head features")
 
-    save_pointcloud(lda_base, labels_base, "base_features.ply")
-    save_pointcloud(lda_proj, labels_proj, "proj_features.ply")
-
     return cluster_set, base_features, proj_features, labels_base, labels_proj, lda_base, lda_proj
 
 #get the latest model
-path = 'trained_models/simclr/'
 epoch = 0
 for file in os.listdir(path):
-    if 'simclr_epoch' in file:
+    if 'epoch' in file:
         e = int(re.findall(r'\d+', file)[0])
         if e > epoch:
             epoch = e
 
-epoch = 22
-path = path + 'simclr_epoch_{:d}.pth'.format(epoch)
+
+path = path + 'epoch_{:d}.pth'.format(epoch)
 
 #path = 'trained_models/ver1.pt'
 
