@@ -23,6 +23,6 @@ class combineDataSets(torch.utils.data.Dataset):
             idx -= length
         raise IndexError
 
-contrastive_datasets = {'kinect': getContrastiveDatasetKinect, 'skiPose': getContrastiveDatasetSki, 'panoptic': getClusterDatasetPanoptic}
-cluster_datasets = {'kinect': ClusterKinectDataset, 'skiPose': ClusterSkiDataset, 'panoptic': ClusterPanopticDataset}
-pose_datasets = {'kinect': getPoseDatasetKinect, 'skiPose': getPoseDatasetSki, 'panoptic': getPoseDatasetPanoptic}
+contrastive_datasets = {'ITOP': getContrastiveDatasetKinect, 'skiPose': getContrastiveDatasetSki, 'panoptic': getClusterDatasetPanoptic}
+cluster_datasets = {'ITOP': ClusterKinectDataset, 'skiPose': ClusterSkiDataset, 'panoptic': ClusterPanopticDataset}
+pose_datasets = {'ITOP': getPoseDatasetKinect, 'skiPose': getPoseDatasetSki, 'panoptic': getPoseDatasetPanoptic}
