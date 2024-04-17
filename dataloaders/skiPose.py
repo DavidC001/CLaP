@@ -190,7 +190,7 @@ class PoseSkiDataset(Dataset):
         else:
           dir = '/test'
 
-        path_file = '/content/Ski-PosePTZ-CameraDataset-png'+dir+'/labels.h5'
+        path_file = dataset_dir+'/Ski-PosePTZ-CameraDataset-png'+dir+'/labels.h5'
         h5_label_file = h5py.File(path_file, 'r')
 
         #load image's path in order
@@ -201,7 +201,7 @@ class PoseSkiDataset(Dataset):
           image_path = dataset_dir+dir+'/seq_{:03d}/cam_{:02d}/image_{:06d}.png'.format(seq,cam,frame)
           paths.append(image_path.replace('\\','/'))
 
-        self.data = {'paths': paths, 'mode':mode}
+        self.data = {'paths': paths}
 
     def __len__(self):
         return len(self.data['paths'])
@@ -216,11 +216,9 @@ class PoseSkiDataset(Dataset):
         image = imageio.imread(self.data['paths'][idx])
 
         sample['image'] = image
-
-        dir = self.data['mode']
         
         #load the joints position
-        path_file = '/content/Ski-PosePTZ-CameraDataset-png'+dir+'/labels.h5'
+        path_file = self.data['paths'][idx].split('/seq')[0]+'/labels.h5'
         h5_label_file = h5py.File(path_file, 'r')
         poses_3d = (h5_label_file['3D'][idx].reshape([-1,3]))
 
