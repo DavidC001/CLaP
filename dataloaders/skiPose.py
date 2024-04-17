@@ -7,6 +7,9 @@ import random
 import matplotlib.pyplot as plt
 import torchvision.transforms as T
 
+import h5py
+import imageio
+
 generator = torch.Generator().manual_seed(42)
 
 
@@ -166,10 +169,69 @@ class ClusterSkiDataset(Dataset):
 
         return sample
 
-
 class PoseSkiDataset(Dataset):
-    def __init__(self, transform, dataset_dir="datasets", mode="train"):
-        print("PoseSkiiDataset")
+
+    def __init__(self, transform, dataset_dir="datasets", mode = "train"):
+
+        # change this to the path where the dataset is stored
+        self.data_path = dataset_dir+"/Ski-PosePTZ-CameraDataset-png"
+        self.training_dir = []
+
+        self.transform = transform
+
+        paths = []
+
+        motion_seq = os.listdir(self.data_path)
+        no_dir = ['license.txt', 'load_h5_example.py', 'README.txt', 'load_h5_example.m']
+
+        #train or test
+        if mode == 'train':
+          dir = '/train'
+        else:
+          dir = '/test'
+
+        path_file = '/content/Ski-PosePTZ-CameraDataset-png'+dir+'/labels.h5'
+        h5_label_file = h5py.File(path_file, 'r')
+
+        #load image's path in order
+        for index in range(0,len(h5_label_file['cam'])):
+          seq   = int(h5_label_file['seq'][index])
+          cam   = int(h5_label_file['cam'][index])
+          frame = int(h5_label_file['frame'][index])
+          image_path = dataset_dir+dir+'/seq_{:03d}/cam_{:02d}/image_{:06d}.png'.format(seq,cam,frame)
+          paths.append(image_path.replace('\\','/'))
+
+        self.data = {'paths': paths, 'mode':mode}
+
+    def __len__(self):
+        return len(self.data['paths'])
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        sample = dict()
+
+        #read the image
+        image = imageio.imread(self.data['paths'][idx])
+
+        sample['image'] = image
+
+        dir = self.data['mode']
+        
+        #load the joints position
+        path_file = '/content/Ski-PosePTZ-CameraDataset-png'+dir+'/labels.h5'
+        h5_label_file = h5py.File(path_file, 'r')
+        poses_3d = (h5_label_file['3D'][idx].reshape([-1,3]))
+
+        sample['poses_3d'] =  poses_3d
+
+        #camera param
+        #TO DO
+
+        #sample['cam'] = cam
+
+        return sample
 
 def getPoseDatasetSki(transform, dataset_dir="datasets"):
     """
