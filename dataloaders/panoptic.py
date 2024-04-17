@@ -7,6 +7,9 @@ import random
 import matplotlib.pyplot as plt
 import torchvision.transforms as T
 
+import json
+import numpy as np
+
 
 generator = torch.Generator().manual_seed(42)
 
@@ -164,7 +167,7 @@ class PosePanopticDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets"):
 
         # change this to the path where the dataset is stored
-        self.data_path = dataset_dir+"/ProcessedPanopticDataset/171204_pose3/hdImages"
+        self.data_path = dataset_dir+"/ProcessedPanopticDataset"
         self.training_dir = []
 
         self.transform = transform
@@ -227,7 +230,17 @@ class PosePanopticDataset(Dataset):
         # Replace 'array' with 'list' in the cam string
         cam = cam.replace('array', 'list')
 
-        sample['cam'] = cam
+        # Load camera parameters
+        camera_params = eval(cam)
+
+        # Camera intrinsic matrix
+        K = camera_params['K']
+
+        # Rotation matrix and translation vector
+        R = camera_params['R']
+        t = camera_params['t']
+
+        sample['cam'] = {'K':K, 'R':R, 't':t}
 
         return sample
     
