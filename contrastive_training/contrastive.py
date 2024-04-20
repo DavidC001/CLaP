@@ -31,6 +31,8 @@ def check_arguments_contrastive(args):
 
 def contrastive_pretraining(args, device='cuda', models_dir="trained_models", datasets_dir="datasets"):
     #skip if specified
+    if "skip" not in args:
+        args["skip"] = False
     if args['skip']:
         print("Skipping contrastive training")
         return
@@ -38,7 +40,7 @@ def contrastive_pretraining(args, device='cuda', models_dir="trained_models", da
     if 'datasets' not in args:
         args['datasets'] = ["panoptic"]
 
-    load_datasets(args['datasets'], datasets_dir=datasets_dir)
+    load_datasets(args['datasets'], dataset_dir=datasets_dir)
 
     print("Contrastive training")
 
@@ -48,5 +50,8 @@ def contrastive_pretraining(args, device='cuda', models_dir="trained_models", da
             params = check_arguments_contrastive(params)
             
             if params['train']:
-                contrastive_train(device=device,  model=model, params=params, datasets=args['datasets'], models_dir=models_dir, datasets_dir=datasets_dir)
+                try:
+                    contrastive_train(device=device,  model=model, params=params, datasets=args['datasets'], models_dir=models_dir, datasets_dir=datasets_dir)
+                except Exception as e:
+                    print(f"Error in training {model}: {e}") 
             
