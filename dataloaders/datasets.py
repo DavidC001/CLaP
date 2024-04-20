@@ -27,4 +27,4 @@ contrastive_datasets = {'ITOP': getContrastiveDatasetKinect, 'skiPose': getContr
 cluster_datasets = {'ITOP': ClusterKinectDataset, 'skiPose': ClusterSkiDataset, 'panoptic': ClusterPanopticDataset}
 pose_datasets = {'ITOP': getPoseDatasetKinect, 'skiPose': getPoseDatasetSki, 'panoptic': getPoseDatasetPanoptic}
 
-out_joints = {'ITOP': 15, 'skiPose': 15, 'panoptic': 18}
+out_joints = {'ITOP': 15, 'skiPose': 17, 'panoptic': 18}

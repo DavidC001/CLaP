@@ -58,15 +58,17 @@ def get_loss(output, pose, weights=None, norm_factor=0.2, device='cuda'):
     output = output.view(batch_size, -1, 3)
     pose = pose.view(pose.shape[0], -1, 3)
 
-    # add first point to output (0,0,0) for each batch
-    output = torch.cat((torch.zeros((batch_size, 1, 3)).to(device), output), 1)
+    #print("output\n", output.shape)
+    #print("pose\n", pose.shape)
 
     # center pose on first point for each batch
     pose = pose - pose[:, 0].unsqueeze(1)
+    # center output on first point for each batch
+    output = output - output[:, 0].unsqueeze(1)
 
     #find rotation matrix for each batch
     batch_rotation_matrix = torch.zeros((batch_size, 3, 3)).to(device)
-    # scaling_factor = torch.zeros((batch_size, 1)).to(device)
+    scaling_factor = torch.zeros((batch_size, 1)).to(device)
 
     with torch.no_grad():
         #center pose on first point for each batch
@@ -82,7 +84,7 @@ def get_loss(output, pose, weights=None, norm_factor=0.2, device='cuda'):
 
     output = torch.bmm(output, batch_rotation_matrix)
 
-    '''
+    
     #find scaling factor for each batch
 
     with torch.no_grad():
@@ -91,8 +93,7 @@ def get_loss(output, pose, weights=None, norm_factor=0.2, device='cuda'):
         
     for i in range(batch_size):
         output[i] = output[i] * scaling_factor[i].item()
-    '''
-
+    
     #print ("output\n", output)
     #print ("pose\n", pose)
     #mean squared error for each batch
@@ -106,7 +107,7 @@ def get_loss(output, pose, weights=None, norm_factor=0.2, device='cuda'):
 
     return loss
 
-def get_optimizer(net, learning_rate, weight_decay, momentum=0.0):
+def get_optimizer(net, learning_rate, weight_decay, momentum=0.0, T_max = 20):
     final_layer_weights = []
     rest_of_the_net_weights = []
 
@@ -123,7 +124,7 @@ def get_optimizer(net, learning_rate, weight_decay, momentum=0.0):
     optimizer = Adam(final_layer_weights, weight_decay=weight_decay, lr=learning_rate)
     #optimizer = SGD([ {'params': final_layer_weights, 'lr': learning_rate} ], weight_decay=weight_decay, momentum=momentum)
 
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=40)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=T_max)
 
     return optimizer, scheduler
 

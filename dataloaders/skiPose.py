@@ -173,14 +173,14 @@ class PoseSkiDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets", mode = "train"):
 
         # change this to the path where the dataset is stored
-        self.data_path = dataset_dir+"/Ski-PosePTZ-CameraDataset-png"
+        data_path = dataset_dir+"/Ski-PosePTZ-CameraDataset-png"
         self.training_dir = []
 
         self.transform = transform
 
         paths = []
 
-        motion_seq = os.listdir(self.data_path)
+        motion_seq = os.listdir(data_path)
         no_dir = ['license.txt', 'load_h5_example.py', 'README.txt', 'load_h5_example.m']
 
         #train or test
@@ -189,7 +189,7 @@ class PoseSkiDataset(Dataset):
         else:
           dir = '/test'
 
-        path_file = dataset_dir+'/Ski-PosePTZ-CameraDataset-png'+dir+'/labels.h5'
+        path_file = data_path+dir+'/labels.h5'
         h5_label_file = h5py.File(path_file, 'r')
 
         #load image's path in order
@@ -197,7 +197,7 @@ class PoseSkiDataset(Dataset):
           seq   = int(h5_label_file['seq'][index])
           cam   = int(h5_label_file['cam'][index])
           frame = int(h5_label_file['frame'][index])
-          image_path = dataset_dir+dir+'/seq_{:03d}/cam_{:02d}/image_{:06d}.png'.format(seq,cam,frame)
+          image_path = data_path+dir+'/seq_{:03d}/cam_{:02d}/image_{:06d}.png'.format(seq,cam,frame)
           paths.append(image_path.replace('\\','/'))
 
         self.data = {'paths': paths}
@@ -221,7 +221,7 @@ class PoseSkiDataset(Dataset):
         #load the joints position
         path_file = self.data['paths'][idx].split('/seq')[0]+'/labels.h5'
         h5_label_file = h5py.File(path_file, 'r')
-        poses_3d = (h5_label_file['3D'][idx].reshape([-1,3]))
+        poses_3d = (h5_label_file['3D'][idx])
 
         sample['poses_3d'] =  poses_3d
 
