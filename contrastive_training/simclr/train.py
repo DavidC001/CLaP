@@ -13,7 +13,7 @@ from flash.core.optimizers import LARS
 from tqdm import tqdm
 
 from contrastive_training.simclr.model import get_simclr_net
-from contrastive_training.utils import get_dataset
+from contrastive_training.utils import get_dataLoaders
 
 from torch.utils.tensorboard import SummaryWriter
 
@@ -112,7 +112,7 @@ def train_simclr(model_dir= "trained_models",name = "simclr", dataset_dir="datas
                   batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, t=0.6, epochs=100, save_every=10):
     
     
-    _, _, _, train_loader, val_loader, test_loader = get_dataset(batch_size, datasets, dataset_dir)
+    train_loader, val_loader, test_loader = get_dataLoaders(batch_size)
 
     net = get_simclr_net()
     net.to(device)

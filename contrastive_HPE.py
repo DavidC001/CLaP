@@ -5,7 +5,7 @@ import argparse
 import json
 import torch
 
-from contrastive_training.train import contrastive_pretraining
+from contrastive_training.contrastive import contrastive_pretraining
 
 import random
 random.seed(0)
