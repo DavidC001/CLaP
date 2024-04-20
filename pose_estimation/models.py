@@ -5,15 +5,15 @@ from torch import nn
 import torch
 from contrastive_training.simclr.model import get_simclr_net
 from contrastive_training.simsiam.model import get_siam_net
-from contrastive_training.MoCo.model import get_moco_net
-from contrastive_training.supervised.model import get_supervised_net
+#from contrastive_training.MoCo.model import get_moco_net
+#from contrastive_training.supervised.model import get_supervised_net
 from torchvision.models import resnet50
 
 models = {
     'siam': get_siam_net,
     'simclr': get_simclr_net,
-    'MoCo': get_moco_net,
-    'LASCon': get_supervised_net,
+    #'MoCo': get_moco_net,
+    #'LASCon': get_supervised_net,
     'ResNet50': resnet50
 }
 
