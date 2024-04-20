@@ -104,6 +104,6 @@
             "momentum": 0.9,
             "epochs": 20,
             "save_every": 1
-        },
+        }
     }
 }
