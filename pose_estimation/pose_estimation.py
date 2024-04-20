@@ -31,7 +31,9 @@ def parseArgs(args):
     return args
 
 def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_dir="datasets"):
-    if args.skip:
+    #skip if specified
+    if args['skip']:
+        print("Skipping pose estimation training")
         return
 
     assert "dataset" in args, "dataset not found in args"
