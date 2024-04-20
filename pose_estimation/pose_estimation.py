@@ -43,7 +43,7 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
     for model in models:
         if model in args:
             params = parseArgs(args[model])
-            if (params.train):
+            if (params["train"]):
                 print(f"Training {model}")
 
                 try:
