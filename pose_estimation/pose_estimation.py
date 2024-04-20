@@ -38,49 +38,46 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
 
     train_loader, val_loader, test_loader = getDatasetLoader(dataset=args["dataset"], batch_size=args["batch_size"], datasets_dir=datasets_dir)
     
-
     for model in models:
         if model in args:
             params = parseArgs(args[model])
             if (params.train):
                 print(f"Training {model}")
-                pretrained = getPoseEstimModel(
-                    path = getLatestModel(os.path.join(models_dir, params['pretrained_name'])),
-                    model_type=model,
-                    layers=params['architecture'],
-                    out_dim=out_joints[args['dataset']],
-                    device=device
-                )
-                print(pretrained)
-                
-                optim, scheduler = get_optimizer(
-                    net=pretrained,
-                    learning_rate=params["learning_rate"],
-                    momentum=params["momentum"],
-                    weight_decay=params["weigth_decay"],
-                    T_max=params["epochs"]
-                )
 
-                train(
-                    model=pretrained,
-                    optimizer= optim,
-                    scheduler=scheduler,
-                    train_loader=train_loader,
-                    val_loader=val_loader,
-                    test_loader=test_loader,
-                    epochs=params["epochs"],
-                    device=device,
-                    model_dir=models_dir
-                    name=params["name"]
-                )
+                try:
 
-                print(f"{model} training done")
+                    pretrained = getPoseEstimModel(
+                        path = getLatestModel(os.path.join(models_dir, params['pretrained_name'])),
+                        model_type=model,
+                        layers=params['architecture'],
+                        out_dim=out_joints[args['dataset']],
+                        device=device
+                    )
+                    print(pretrained)
+                    
+                    optim, scheduler = get_optimizer(
+                        net=pretrained,
+                        learning_rate=params["learning_rate"],
+                        momentum=params["momentum"],
+                        weight_decay=params["weigth_decay"],
+                        T_max=params["epochs"]
+                    )
+                    
+                    train(
+                        model=pretrained,
+                        optimizer= optim,
+                        scheduler=scheduler,
+                        train_loader=train_loader,
+                        val_loader=val_loader,
+                        test_loader=test_loader,
+                        epochs=params["epochs"],
+                        device=device,
+                        model_dir=models_dir,
+                        name=params["name"]
+                    )
 
+                    print(f"{model} training done")
 
-    # pose estimation TODO
-    #simclr_path = 'trained_models/ver1.pt'
-    simclr_path = 'trained_models/simclr/simclr_epoch_25.pth'
-
-    simclr = get_simclr_net()
-
-    main(simclr_path, simclr, name="sim_2layer_2.1", epochs=40, learning_rate=0.02, device=device)
+                except Exception as e:
+                    print(f"Error training {model}: {e}")
+                    continue
