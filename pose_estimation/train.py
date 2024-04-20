@@ -5,8 +5,8 @@ from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
 import torch
 import re
-from pose_estimation.models import get_linear_evaluation_model
-from pose_estimation.functions import get_loss, get_optimizer
+from pose_estimation.functions import get_loss
+
 
 
 def training_step(net, data_loader, optimizer, cost_function, device='cuda'):
@@ -72,10 +72,8 @@ def test_step(net, data_loader, cost_function, device='cuda'):
 
     return cumulative_loss / batches, cumulative_accuracy / samples
 
-def train(path, base, name, model_type, model_dir="trained_models", batch_size=128, device='cuda', learning_rate=0.001, weight_decay=0.000001, momentum=0.9, epochs=20):
-    _, _, _, train_loader, val_loader, test_loader = get_data(batch_size)
-
-    net = get_linear_evaluation_model(path, base, model_type, device=device)
+def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, epochs, device='cuda', model_dir="trained_models", name="model"):
+    net = model
     epoch = 0
     cost_function = get_loss
 
@@ -106,7 +104,6 @@ def train(path, base, name, model_type, model_dir="trained_models", batch_size=1
             f.close()
 
         
-    optimizer, scheduler = get_optimizer(net, learning_rate, weight_decay, momentum)
     if os.path.exists(optimizer_file+str(epoch)+'.pt'):
         print("Loaded optimizer from epoch", epoch)
         optimizer.load_state_dict(torch.load(optimizer_file+str(epoch)+'.pt'))
