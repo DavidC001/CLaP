@@ -48,5 +48,8 @@ def contrastive_pretraining(args, device='cuda', models_dir="trained_models", da
             params = check_arguments_contrastive(params)
             
             if params['train']:
-                contrastive_train(device=device,  model=model, params=params, datasets=args['datasets'], models_dir=models_dir, datasets_dir=datasets_dir)
+                try:
+                    contrastive_train(device=device,  model=model, params=params, datasets=args['datasets'], models_dir=models_dir, datasets_dir=datasets_dir)
+                except Exception as e:
+                    print(f"Error in training {model}: {e}") 
             
