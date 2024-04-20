@@ -72,14 +72,14 @@ def test_step(net, data_loader, cost_function, device='cuda'):
 
     return cumulative_loss / batches, cumulative_accuracy / samples
 
-def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, epochs, device='cuda', model_dir="trained_models", name="model"):
+def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, epochs, save_every=10, device='cuda', model_dir="trained_models", name="model"):
     net = model
     epoch = 0
     cost_function = get_loss
 
     #redo this
     info_file = os.path.join(model_dir, name, "info.txt").replace("\\", "/")
-    model_file = os.path.join(model_dir, name, "epoch").replace("\\", "/")
+    model_file = os.path.join(model_dir, name, "epoch_").replace("\\", "/")
     model_dir = os.path.join(model_dir, name).replace("\\", "/")
     optimizer_file = os.path.join(model_dir, "optimizer_epoch").replace("\\", "/")
     scheduler_file = os.path.join(model_dir, "scheduler_epoch").replace("\\", "/")
@@ -122,9 +122,11 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
         print('\tValidation loss {:.5f}, Validation Acc {:.2f}'.format(val_loss, val_accuracy))
         print('-----------------------------------------------------')
 
-        torch.save(net.state_dict(), model_file+str(e+1)+'.pt')
-        torch.save(optimizer.state_dict(), optimizer_file+str(e+1)+'.pt')
-        torch.save(scheduler.state_dict(), scheduler_file+str(e+1)+'.pt')
+        if (e+1) % save_every == 0:
+            torch.save(net.state_dict(), model_file+str(e+1)+'.pt')
+            torch.save(optimizer.state_dict(), optimizer_file+str(e+1)+'.pt')
+            torch.save(scheduler.state_dict(), scheduler_file+str(e+1)+'.pt')
+        
         #write information to file
         f = open(info_file, "a")
         f.write('Epoch: {:d}\n'.format(e+1))
@@ -139,6 +141,11 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
         writer.add_scalar(tensorboard_tag+'/Accuracy/val', val_accuracy, e+1)
         writer.add_scalar(tensorboard_tag+'/lr', scheduler.get_last_lr()[0], e+1)
         writer.flush()
+
+    if epochs % save_every != 0:
+        torch.save(net.state_dict(), model_file+str(epochs)+'.pt')
+        torch.save(optimizer.state_dict(), optimizer_file+str(epochs)+'.pt')
+        torch.save(scheduler.state_dict(), scheduler_file+str(epochs)+'.pt')
 
     print('After training:')
     train_loss, train_accuracy = test_step(net, train_loader, cost_function, device)
