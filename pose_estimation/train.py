@@ -68,7 +68,7 @@ def test_step(net, data_loader, cost_function, device='cuda'):
 
             batches += 1
             samples += images.shape[0]
-            cumulative_accuracy += torch.cdist(output, poses[:,3:], 2).mean()
+            cumulative_accuracy += torch.cdist(output, poses, 2).mean()
 
     return cumulative_loss / batches, cumulative_accuracy / samples
 
