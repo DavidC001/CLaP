@@ -12,7 +12,7 @@ from torch import nn
 from tqdm import tqdm
 
 from contrastive_training.simsiam.model import get_siam_net
-from contrastive_training.utils import get_dataset
+from contrastive_training.utils import get_dataLoaders
 
 from torch.utils.tensorboard import SummaryWriter
 
@@ -92,10 +92,10 @@ def val_step(net, data_loader, cost_function, device='cuda'):
     return cumulative_loss / samples
 
 
-def train_simsiam(model_dir="trained_models", name = "simsiam",  dataset_dir="datasets", datasets="panoptic",
+def train_simsiam(model_dir="trained_models", name = "simsiam",  dataset_dir="datasets", datasets="panoptic", t=0,
                   batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, epochs=100, save_every=10):
     
-    _, _, _, train_loader, val_loader, test_loader = get_dataset(batch_size, datasets, dataset_dir)
+    train_loader, val_loader, test_loader = get_dataLoaders(batch_size)
 
     net = get_siam_net()
     net.to(device)

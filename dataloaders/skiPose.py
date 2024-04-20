@@ -114,7 +114,7 @@ def getContrastiveDatasetSki(transform, dataset_dir="datasets"):
     training_samples = int(num_samples * 0.8 + 1)
     val_samples = num_samples - training_samples
 
-    train, val, = torch.utils.data.random_split(
+    train, val = torch.utils.data.random_split(
         dataset, [training_samples, val_samples], generator=generator
     )
 
@@ -246,5 +246,16 @@ def getPoseDatasetSki(transform, dataset_dir="datasets"):
         tuple: A tuple containing the train and test datasets.
     """
     train = PoseSkiDataset(transform, dataset_dir, mode="train")
+    
+    num_samples = len(train)
+
+    training_samples = int(num_samples * 0.8 + 1)
+    val_samples = num_samples - training_samples
+
+    train, val = torch.utils.data.random_split(
+        train, [training_samples, val_samples], generator=generator
+    )
+
     test = PoseSkiDataset(transform, dataset_dir, mode="test")
-    return train, test
+    
+    return train, val, test
