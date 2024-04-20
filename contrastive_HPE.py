@@ -6,6 +6,7 @@ import json
 import torch
 
 from contrastive_training.contrastive import contrastive_pretraining
+from pose_estimation.pose_estimation import pose_estimation
 
 import random
 random.seed(0)
@@ -26,6 +27,7 @@ def main(args):
     else: datasets_dir = data['datasets_dir']
     
     contrastive_pretraining(args=data["contrastive"], device=device, models_dir=models_dir, datasets_dir=datasets_dir)
+    pose_estimation(args=data["pose_estimation"], device=device, models_dir=models_dir, datasets_dir=datasets_dir)
 
     
 

@@ -5,8 +5,8 @@ from contrastive_training.simsiam.train import train_simsiam
 from contrastive_training.simclr.train import train_simclr
 
 train_functions = {
-    "SimCLR": train_simclr,
-    "SimSiam": train_simsiam
+    "simclr": train_simclr,
+    "simsiam": train_simsiam
 }
 
 def contrastive_train(model, params, device='cuda', datasets=["panoptic"], models_dir="trained_models", datasets_dir="datasets"):
