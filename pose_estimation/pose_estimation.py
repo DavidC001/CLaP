@@ -71,6 +71,7 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
                         val_loader=val_loader,
                         test_loader=test_loader,
                         epochs=params["epochs"],
+                        save_every=params["save_every"],
                         device=device,
                         model_dir=models_dir,
                         name=params["name"]
