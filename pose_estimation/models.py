@@ -23,7 +23,7 @@ class Linear(nn.Module):
         super(Linear, self).__init__()
         self.layers = nn.Sequential()
         layers.append(output_dim)
-        for i in range(len(layers)-2):
+        for i in range(len(layers)-1):
             self.layers.add_module('linear'+str(i), nn.Linear(layers[i], layers[i+1]))
             if i != len(layers)-3:
                 self.layers.add_module('relu'+str(i), nn.ReLU())
@@ -33,14 +33,13 @@ class Linear(nn.Module):
         z = self.layers(x)
         return z
 
-def getPoseEstimModel(path, model_type, layers, out_dim, device='cuda'):
+def getPoseEstimModel(path, model_type, layers, out_dim, device='cpu'):
     base = models[model_type]()
     if path:
         base.load_state_dict(torch.load(path, map_location=torch.device(device)))
 
     if model_type == 'siam' or model_type == 'MoCo':
-        base = base.base
-    base.fc = Linear(layers, out_dim)
+        base.module = base.module.base
+    base.module.fc = Linear(layers, out_dim)
 
-
-    return base
+    return base.to(device)

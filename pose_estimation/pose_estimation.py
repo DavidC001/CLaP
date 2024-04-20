@@ -54,10 +54,10 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
                             path = getLatestModel(os.path.join(models_dir, params['pretrained_name'])),
                             model_type=model,
                             layers=params['architecture'],
-                            out_dim=out_joints[args['dataset']],
+                            out_dim=out_joints[args['dataset']]*3,
                             device=device
                         )
-                    #print(pretrained)
+                    print(pretrained)
                         
                     optim, scheduler = get_optimizer(
                             net=pretrained,
@@ -67,7 +67,14 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
                             T_max=params["epochs"]
                         )
                         
-                    train(
+
+                    print(f"{model} training done")
+
+                except Exception as e:
+                    print(f"Error training {model}: {e}")
+                    continue
+                    
+                train(
                             model=pretrained,
                             optimizer= optim,
                             scheduler=scheduler,
@@ -80,12 +87,6 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
                             model_dir=models_dir,
                             name=params["name"]
                         )
-
-                    print(f"{model} training done")
-
-                except Exception as e:
-                    print(f"Error training {model}: {e}")
-                    continue
 
 if __name__ == '__main__':
     args = {
