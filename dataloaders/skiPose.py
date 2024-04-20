@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 import torchvision.transforms as T
 
 import h5py
-import imageio
 
 generator = torch.Generator().manual_seed(42)
 
@@ -213,7 +212,9 @@ class PoseSkiDataset(Dataset):
         sample = dict()
 
         #read the image
-        image = imageio.imread(self.data['paths'][idx])
+        image = cv2.imread(self.data['paths'][idx])
+        image =cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = self.transform(image)
 
         sample['image'] = image
         
