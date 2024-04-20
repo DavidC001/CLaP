@@ -64,6 +64,7 @@ def check_arguments_contrastive(args):
     
     return args
 
+#TODO redo
 def contrastive_pretraining(args, device='cuda', models_dir="trained_models", datasets_dir="datasets"):
     #skip if specified
     if args['skip']:
