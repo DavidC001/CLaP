@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import torchvision.transforms as T
 import h5py 
 
+generator = torch.Generator().manual_seed(42)
 
 class ContrastiveKinectDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets", mode="train"):

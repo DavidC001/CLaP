@@ -221,7 +221,7 @@ class PoseSkiDataset(Dataset):
         #load the joints position
         path_file = self.data['paths'][idx].split('/seq')[0]+'/labels.h5'
         h5_label_file = h5py.File(path_file, 'r')
-        poses_3d = (h5_label_file['3D'][idx].reshape([-1,3]))
+        poses_3d = (h5_label_file['3D'][idx])
 
         sample['poses_3d'] =  poses_3d
 
