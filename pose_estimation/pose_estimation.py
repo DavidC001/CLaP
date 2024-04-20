@@ -32,6 +32,8 @@ def parseArgs(args):
 
 def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_dir="datasets"):
     #skip if specified
+    if "skip" not in args:
+        args["skip"] = False
     if args['skip']:
         print("Skipping pose estimation training")
         return
@@ -49,38 +51,58 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
                 try:
 
                     pretrained = getPoseEstimModel(
-                        path = getLatestModel(os.path.join(models_dir, params['pretrained_name'])),
-                        model_type=model,
-                        layers=params['architecture'],
-                        out_dim=out_joints[args['dataset']],
-                        device=device
-                    )
-                    print(pretrained)
-                    
+                            path = getLatestModel(os.path.join(models_dir, params['pretrained_name'])),
+                            model_type=model,
+                            layers=params['architecture'],
+                            out_dim=out_joints[args['dataset']],
+                            device=device
+                        )
+                    #print(pretrained)
+                        
                     optim, scheduler = get_optimizer(
-                        net=pretrained,
-                        learning_rate=params["learning_rate"],
-                        momentum=params["momentum"],
-                        weight_decay=params["weigth_decay"],
-                        T_max=params["epochs"]
-                    )
-                    
+                            net=pretrained,
+                            learning_rate=params["learning_rate"],
+                            momentum=params["momentum"],
+                            weight_decay=params["weight_decay"],
+                            T_max=params["epochs"]
+                        )
+                        
                     train(
-                        model=pretrained,
-                        optimizer= optim,
-                        scheduler=scheduler,
-                        train_loader=train_loader,
-                        val_loader=val_loader,
-                        test_loader=test_loader,
-                        epochs=params["epochs"],
-                        save_every=params["save_every"],
-                        device=device,
-                        model_dir=models_dir,
-                        name=params["name"]
-                    )
+                            model=pretrained,
+                            optimizer= optim,
+                            scheduler=scheduler,
+                            train_loader=train_loader,
+                            val_loader=val_loader,
+                            test_loader=test_loader,
+                            epochs=params["epochs"],
+                            save_every=params["save_every"],
+                            device=device,
+                            model_dir=models_dir,
+                            name=params["name"]
+                        )
 
                     print(f"{model} training done")
 
                 except Exception as e:
                     print(f"Error training {model}: {e}")
                     continue
+
+if __name__ == '__main__':
+    args = {
+        'dataset': 'ski',
+        'skip': False,
+        'simclr': {
+            'architecture': [512, 256],
+            'name': 'simclr_estim',
+            'pretrained_name': 'simclr',
+            'train': True,
+            'batch_size': 1024,
+            'learning_rate': 0.01,
+            'weight_decay': 0.000001,
+            'momentum': 0.9,
+            'epochs': 20,
+            'save_every': 10
+        }
+    }
+
+    pose_estimation(args)
