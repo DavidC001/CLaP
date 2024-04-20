@@ -106,7 +106,7 @@ def get_loss(output, pose, weights=None, norm_factor=0.2, device='cuda'):
 
     return loss
 
-def get_optimizer(net, learning_rate, weight_decay, momentum=0.0):
+def get_optimizer(net, learning_rate, weight_decay, momentum=0.0, T_max = 20):
     final_layer_weights = []
     rest_of_the_net_weights = []
 
@@ -123,7 +123,7 @@ def get_optimizer(net, learning_rate, weight_decay, momentum=0.0):
     optimizer = Adam(final_layer_weights, weight_decay=weight_decay, lr=learning_rate)
     #optimizer = SGD([ {'params': final_layer_weights, 'lr': learning_rate} ], weight_decay=weight_decay, momentum=momentum)
 
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=40)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=T_max)
 
     return optimizer, scheduler
 

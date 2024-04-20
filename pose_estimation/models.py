@@ -33,7 +33,7 @@ class Linear(nn.Module):
         z = self.layers(x)
         return z
 
-def get_linear_evaluation_model(path, model_type, layers, out_dim, device='cuda'):
+def getPoseEstimModel(path, model_type, layers, out_dim, device='cuda'):
     base = models[model_type]()
     if path:
         base.load_state_dict(torch.load(path, map_location=torch.device(device)))

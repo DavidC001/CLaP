@@ -49,60 +49,61 @@
     },
     "pose_estimation":{
         "skip": true,
-        "datasets": ["skiPose"],
+        "dataset": "skiPose",
+        "batch_size": 512,
         "simclr":{
             "train": true,
             "name": "simclr_estimator",
             "pretrained_name": "simclr",
             "architecture": [158,60],
-            "batch_size": 512,
             "learning_rate": 0.8,
             "weight_decay": 0.000001,
             "momentum": 0.9,
-            "epochs": 20
+            "epochs": 20,
+            "save_every": 1
         },
         "simsiam":{
             "train": true,
             "name": "simsiam_estimator",
             "pretrained_name": "simsiam",
             "architecture": [158,60],
-            "batch_size": 512,
             "learning_rate": 0.8,
             "weight_decay": 0.000001,
             "momentum": 0.9,
-            "epochs": 20
+            "epochs": 20,
+            "save_every": 1
         },
         "MoCo":{
             "train": true,
             "name": "moco_estimator",
             "pretrained_name": "moco",
             "architecture": [158,60],
-            "batch_size": 512,
             "learning_rate": 0.8,
             "weight_decay": 0.000001,
             "momentum": 0.9,
-            "epochs": 20
+            "epochs": 20,
+            "save_every": 1
         },
         "LASCon":{
             "train": true,
             "name": "supervised_estimator",
             "pretrained_name": "LASCon",
             "architecture": [158,60],
-            "batch_size": 512,
             "learning_rate": 0.8,
             "weight_decay": 0.000001,
             "momentum": 0.9,
-            "epochs": 20
+            "epochs": 20,
+            "save_every": 1
         },
         "resnet":{
             "train": true,
             "name": "resnet_estimator",
             "architecture": [158,60],
-            "batch_size": 512,
             "learning_rate": 0.8,
             "weight_decay": 0.000001,
             "momentum": 0.9,
-            "epochs": 20
+            "epochs": 20,
+            "save_every": 1
         },
     }
 }
