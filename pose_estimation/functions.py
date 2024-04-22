@@ -33,7 +33,7 @@ def find_rotation_mat(points1, points2):
 
 def find_scaling(points1, points2):
     """
-    Function to find the scaling factor between two sets of ordered 3D points.
+    Function to find the scaling factor between two sets of centered and ordered 3D points.
 
     Parameters:
     - points1: input containing a set of ordered 3D points
@@ -42,11 +42,7 @@ def find_scaling(points1, points2):
     Returns:
     - scaling_factor: torch.Tensor, 1x1 scaling factor
     """
-    points1 = points1.view(-1)
-    points2 = points2.view(-1)
-
-    # Calculate the scaling factor
-    scaling_factor = torch.sum(points2 * points1) / torch.sum(points1 * points1)
+    scaling_factor = torch.norm(points1) / torch.norm(points2)
 
     return scaling_factor
 
@@ -71,11 +67,7 @@ def get_loss(output, pose, weights=None, norm_factor=0.2, device='cuda'):
     scaling_factor = torch.zeros((batch_size, 1)).to(device)
 
     with torch.no_grad():
-        #center pose on first point for each batch
-        pose = pose - pose[:, 0].unsqueeze(1)
-
         #print ("output before\n", output)
-
         for i in range(batch_size):
             #print(output[i])
             rotation_matrix = find_rotation_mat(pose[i], output[i])
