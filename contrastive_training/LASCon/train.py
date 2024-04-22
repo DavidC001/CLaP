@@ -48,11 +48,11 @@ def label_similarity(poses):
     dist = torch.zeros((batch_size, batch_size)).to(poses.device)
     for i in range(batch_size):
         for j in range(i+1, batch_size):
-            rot_mat = find_rotation_mat(poses[i], poses[j])
-            poses_rot = torch.mm(poses[j], rot_mat)
-            scaling_factor = find_scaling(poses_rot, poses[i])
-            poses_rot = poses_rot * scaling_factor.item()
-            distance = torch.mean((poses[i] - poses_rot)**2)
+            #rot_mat = find_rotation_mat(poses[i], poses[j])
+            #poses_rot = torch.mm(poses[j], rot_mat)
+            #scaling_factor = find_scaling(poses_rot, poses[i])
+            #poses_rot = poses_rot * scaling_factor.item()
+            distance = torch.mean(torch.cdist(poses[i], poses[j], p=2))
             dist[i, j] = dist[j, i] = distance
 
     #normalized similarity
