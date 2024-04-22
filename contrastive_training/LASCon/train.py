@@ -52,8 +52,8 @@ def label_similarity(poses):
             poses_rot = torch.mm(poses[j], rot_mat)
             scaling_factor = find_scaling(poses_rot, poses[i])
             poses_rot = poses_rot * scaling_factor.item()
-            dist = torch.mean((poses[i] - poses_rot)**2)
-            dist[i, j] = dist[j, i] = dist
+            distance = torch.mean((poses[i] - poses_rot)**2)
+            dist[i, j] = dist[j, i] = distance
 
     #normalized similarity
     sim = torch.exp(-dist / torch.max(dist))
