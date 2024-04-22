@@ -71,11 +71,7 @@ def get_loss(output, pose, weights=None, norm_factor=0.2, device='cuda'):
     scaling_factor = torch.zeros((batch_size, 1)).to(device)
 
     with torch.no_grad():
-        #center pose on first point for each batch
-        pose = pose - pose[:, 0].unsqueeze(1)
-
         #print ("output before\n", output)
-
         for i in range(batch_size):
             #print(output[i])
             rotation_matrix = find_rotation_mat(pose[i], output[i])
