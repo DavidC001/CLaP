@@ -102,7 +102,7 @@ class ContrastivePanopticDataset(Dataset):
         return sample
 
 
-def getClusterDatasetPanoptic(transform, dataset_dir="datasets", batch_size=1, shuffle=False):
+def getContrastiveDatasetPanoptic(transform, dataset_dir="datasets", batch_size=1, shuffle=False):
     """
     Returns training and validation datasets for clustering in the Panoptic dataset.
 
@@ -116,18 +116,19 @@ def getClusterDatasetPanoptic(transform, dataset_dir="datasets", batch_size=1, s
         training_data (torch.utils.data.Dataset): The training dataset.
         val_data (torch.utils.data.Dataset): The validation dataset.
     """
-    dataset = ClusterPanopticDataset(transform, dataset_dir)
+    dataset = ContrastivePanopticDataset(transform, dataset_dir)
 
     num_samples = len(dataset)
 
-    training_samples = int(num_samples * 0.8 + 1)
-    val_samples = num_samples - training_samples
+    training_samples = int(num_samples * 0.6 + 1)
+    val_samples = int(num_samples * 0.2 + 1)
+    test_samples = num_samples - training_samples - val_samples
 
-    training_data, val_data, = torch.utils.data.random_split(
-        dataset, [training_samples, val_samples], generator=generator
+    training_data, val_data, test_data = torch.utils.data.random_split(
+        dataset, [training_samples, val_samples, test_samples], generator=generator
     )
 
-    return training_data, val_data
+    return training_data, val_data, test_data
 
 
 class ClusterPanopticDataset(Dataset):
@@ -262,11 +263,12 @@ def getPoseDatasetPanoptic(transform, dataset_dir="datasets", batch_size=1, shuf
 
     num_samples = len(dataset)
 
-    training_samples = int(num_samples * 0.8 + 1)
-    val_samples = num_samples - training_samples
+    training_samples = int(num_samples * 0.6 + 1)
+    val_samples = int(num_samples * 0.2 + 1)
+    test_samples = num_samples - training_samples - val_samples
 
-    training_data, val_data, = torch.utils.data.random_split(
-        dataset, [training_samples, val_samples], generator=generator
+    training_data, val_data, test_data = torch.utils.data.random_split(
+        dataset, [training_samples, val_samples, test_samples], generator=generator
     )
 
-    return training_data, val_data
+    return training_data, val_data, test_data

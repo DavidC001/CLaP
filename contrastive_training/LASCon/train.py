@@ -12,8 +12,11 @@ from flash.core.optimizers import LARS
 
 from tqdm import tqdm
 
+#model is the same as simclr
 from contrastive_training.simclr.model import get_simclr_net
-from contrastive_training.utils import get_dataLoaders
+from contrastive_training.LASCon.utils import get_dataLoaders
+
+from pose_estimation.functions import find_rotation_mat, find_scaling
 
 from torch.utils.tensorboard import SummaryWriter
 
@@ -38,29 +41,46 @@ def get_optimizer(model, lr, wd, momentum, epochs):
 
     return optimizer, scheduler
 
+def label_similarity(poses):
+    batch_size = poses.size()[0]
 
-def get_loss(geom_encoddings, app_encoddings, t):
-    geom_encoddings = F.normalize(geom_encoddings, p=2, dim=1)
-    app_encoddings = F.normalize(app_encoddings, p=2, dim=1)
+    #calculate similarity between each pair of set of points of a pose
+    dist = torch.zeros((batch_size, batch_size)).to(poses.device)
+    for i in range(batch_size):
+        for j in range(i+1, batch_size):
+            #rot_mat = find_rotation_mat(poses[i], poses[j])
+            #poses_rot = torch.mm(poses[j], rot_mat)
+            #scaling_factor = find_scaling(poses_rot, poses[i])
+            #poses_rot = poses_rot * scaling_factor.item()
+            distance = torch.mean(torch.cdist(poses[i], poses[j], p=2))
+            dist[i, j] = dist[j, i] = distance
 
-    def get_sim(zi, zj, t):
-        cosi = torch.nn.CosineSimilarity(dim=1)
-        return torch.exp(cosi(zi, zj) / t)
+    #normalized similarity
+    sim = torch.exp(-dist / torch.max(dist))
+    
+    return sim
 
-    num = get_sim(geom_encoddings, app_encoddings, t)
-    num = torch.cat([num, num])
 
-    batch = torch.cat([geom_encoddings, app_encoddings])
-    batch = batch / batch.norm(dim=1)[:, None]
-    sim = torch.mm(batch, batch.transpose(0,1))
+def get_loss(emb, poses, t):
+    batch_size = poses.size()[0]
+    poses = poses.view(batch_size, -1, 3)
+
+    #normalize to unit sphere
+    emb = F.normalize(emb, p=2, dim=1)
+
+    #calculate dot products
+    sim = torch.mm(emb, emb.transpose(0,1))
     sim = torch.exp(sim / t)
 
+    #calculate denominator
     denom = torch.sum(sim, dim=1) - torch.diagonal(sim, 0)
-    loss_vec = - torch.log(num / denom)
 
-    loss = loss_vec.sum() / batch.size()[0]
+    #use LASCon loss
+    lablesSim = label_similarity(poses)
+    
+    loss_vec = - torch.log(sim / denom) * lablesSim
 
-    return loss
+    return loss_vec.sum() / emb.size()[0]
 
 
 def train_step(net, data_loader, optimizer, cost_function, t, device='cuda'):
@@ -70,13 +90,12 @@ def train_step(net, data_loader, optimizer, cost_function, t, device='cuda'):
 
     for batch_idx, batch in enumerate(tqdm(data_loader)):
 
-        image1 = batch['image1'].to(device)
-        image2 = batch['image2'].to(device)
+        images = batch['image'].to(device)
+        poses = batch['poses_3d'].to(device)
 
-        _, image1_encoddings = net(image1)
-        _, image2_encoddings = net(image2)
+        _, image_encoddings = net(images)
 
-        loss = cost_function(image1_encoddings, image2_encoddings, t)
+        loss = cost_function(image_encoddings, poses, t)
         loss.backward()
 
         optimizer.step()
@@ -84,7 +103,7 @@ def train_step(net, data_loader, optimizer, cost_function, t, device='cuda'):
         optimizer.zero_grad()
 
         cumulative_loss += loss.item()
-        samples += image1.shape[0]
+        samples += images.shape[0]
 
     return cumulative_loss / samples
 
@@ -94,25 +113,24 @@ def val_step(net, data_loader, cost_function, t, device='cuda'):
     with torch.no_grad():
         for batch_idx, batch in enumerate(tqdm(data_loader)):
 
-            image1 = batch['image1'].to(device)
-            image2 = batch['image2'].to(device)
+            images = batch['image'].to(device)
+            poses = batch['poses_3d'].to(device)
 
-            _, image1_encoddings = net(image1)
-            _, image2_encoddings = net(image2)
+            _, image_encoddings = net(images)
 
-            loss = cost_function(image1_encoddings, image2_encoddings, t)
+            loss = cost_function(image_encoddings, poses, t)
 
             cumulative_loss += loss.item()
-            samples += image1.shape[0]
+            samples += images.shape[0]
 
     return cumulative_loss / samples
 
 
-def train_simclr(model_dir= "trained_models",name = "simclr", dataset_dir="datasets", datasets=["panoptic"],
+def train_LASCon(model_dir= "trained_models",name = "LASCon", dataset_dir="datasets", datasets=["panoptic"],
                   batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, t=0.6, epochs=100, save_every=10):
     
     
-    train_loader, val_loader, test_loader = get_dataLoaders(batch_size)
+    train_loader, val_loader, test_loader = get_dataLoaders(batch_size=batch_size, datasets=datasets, dataset_dir=dataset_dir)
 
     net = get_simclr_net()
     net.to(device)
@@ -179,4 +197,4 @@ def train_simclr(model_dir= "trained_models",name = "simclr", dataset_dir="datas
         torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pth'.format(epochs))
 
 if __name__ == "__main__":
-    train_simclr(name = "simclr", batch_size=180, epochs=100, learning_rate=0.3)
+    train_LASCon(name = "LASCon", datasets=["skiPose"],batch_size=650, epochs=100, learning_rate=0.3)
