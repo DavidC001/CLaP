@@ -13,7 +13,7 @@ models = {
     'siam': get_siam_net,
     'simclr': get_simclr_net,
     #'MoCo': get_moco_net,
-    #'LASCon': get_supervised_net,
+    'LASCon': get_simclr_net,
     'ResNet50': resnet50
 }
 
