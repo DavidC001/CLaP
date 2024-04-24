@@ -1,6 +1,5 @@
 import cv2
 import os
-from PIL import Image
 import numpy as np
 
 def is_completely_green(image_path):
@@ -8,25 +7,29 @@ def is_completely_green(image_path):
     if not os.path.isfile(image_path):
         print(f"Image file not found: {image_path}")
         return False
-    
-    threshold = 1.5 
 
     image = cv2.imread(image_path)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-    blue, green, red = cv2.split(image)
-    mean_blue = np.sum(blue) 
-    mean_red= np.sum(red)
-
-    print(mean_blue, mean_red)
-
-    cv2.imshow(image_path, image)
-    cv2.waitKey(0)
+    red, green, blue = cv2.split(image)
+    mean_blue = np.array(blue).sum() 
+    mean_red= np.array(red).sum()
+    
 
 
-    if mean_blue < threshold and mean_red < threshold:
+    # cv2.imshow(image_path, image)
+    # cv2.waitKey(0)
+
+    if mean_blue == 0 and mean_red == 0:
+        print(mean_blue, mean_red)
+        # cv2.imshow(image_path, image)
+        # cv2.waitKey(0)
+
         return True
     else:
         return False
+
+
 
 
 # def is_black_and_green(image_path):
@@ -42,7 +45,7 @@ def is_completely_green(image_path):
 #         return True
 #     else:
 #         return False
-
+from tqdm import tqdm
 
 def main():
     folder = [
@@ -50,15 +53,15 @@ def main():
         '160422_ultimatum1', '160906_band1', '160906_band2', '160906_band3', '160906_ian1', '160906_ian2', '160906_ian3', '160906_ian5', 
         '161029_flute1', '161029_piano1', '161029_piano2', '161029_piano3', '161029_piano4', '170307_dance5', '171026_cell03', '171026_pose1', '171026_pose2', '171026_pose3', '171024_pose1', '171024_pose2', '171024_pose3', '171024_pose4', '171024_pose5', '171024_pose6'
             ]
-    folder_path = "datasets/Panoptic/"
+    base_folder_path = "datasets/Panoptic/"
     green_images = []
 
 
     for folder_name in folder:
         print(f"Processing folder: {folder_name}")
-        folder_path = os.path.join(folder_path, folder_name)
+        folder_path = os.path.join(base_folder_path, folder_name)
         for root, _, files in os.walk(folder_path):
-            for file in files:
+            for file in tqdm(files):
                 if file.endswith(".jpg"):
                     image_path = os.path.join(root, file)
                     if is_completely_green(image_path):
