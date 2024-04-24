@@ -729,4 +729,4 @@
 171026_pose1;hd_00_01;person_0;00004763.jpg
 171026_pose1;hd_00_19;person_0;00003516.jpg
 171026_pose1;hd_00_19;person_2;00018833.jpg
-
+171026_pose2;hd_00_02;person_0;00004772.jpg
