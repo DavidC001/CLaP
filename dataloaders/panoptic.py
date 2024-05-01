@@ -17,6 +17,12 @@ generator = torch.Generator().manual_seed(42)
 class ContrastivePanopticDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets"):
 
+        #open green_images.txt
+        no_files = []
+        with open(dataset_dir+"/green_images.txt") as f:
+            for line in f:
+                no_files.append(line.strip())
+
         # change this to the path where the dataset is stored
         self.data_path = dataset_dir+"/ProcessedPanopticDataset/"
         self.training_dir = []
@@ -37,6 +43,9 @@ class ContrastivePanopticDataset(Dataset):
                     if os.path.exists(os.path.join(self.data_path,dir, 'hdJoints')):
                         data_path = os.path.join(self.data_path,dir, 'hdJoints')
                         for lists in (os.listdir(data_path)):
+                            if lists.replace('json','jpg') in no_files:
+                                print("removing: ", lists.replace('json','jpg'))
+                                continue
                             paths.append(os.path.join(data_path,lists.split('.json')[0]).replace('\\', '/'))
                 elif 'ian' in dir:
                     continue
@@ -44,6 +53,9 @@ class ContrastivePanopticDataset(Dataset):
                     if os.path.exists(os.path.join(self.data_path,dir,'hdJoints')):
                         data_path = os.path.join(self.data_path,dir,'hdJoints')
                         for lists in (os.listdir(data_path)):
+                            if lists.replace('json','jpg') in no_files:
+                                print("removing: ", lists.replace('json','jpg'))
+                                continue
                             paths.append(os.path.join(data_path,lists.split('.json')[0]).replace('\\', '/'))
 
         self.data = {'paths': paths}
@@ -134,11 +146,18 @@ def getContrastiveDatasetPanoptic(transform, dataset_dir="datasets", batch_size=
 class ClusterPanopticDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets"):
 
+        #open green_images.txt
+        no_files = []
+        with open(dataset_dir+"/green_images.txt") as f:
+            for line in f:
+                no_files.append(line.strip())
+
         # change this to the path where the dataset is stored
         self.data_path = dataset_dir+"/ProcessedPanopticDataset/171204_pose3/hdImages"
 
-        images = [os.path.join(self.data_path, f.replace('\\','/')) for f in os.listdir(self.data_path) 
-                    if os.path.isfile(os.path.join(self.data_path, f.replace('\\','/')))][0:6000]
+        images = [os.path.join(self.data_path, f).replace('\\','/') for f in os.listdir(self.data_path) 
+                    if (os.path.isfile(os.path.join(self.data_path, f)) and f not in no_files)] [0:6000]
+        print("Number of images: ", len(images))
         self.transform = transform
 
         self.data = {'paths': images}
@@ -161,6 +180,7 @@ class ClusterPanopticDataset(Dataset):
         image = self.transform(image)
 
         sample['image'] = image
+        sample['path'] = image_path
 
         return sample
 
@@ -174,6 +194,12 @@ class PosePanopticDataset(Dataset):
         self.transform = transform
 
         paths = []
+        
+        #open green_images.txt
+        no_files = []
+        with open(dataset_dir+"/green_images.txt") as f:
+            for line in f:
+                no_files.append(line.strip())
 
         motion_seq = os.listdir(self.data_path)
         no_dir = ['scripts','python','matlab','.git','glViewer.py','README.md','matlab',
@@ -187,6 +213,8 @@ class PosePanopticDataset(Dataset):
                     joint_path = os.path.join(self.data_path,dir,'hdJoints').replace('\\', '/')
                     if os.path.exists(joint_path):
                         for lists in (os.listdir(joint_path)):
+                            if lists.replace('json','jpg') in no_files:
+                                continue
                             paths.append(os.path.join(joint_path,lists.split('.json')[0]).replace('\\', '/'))
                 elif 'ian' in dir:
                     continue
@@ -194,6 +222,8 @@ class PosePanopticDataset(Dataset):
                     joint_path = os.path.join(self.data_path,dir,'hdJoints').replace('\\', '/')
                     if os.path.exists(joint_path):
                         for lists in (os.listdir(joint_path)):
+                            if lists.replace('json','jpg') in no_files:
+                                continue
                             paths.append(os.path.join(joint_path,lists.split('.json')[0]).replace('\\', '/'))
 
         self.data = {'paths': paths}
