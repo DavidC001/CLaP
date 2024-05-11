@@ -44,21 +44,24 @@ def get_optimizer(model, lr, wd, momentum, epochs):
 def label_similarity(poses):
     batch_size = poses.size()[0]
 
-    #calculate similarity between each pair of set of points of a pose
-    dist = torch.zeros((batch_size, batch_size)).to(poses.device)
+    #calculate similarity between each pair of set of points of a pose, use low precision
+    dist = torch.zeros((batch_size, batch_size), dtype=torch.int8).to(poses.device)
     for i in range(batch_size):
         for j in range(i+1, batch_size):
             #rot_mat = find_rotation_mat(poses[i], poses[j])
             #poses_rot = torch.mm(poses[j], rot_mat)
             #scaling_factor = find_scaling(poses_rot, poses[i])
             #poses_rot = poses_rot * scaling_factor.item()
-            distance = torch.mean(torch.cdist(poses[i], poses[j], p=2))
+            #distance = torch.mean(torch.cdist(poses[i], poses[j], p=2))
+            
+            #cosine similarity between two poses
+            distance = torch.nn.functional.cosine_similarity(poses[i][[16,8,14,5,11],:].view(-1), poses[j][[16,8,14,5,11],:].view(-1), dim=0)
             dist[i, j] = dist[j, i] = distance
 
     #normalized similarity
-    sim = torch.exp(-dist / torch.max(dist))
+    #sim = torch.exp(-dist / torch.max(dist))
     
-    return sim
+    return dist
 
 
 def get_loss(emb, poses, t):
