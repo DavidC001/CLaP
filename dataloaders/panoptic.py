@@ -18,10 +18,10 @@ class ContrastivePanopticDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets"):
 
         #open green_images.txt
-        no_files = []
+        self.no_files = []
         with open(dataset_dir+"/green_images.txt") as f:
             for line in f:
-                no_files.append(line.strip())
+                self.no_files.append(line.strip())
 
         # change this to the path where the dataset is stored
         self.data_path = dataset_dir+"/ProcessedPanopticDataset/"
@@ -43,7 +43,7 @@ class ContrastivePanopticDataset(Dataset):
                     if os.path.exists(os.path.join(self.data_path,dir, 'hdJoints')):
                         data_path = os.path.join(self.data_path,dir, 'hdJoints')
                         for lists in (os.listdir(data_path)):
-                            if lists.replace('json','jpg') in no_files:
+                            if lists.replace('json','jpg') in self.no_files:
                                 print("removing: ", lists.replace('json','jpg'))
                                 continue
                             paths.append(os.path.join(data_path,lists.split('.json')[0]).replace('\\', '/'))
@@ -53,7 +53,7 @@ class ContrastivePanopticDataset(Dataset):
                     if os.path.exists(os.path.join(self.data_path,dir,'hdJoints')):
                         data_path = os.path.join(self.data_path,dir,'hdJoints')
                         for lists in (os.listdir(data_path)):
-                            if lists.replace('json','jpg') in no_files:
+                            if lists.replace('json','jpg') in self.no_files:
                                 print("removing: ", lists.replace('json','jpg'))
                                 continue
                             paths.append(os.path.join(data_path,lists.split('.json')[0]).replace('\\', '/'))
@@ -76,6 +76,10 @@ class ContrastivePanopticDataset(Dataset):
         split[1] = camera
         second_path = ';'.join(split)
 
+        image_name = image_path.split('/')[-1]
+        if image_name in self.no_files:
+            return "Invalid Image"
+
         return second_path
 
 
@@ -89,7 +93,7 @@ class ContrastivePanopticDataset(Dataset):
         image1_path = path_split[0] + '/hdImages' + path_split[-1] + '.jpg'
         image2_path = self.get_second_view(image1_path)
 
-        for i in range(0, 10):
+        for i in range(0, 20):
             if os.path.isfile(image2_path):
                 image2 = cv2.imread(image2_path)
                 image2 =cv2.cvtColor(image2, cv2.COLOR_BGR2RGB)
