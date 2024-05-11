@@ -44,7 +44,7 @@ class ContrastivePanopticDataset(Dataset):
                         data_path = os.path.join(self.data_path,dir, 'hdJoints')
                         for lists in (os.listdir(data_path)):
                             if lists.replace('json','jpg') in self.no_files:
-                                print("removing: ", lists.replace('json','jpg'))
+                                # print("removing: ", lists.replace('json','jpg'))
                                 continue
                             paths.append(os.path.join(data_path,lists.split('.json')[0]).replace('\\', '/'))
                 elif 'ian' in dir:
@@ -54,7 +54,7 @@ class ContrastivePanopticDataset(Dataset):
                         data_path = os.path.join(self.data_path,dir,'hdJoints')
                         for lists in (os.listdir(data_path)):
                             if lists.replace('json','jpg') in self.no_files:
-                                print("removing: ", lists.replace('json','jpg'))
+                                # print("removing: ", lists.replace('json','jpg'))
                                 continue
                             paths.append(os.path.join(data_path,lists.split('.json')[0]).replace('\\', '/'))
 
