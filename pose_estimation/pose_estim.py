@@ -3,8 +3,8 @@ sys.path.append(".")
 
 import os
 from pose_estimation.models import models, getPoseEstimModel
-from dataloaders.datasets import out_joints 
 from pose_estimation.functions import get_optimizer
+from dataloaders.datasets import out_joints 
 from pose_estimation.train import train
 from pose_estimation.utils import getLatestModel, getDatasetLoader
 
@@ -90,14 +90,14 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
 
 if __name__ == '__main__':
     args = {
-        'dataset': 'ski',
+        'dataset': 'skiPose',
         'skip': False,
+        'batch_size': 1024,
         'simclr': {
             'architecture': [512, 256],
             'name': 'simclr_estim',
             'pretrained_name': 'simclr',
             'train': True,
-            'batch_size': 1024,
             'learning_rate': 0.01,
             'weight_decay': 0.000001,
             'momentum': 0.9,
@@ -106,4 +106,4 @@ if __name__ == '__main__':
         }
     }
 
-    pose_estimation(args)
+    pose_estimation(args, device="cuda")

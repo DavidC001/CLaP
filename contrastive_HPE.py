@@ -6,7 +6,7 @@ import json
 import torch
 
 from contrastive_training.contrastive import contrastive_pretraining
-from pose_estimation.pose_estimation import pose_estimation
+from pose_estimation.pose_estim import pose_estimation
 
 import random
 random.seed(0)
