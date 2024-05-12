@@ -9,12 +9,12 @@ train_data, val_data, test_data = None, None, None
 def load_datasets(datasets, dataset_dir="datasets"):
     global train_data, val_data, test_data
 
-    transforms = T.Compose(
-        [
-            T.ToTensor(),
-            T.Resize(size=(128, 128)),
-        ]
-    )
+    normalize = T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    transforms = T.Compose([T.ToPILImage(),
+                            T.Resize(256),
+                            T.CenterCrop(224),
+                            T.ToTensor(),
+                            normalize])
 
     train, val, test = [], [], []
     
