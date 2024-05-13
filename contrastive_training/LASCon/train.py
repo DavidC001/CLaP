@@ -9,6 +9,7 @@ import torch.nn.functional as F
 from torch import nn
 
 from flash.core.optimizers import LARS
+from torch.optim import Adam
 
 from tqdm import tqdm
 
@@ -32,10 +33,10 @@ def get_optimizer(model, lr, wd, momentum, epochs):
         else:
             rest_of_the_net_weights.append(param)
 
-    optimizer = LARS([
+    optimizer = Adam([
         {'params': rest_of_the_net_weights, 'lr': lr},
         {'params': final_layer_weights, 'lr': lr}
-    ], weight_decay=wd, momentum=momentum)
+    ], weight_decay=wd)
 
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=1e-6)
 
