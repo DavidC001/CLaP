@@ -4,17 +4,22 @@ import torchvision.transforms as T
 from dataloaders.datasets import contrastive_datasets
 from dataloaders.datasets import combineDataSets
 
+#import RN50 transforms
+from torchvision.models.resnet import  ResNet50_Weights
+
 train_data, val_data, test_data = None, None, None
 
 def load_datasets(datasets, dataset_dir="datasets"):
     global train_data, val_data, test_data
 
-    normalize = T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    transforms = T.Compose([T.ToPILImage(),
-                            T.Resize(256),
-                            T.CenterCrop(224),
-                            T.ToTensor(),
-                            normalize])
+    # normalize = T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    # transforms = T.Compose([T.ToPILImage(),
+    #                         T.Resize(256),
+    #                         T.CenterCrop(224),
+    #                         T.ToTensor(),
+    #                         normalize])
+    
+    transforms = ResNet50_Weights.DEFAULT.transforms()
 
     train, val, test = [], [], []
     

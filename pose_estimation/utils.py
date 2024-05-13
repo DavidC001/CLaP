@@ -6,6 +6,7 @@ import re
 import torch
 import torchvision.transforms as T
 from dataloaders.datasets import pose_datasets
+from torchvision.models.resnet import  ResNet50_Weights
 
 def getLatestModel(path):
     path = path.replace("\\", "/")
@@ -19,12 +20,14 @@ def getLatestModel(path):
     return os.path.join(path, "epoch_"+str(epoch)+".pth").replace("\\", "/")
 
 def getDatasetLoader(dataset, batch_size, datasets_dir="datasets"):
-    normalize = T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    transforms = T.Compose([T.ToPILImage(),
-                            T.Resize(256),
-                            T.CenterCrop(224),
-                            T.ToTensor(),
-                            normalize])
+    # normalize = T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    # transforms = T.Compose([T.ToPILImage(),
+    #                         T.Resize(256),
+    #                         T.CenterCrop(224),
+    #                         T.ToTensor(),
+    #                         normalize])
+
+    transforms = ResNet50_Weights.DEFAULT.transforms()
 
     train, val, test = pose_datasets[dataset](transforms, datasets_dir)
     
