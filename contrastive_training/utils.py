@@ -20,6 +20,7 @@ def load_datasets(datasets, dataset_dir="datasets"):
     #                         normalize])
     
     transforms = ResNet50_Weights.DEFAULT.transforms()
+    transforms = T.Compose([T.ToPILImage(), transforms])
 
     train, val, test = [], [], []
     
