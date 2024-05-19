@@ -22,6 +22,8 @@ class Linear(nn.Module):
     def __init__(self, layers, output_dim=48):
         super(Linear, self).__init__()
         self.layers = nn.Sequential()
+        #attach 2048 to the beginning of the list
+        layers.insert(0, 2048)
         layers.append(output_dim)
         for i in range(len(layers)-1):
             self.layers.add_module('linear'+str(i), nn.Linear(layers[i], layers[i+1]))
