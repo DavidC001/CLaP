@@ -28,9 +28,8 @@ class Linear(nn.Module):
         layers.append(output_dim)
         for i in range(len(layers)-1):
             self.layers.add_module('linear'+str(i), nn.Linear(layers[i], layers[i+1]))
-            if i != len(layers)-3:
+            if i < len(layers)-2:
                 self.layers.add_module('relu'+str(i), nn.ReLU())
-
 
     def forward(self, x):
         z = self.layers(x)

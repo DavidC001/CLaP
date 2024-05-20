@@ -1,6 +1,6 @@
 import torch
 from torch.optim import SGD
-from torch.optim import Adam
+from torch.optim import AdamW
 import numpy as np
 
 def find_rotation_mat(points1, points2):
@@ -59,38 +59,38 @@ def get_loss(output, pose, weights=None, norm_factor=0.2, device='cuda'):
     #print("pose\n", pose.shape)
 
     # center pose on mean point for each batch
-    pose = pose - pose[:, 0].unsqueeze(1)
+    pose = pose - pose.mean(dim=1).unsqueeze(1)
     # center output on first point for each batch
-    output = output - output[:, 0].unsqueeze(1)
+    output = output - output.mean(dim=1).unsqueeze(1)
 
     #find rotation matrix for each batch
     batch_rotation_matrix = torch.zeros((batch_size, 3, 3)).to(device)
-    scaling_factor = torch.zeros((batch_size, 1)).to(device)
+    # scaling_factor = torch.zeros((batch_size, 1)).to(device)
 
     with torch.no_grad():
         #print ("output before\n", output)
         for i in range(batch_size):
             #print(output[i])
-            rotation_matrix = find_rotation_mat(pose[i], output[i])
+            rotation_matrix = find_rotation_mat(output[i], pose[i])
             
             batch_rotation_matrix[i] = rotation_matrix
 
     output = torch.bmm(output, batch_rotation_matrix)
-
     
     #find scaling factor for each batch
 
-    with torch.no_grad():
-        for i in range(batch_size):
-            scaling_factor[i] = find_scaling(pose[i], output[i])
+    # with torch.no_grad():
+    #     for i in range(batch_size):
+    #         scaling_factor[i] = find_scaling(pose[i], output[i])
         
-    for i in range(batch_size):
-        output[i] = output[i] * scaling_factor[i].item()
+    # for i in range(batch_size):
+    #     output[i] = output[i] * scaling_factor[i].item()
     
     #print ("output\n", output)
     #print ("pose\n", pose)
     #mean squared error for each batch
     loss = torch.mean((pose - output)**2)
+    # breakpoint()
     #print(loss)
 
     # add L2 normalization factor for weights
@@ -114,7 +114,7 @@ def get_optimizer(net, learning_rate, weight_decay, momentum=0.0, T_max = 20):
         
     #print (final_layer_weights)
 
-    optimizer = Adam(final_layer_weights, weight_decay=weight_decay, lr=learning_rate)
+    optimizer = AdamW(final_layer_weights, weight_decay=weight_decay, lr=learning_rate)
     #optimizer = SGD([ {'params': final_layer_weights, 'lr': learning_rate} ], weight_decay=weight_decay, momentum=momentum)
 
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=T_max)

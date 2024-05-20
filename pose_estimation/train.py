@@ -31,17 +31,17 @@ def training_step(net, data_loader, optimizer, cost_function, device='cuda'):
         cumulative_loss += loss.item()
 
         loss.backward()
+        # print(loss.item())
 
         optimizer.step()
 
         optimizer.zero_grad()
 
-        batches += 1
         samples += images.shape[0]
 
-        cumulative_accuracy += torch.cdist(output, poses, 2).mean()
+        
 
-    return cumulative_loss / batches, cumulative_accuracy / samples
+    return cumulative_loss / samples
 
 
 def test_step(net, data_loader, cost_function, device='cuda'):
@@ -53,24 +53,30 @@ def test_step(net, data_loader, cost_function, device='cuda'):
     net.eval()
 
     with torch.no_grad():
+        #show image and poses
+        from matplotlib import pyplot as plt
+        import cv2
 
         for batch_idx, batch in enumerate(tqdm(data_loader)):
             images = batch['image']
             poses = batch['poses_3d']
+            cv2.imshow("image", images[0].cpu().numpy().transpose(1,2,0))
 
             images = images.to(device)
             poses = poses.to(device)
 
             output = net(images)
 
+            pose = poses[0].view(-1,3).cpu()
+
             loss = cost_function(output, poses, device=device)
             cumulative_loss += loss.item()
 
-            batches += 1
-            samples += images.shape[0]
-            cumulative_accuracy += torch.cdist(output, poses, 2).mean()
+            pose = poses[0].view(-1,3).cpu()
 
-    return cumulative_loss / batches, cumulative_accuracy / samples
+            samples += images.shape[0]
+
+    return cumulative_loss / samples
 
 def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, epochs, save_every=10, device='cuda', model_dir="trained_models", name="model"):
     net = model
@@ -112,14 +118,14 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
 
     for e in range(epoch, epochs):
 
-        train_loss, train_accuracy = training_step(net, train_loader, optimizer, cost_function, device)
-        val_loss, val_accuracy = test_step(net, val_loader, cost_function, device)
+        train_loss = training_step(net, train_loader, optimizer, cost_function, device)
+        val_loss = test_step(net, val_loader, cost_function, device)
 
         scheduler.step()
 
         print('Epoch: {:d}'.format(e+1))
-        print('\tTraining loss {:.5f}, Training Acc {:.4f}'.format(train_loss, train_accuracy))
-        print('\tValidation loss {:.5f}, Validation Acc {:.2f}'.format(val_loss, val_accuracy))
+        print('\tTraining loss {:.5f}'.format(train_loss))
+        print('\tValidation loss {:.5f}'.format(val_loss))
         print('-----------------------------------------------------')
 
         if (e+1) % save_every == 0:
@@ -130,15 +136,13 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
         #write information to file
         f = open(info_file, "a")
         f.write('Epoch: {:d}\n'.format(e+1))
-        f.write('\tTraining loss {:.5f}, Training Acc {:.4f}\n'.format(train_loss, train_accuracy))
-        f.write('\tValidation loss {:.5f}, Validation Acc {:.2f}\n'.format(val_loss, val_accuracy))
+        f.write('\tTraining loss {:.5f}\n'.format(train_loss))
+        f.write('\tValidation loss {:.5f}\n'.format(val_loss))
         f.write('-----------------------------------------------------\n')
         f.close()
 
         writer.add_scalar(tensorboard_tag+'/Loss/train', train_loss, e+1)
         writer.add_scalar(tensorboard_tag+'/Loss/val', val_loss, e+1)
-        writer.add_scalar(tensorboard_tag+'/Accuracy/train', train_accuracy, e+1)
-        writer.add_scalar(tensorboard_tag+'/Accuracy/val', val_accuracy, e+1)
         writer.add_scalar(tensorboard_tag+'/lr', scheduler.get_last_lr()[0], e+1)
         writer.flush()
 
