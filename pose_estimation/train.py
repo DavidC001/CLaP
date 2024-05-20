@@ -167,21 +167,21 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
         torch.save(scheduler.state_dict(), scheduler_file+str(epochs)+'.pt')
 
     print('After training:')
-    train_loss, train_accuracy = test_step(net, train_loader, cost_function, device)
-    val_loss, val_accuracy = test_step(net, val_loader, cost_function, device)
-    test_loss, test_accuracy = test_step(net, test_loader, cost_function, device)
+    train_loss = test_step(net, train_loader, cost_function, device)
+    val_loss = test_step(net, val_loader, cost_function, device)
+    test_loss = test_step(net, test_loader, cost_function, device)
 
-    print('\tTraining loss {:.5f}, Training Acc {:.4f}'.format(train_loss, train_accuracy))
-    print('\tValidation loss {:.5f}, Validation Acc {:.4f}'.format(val_loss, val_accuracy))
-    print('\tTest loss {:.5f}, Test Acc {:.4f}'.format(test_loss, test_accuracy))
+    print('\tTraining loss {:.5f}'.format(train_loss))
+    print('\tValidation loss {:.5f}'.format(val_loss))
+    print('\tTest loss {:.5f}'.format(test_loss))
     print('-----------------------------------------------------')
 
     #write information to file
     f = open(info_file, "a")
     f.write('After training:\n')
-    f.write('\tTraining loss {:.5f}, Training Acc {:.4f}\n'.format(train_loss, train_accuracy))
-    f.write('\tValidation loss {:.5f}, Validation Acc {:.4f}\n'.format(val_loss, val_accuracy))
-    f.write('\tTest loss {:.5f}, Test Acc {:.4f}\n'.format(test_loss, test_accuracy))
+    f.write('\tTraining loss {:.5f}\n'.format(train_loss))
+    f.write('\tValidation loss {:.5f}\n'.format(val_loss))
+    f.write('\tTest loss {:.5f}\n'.format(test_loss))
     f.write('-----------------------------------------------------\n')
     f.close()
 
