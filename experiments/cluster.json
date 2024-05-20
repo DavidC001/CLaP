@@ -3,7 +3,7 @@
     "models_dir": "trained_models",
     "datasets_dir": "datasets",
     "contrastive":{
-        "skip": false,
+        "skip": true,
         "datasets": ["panoptic"],
         "simclr":{
             "train": true,
@@ -48,7 +48,7 @@
         }
     },
     "pose_estimation":{
-        "skip": true,
+        "skip": false,
         "dataset": "skiPose",
         "batch_size": 256,
         "simclr":{
@@ -74,7 +74,7 @@
             "save_every": 1
         },
         "MoCo":{
-            "train": true,
+            "train": false,
             "name": "moco_estimator",
             "pretrained_name": "moco",
             "architecture": [158,60],
@@ -99,6 +99,7 @@
             "train": true,
             "name": "resnet_estimator",
             "architecture": [158,60],
+            "pretrained_name": "resnet50",
             "learning_rate": 0.8,
             "weight_decay": 0.000001,
             "momentum": 0.9,
