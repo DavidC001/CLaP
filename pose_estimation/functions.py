@@ -58,9 +58,9 @@ def get_loss(output, pose, weights=None, norm_factor=0.2, device='cuda'):
     #print("pose\n", pose.shape)
 
     # center pose on mean point for each batch
-    pose = pose - pose[:, 0]
+    pose = pose - pose[:, 0].unsqueeze(1)
     # center output on first point for each batch
-    output = output - output[:, 0]
+    output = output - output[:, 0].unsqueeze(1)
 
     #find rotation matrix for each batch
     batch_rotation_matrix = torch.zeros((batch_size, 3, 3)).to(device)
