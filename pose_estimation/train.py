@@ -60,19 +60,15 @@ def test_step(net, data_loader, cost_function, device='cuda'):
         for batch_idx, batch in enumerate(tqdm(data_loader)):
             images = batch['image']
             poses = batch['poses_3d']
-            # cv2.imshow("image", images[0].cpu().numpy().transpose(1,2,0))
+            cv2.imshow("image", images[0].cpu().numpy().transpose(1,2,0))
 
             images = images.to(device)
             poses = poses.to(device)
 
             output = net(images)
 
-            pose = poses[0].view(-1,3).cpu()
-
             loss = cost_function(output, poses, device=device)
             cumulative_loss += loss.item()
-
-            pose = poses[0].view(-1,3).cpu()
 
             samples += images.shape[0]
 
