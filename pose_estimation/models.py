@@ -45,7 +45,7 @@ def getPoseEstimModel(path, model_type, layers, out_dim, device='cpu'):
     
     base = base.to(device)
     
-    if model_type == 'siam' or model_type == 'MoCo':
+    if model_type == 'simsiam' or model_type == 'MoCo':
         base.module = base.module.base
     base.module.fc = Linear(layers, out_dim)
 
