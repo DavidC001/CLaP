@@ -11,7 +11,7 @@ from torchvision.models import resnet50
 from torchvision.models import ResNet50_Weights
 
 models = {
-    'siam': get_siam_net,
+    'simsiam': get_siam_net,
     'simclr': get_simclr_net,
     #'MoCo': get_moco_net,
     'LASCon': get_simclr_net,
