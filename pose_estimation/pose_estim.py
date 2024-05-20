@@ -57,7 +57,7 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
                             out_dim=out_joints[args['dataset']]*3,
                             device=device
                         )
-                    print(pretrained)
+                    # print(pretrained)
                         
                     optim, scheduler = get_optimizer(
                             net=pretrained,
