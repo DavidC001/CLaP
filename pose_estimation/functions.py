@@ -1,6 +1,7 @@
 import torch
 from torch.optim import SGD
 from torch.optim import Adam
+import numpy as np
 
 def find_rotation_mat(points1, points2):
     """

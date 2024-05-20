@@ -39,11 +39,13 @@ class Linear(nn.Module):
 def getPoseEstimModel(path, model_type, layers, out_dim, device='cpu'):
     if model_type != 'resnet':
         base = models[model_type]()
-        base.load_state_dict(torch.load(path, map_location=torch.device(device))).to(device)
-    elif model_type == 'resnet':
+        base.load_state_dict(torch.load(path, map_location=torch.device(device)))
+    else:
         weights = ResNet50_Weights.DEFAULT
-        base = nn.DataParallel(resnet50(weights=weights)).to(device)
-
+        base = nn.DataParallel(resnet50(weights=weights))
+    
+    base = base.to(device)
+    
     if model_type == 'siam' or model_type == 'MoCo':
         base.module = base.module.base
     base.module.fc = Linear(layers, out_dim)
