@@ -37,7 +37,7 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
     if args['skip']:
         print("Skipping pose estimation training")
         return
-
+    
     assert "dataset" in args, "dataset not found in args"
 
     train_loader, val_loader, test_loader = getDatasetLoader(dataset=args["dataset"], batch_size=args["batch_size"], datasets_dir=datasets_dir)
@@ -66,15 +66,8 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
                             weight_decay=params["weight_decay"],
                             T_max=params["epochs"]
                         )
-                        
 
-                    print(f"{model} training done")
-
-                except Exception as e:
-                    print(f"Error training {model}: {e}")
-                    continue
-                    
-                train(
+                    train(
                             model=pretrained,
                             optimizer= optim,
                             scheduler=scheduler,
@@ -87,6 +80,13 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
                             model_dir=models_dir,
                             name=params["name"]
                         )
+                    
+                    print(f"{model} training done")
+
+                except Exception as e:
+                    print(f"Error training {model}: {e}")
+                    continue
+                    
 
 if __name__ == '__main__':
     args = {

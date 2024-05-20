@@ -10,14 +10,21 @@ from torchvision.models.resnet import  ResNet50_Weights
 
 def getLatestModel(path):
     path = path.replace("\\", "/")
-    files = os.listdir(path)
-    #remove non weight files
-    files = [file for file in files if '.pt' in file]
-    if len(files) > 1:
-        epoch = max([int(re.findall(r'\d+', file)[0]) for file in files])
-    else:
-        raise Exception("No model found")
-    return os.path.join(path, "epoch_"+str(epoch)+".pth").replace("\\", "/")
+    try:
+        files = os.listdir(path)
+        #remove non weight files
+        files = [file for file in files if '.pt' in file]
+        if len(files) > 1:
+            epoch = max([int(re.findall(r'\d+', file)[0]) for file in files])
+        else:
+            raise Exception("No model found")
+
+        path = os.path.join(path, "epoch_"+str(epoch)+".pth").replace("\\", "/")
+    except:
+        path = None
+    
+    return path
+        
 
 def getDatasetLoader(dataset, batch_size, datasets_dir="datasets"):
     # normalize = T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
