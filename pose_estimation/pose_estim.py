@@ -9,6 +9,15 @@ from pose_estimation.train import train
 from pose_estimation.utils import getLatestModel, getDatasetLoader
 
 def parseArgs(args):
+    """
+    Parse the arguments for the pose estimation model.
+
+    Parameters:
+    - args: dict, arguments for the pose estimation model
+
+    Returns:
+    - args: dict, updated arguments for the pose estimation model
+    """
     assert 'architecture' in args, 'estimator head architecture not found in args'
     assert 'name' in args, 'name not found for args'
     assert 'pretrained_name' in args, 'pretrained model name not found in args'
@@ -31,6 +40,17 @@ def parseArgs(args):
     return args
 
 def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_dir="datasets", base_model="resnet18"):
+    """
+    Train the pose estimation model.
+
+    Parameters:
+    - args: dict, arguments for the pose estimation model
+    - device: str, device, default is 'cpu'
+    - models_dir: str, directory to save the trained models, default is 'trained_models'
+    - datasets_dir: str, directory to save the datasets, default is 'datasets'
+    - base_model: str, base model, default is 'resnet18'
+
+    """
     #skip if specified
     if "skip" not in args:
         args["skip"] = False

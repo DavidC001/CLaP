@@ -21,7 +21,18 @@ models = {
 
 
 class Linear(nn.Module):
+    """
+    Linear layer with ReLU activation function for the pose estimation model.
+    """
     def __init__(self, layers, output_dim=48, base_model='resnet18'):
+        """
+        Initialize the Linear layer.
+
+        Parameters:
+        - layers: list, list of layer dimensions
+        - output_dim: int, output dimension, default is 48
+        - base_model: str, base model, default is 'resnet18'
+        """
         super(Linear, self).__init__()
         self.layers = nn.Sequential()
         #attach 2048 to the beginning of the list
@@ -42,6 +53,20 @@ class Linear(nn.Module):
         return z
 
 def getPoseEstimModel(path, model_type, layers, out_dim, device='cpu', base_model='resnet18'):
+    """
+    Get the pose estimation model.
+
+    Parameters:
+    - path: str, path to the model weights
+    - model_type: str, model type ['simsiam', 'simclr', 'MoCo', 'LASCon', 'resnet']
+    - layers: list, list of layer dimensions
+    - out_dim: int, output dimension
+    - device: str, device, default is 'cpu'
+    - base_model: str, base model, default is 'resnet18'
+
+    Returns:
+    - base: torch.nn.Module, pose estimation model with the specified weights
+    """
     if model_type != 'resnet':
         base = models[model_type](base_model)
         base.load_state_dict(torch.load(path, map_location=torch.device(device)))

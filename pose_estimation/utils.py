@@ -9,6 +9,15 @@ from dataloaders.datasets import pose_datasets
 from torchvision.models.resnet import  ResNet50_Weights, ResNet18_Weights
 
 def getLatestModel(path):
+    """
+    Return the path to the latest model in the directory.
+
+    Parameters:
+    - path: str, path to the directory
+
+    Returns:
+    - path: str, path to the latest model in the directory
+    """
     path = path.replace("\\", "/")
     try:
         files = os.listdir(path)
@@ -27,6 +36,20 @@ def getLatestModel(path):
         
 
 def getDatasetLoader(dataset, batch_size, datasets_dir="datasets", base_model="resnet18"):
+    """
+    return the dataloader for the specified dataset.
+
+    Parameters:
+    - dataset: str, dataset name
+    - batch_size: int, batch size
+    - datasets_dir: str, directory to save the datasets, default is 'datasets'
+    - base_model: str, base model, default is 'resnet18'
+
+    Returns:
+    - train_loader: torch.utils.data.DataLoader, training dataloader
+    - val_loader: torch.utils.data.DataLoader, validation dataloader
+    - test_loader: torch.utils.data.DataLoader, test dataloader
+    """
     # normalize = T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     # transforms = T.Compose([T.ToPILImage(),
     #                         T.Resize(256),

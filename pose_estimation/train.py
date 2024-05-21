@@ -10,6 +10,16 @@ from pose_estimation.functions import get_loss
 
 
 def training_step(net, data_loader, optimizer, cost_function, device='cuda'):
+    """
+    Make a training step for the pose estimation model.
+
+    Parameters:
+    - net: torch.nn.Module, network model
+    - data_loader: torch.utils.data.DataLoader, data loader
+    - optimizer: torch.optim.Optimizer, optimizer
+    - cost_function: function, cost function
+    - device: str, device, default is 'cuda'
+    """
     cumulative_loss = 0.0
     samples = 0.0
 
@@ -43,6 +53,15 @@ def training_step(net, data_loader, optimizer, cost_function, device='cuda'):
 
 
 def test_step(net, data_loader, cost_function, device='cuda'):
+    """
+    Make a test step for the pose estimation model.
+
+    Parameters:
+    - net: torch.nn.Module, network model
+    - data_loader: torch.utils.data.DataLoader, data loader
+    - cost_function: function, cost function
+    - device: str, device, default is 'cuda'
+    """
     cumulative_loss = 0.
     samples = 0.
 
@@ -96,6 +115,23 @@ def test_step(net, data_loader, cost_function, device='cuda'):
     return cumulative_loss / samples
 
 def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, epochs, save_every=10, device='cuda', model_dir="trained_models", name="model"):
+    """
+    Train the pose estimation model.
+
+    Parameters:
+    - model: torch.nn.Module, network model
+    - optimizer: torch.optim.Optimizer, optimizer
+    - scheduler: torch.optim.lr_scheduler, scheduler
+    - train_loader: torch.utils.data.DataLoader, training data loader
+    - val_loader: torch.utils.data.DataLoader, validation data loader
+    - test_loader: torch.utils.data.DataLoader, test data loader
+    - epochs: int, number of epochs
+    - save_every: int, save every n epochs, default is 10
+    - device: str, device, default is 'cuda'
+    - model_dir: str, directory to save the trained models, default is 'trained_models'
+    - name: str, model name, default is 'model'
+    
+    """
     net = model
     epoch = 0
     cost_function = get_loss

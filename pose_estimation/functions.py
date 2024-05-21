@@ -49,6 +49,19 @@ def find_scaling(points1, points2):
 
 # get loss for the whole batch
 def get_loss(output, pose, weights=None, norm_factor=0.2, device='cuda'):
+    """
+    Calculate the loss between the predicted and target poses.
+
+    Parameters:
+    - output: torch.Tensor, predicted pose
+    - pose: torch.Tensor, target pose
+    - weights: torch.Tensor, weights of the model for L2 normalization, default is None
+    - norm_factor: float, L2 normalization factor, default is 0.2
+    - device: str, device to run the model, default is 'cuda'
+
+    Returns:
+    - loss: torch.Tensor, loss value
+    """
     batch_size = output.shape[0]
 
     # vectors are a column vector and should be grouped by 3 (x, y, z)
@@ -101,6 +114,20 @@ def get_loss(output, pose, weights=None, norm_factor=0.2, device='cuda'):
     return loss
 
 def get_optimizer(net, learning_rate, weight_decay, momentum=0.0, T_max = 20):
+    """
+    Get the optimizer and scheduler for the network.
+
+    Parameters:
+    - net: torch.nn.Module, network model
+    - learning_rate: float, learning rate
+    - weight_decay: float, weight decay
+    - momentum: float, momentum, default is 0.0
+    - T_max: int, maximum number of iterations, default is 20
+
+    Returns:
+    - optimizer: torch.optim, optimizer
+    - scheduler: torch.optim.lr_scheduler, scheduler
+    """
     final_layer_weights = []
     rest_of_the_net_weights = []
 
