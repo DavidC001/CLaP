@@ -61,33 +61,33 @@ def test_step(net, data_loader, cost_function, device='cuda'):
             loss = cost_function(output, poses, device=device)
             cumulative_loss += loss.item()
 
-            # #show the two poses
-            # from matplotlib import pyplot as plt
-            # import cv2
-            # from pose_estimation.functions import find_rotation_mat
-            # cv2.imshow("image", images[0].cpu().numpy().transpose(1,2,0))
-            # poses = poses[0].view(-1,3)
-            # poses = poses - poses.mean(dim=0)
-            # output = output[0].view(-1,3)
-            # output = output - output.mean(dim=0)
-            # rotation_matrix = find_rotation_mat(output, poses)
-            # output = torch.mm(output, rotation_matrix)
-            # fig = plt.figure()
-            # ax = fig.add_subplot(111, projection='3d')
-            # ax.scatter(poses[:,0].cpu().numpy(), poses[:,1].cpu().numpy(), poses[:,2].cpu().numpy(), c='r')
-            # #write numbers
-            # for i in range(poses.shape[0]):
-            #     ax.text(poses[i,0].cpu().numpy(), poses[i,1].cpu().numpy(), poses[i,2].cpu().numpy(), "T"+str(i))
-            # #connect the 17 joints
-            # connections = [ [0,1], [1,2], [2,3], [0,4], [4,5], [5,6], [8,9], [9,10], [8,11], [11,12], [12,13], [0,7], [14,15], [15,16],[7,8], [14,8]]
-            # for connection in connections:
-            #     ax.plot([poses[connection[0],0].cpu().numpy(), poses[connection[1],0].cpu().numpy()], [poses[connection[0],1].cpu().numpy(), poses[connection[1],1].cpu().numpy()], [poses[connection[0],2].cpu().numpy(), poses[connection[1],2].cpu().numpy()], c='r')
-            # ax.scatter(output[:,0].cpu().numpy(), output[:,1].cpu().numpy(), output[:,2].cpu().numpy(), c='b')
-            # for i in range(output.shape[0]):
-            #     ax.text(output[i,0].cpu().numpy(), output[i,1].cpu().numpy(), output[i,2].cpu().numpy(), "P"+str(i))
-            # for connection in connections:
-            #     ax.plot([output[connection[0],0].cpu().numpy(), output[connection[1],0].cpu().numpy()], [output[connection[0],1].cpu().numpy(), output[connection[1],1].cpu().numpy()], [output[connection[0],2].cpu().numpy(), output[connection[1],2].cpu().numpy()], c='b')
-            # plt.show()
+            #show the two poses
+            from matplotlib import pyplot as plt
+            import cv2
+            from pose_estimation.functions import find_rotation_mat
+            cv2.imshow("image", images[0].cpu().numpy().transpose(1,2,0))
+            poses = poses[0].view(-1,3)
+            poses = poses - poses.mean(dim=0)
+            output = output[0].view(-1,3)
+            output = output - output.mean(dim=0)
+            rotation_matrix = find_rotation_mat(output, poses)
+            output = torch.mm(output, rotation_matrix)
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+            ax.scatter(poses[:,0].cpu().numpy(), poses[:,1].cpu().numpy(), poses[:,2].cpu().numpy(), c='r')
+            #write numbers
+            for i in range(poses.shape[0]):
+                ax.text(poses[i,0].cpu().numpy(), poses[i,1].cpu().numpy(), poses[i,2].cpu().numpy(), "T"+str(i))
+            #connect the 17 joints
+            connections = [ [0,1], [1,2], [2,3], [0,4], [4,5], [5,6], [8,9], [9,10], [8,11], [11,12], [12,13], [0,7], [14,15], [15,16],[7,8], [14,8]]
+            for connection in connections:
+                ax.plot([poses[connection[0],0].cpu().numpy(), poses[connection[1],0].cpu().numpy()], [poses[connection[0],1].cpu().numpy(), poses[connection[1],1].cpu().numpy()], [poses[connection[0],2].cpu().numpy(), poses[connection[1],2].cpu().numpy()], c='r')
+            ax.scatter(output[:,0].cpu().numpy(), output[:,1].cpu().numpy(), output[:,2].cpu().numpy(), c='b')
+            for i in range(output.shape[0]):
+                ax.text(output[i,0].cpu().numpy(), output[i,1].cpu().numpy(), output[i,2].cpu().numpy(), "P"+str(i))
+            for connection in connections:
+                ax.plot([output[connection[0],0].cpu().numpy(), output[connection[1],0].cpu().numpy()], [output[connection[0],1].cpu().numpy(), output[connection[1],1].cpu().numpy()], [output[connection[0],2].cpu().numpy(), output[connection[1],2].cpu().numpy()], c='b')
+            plt.show()
 
 
             samples += images.shape[0]
@@ -99,15 +99,15 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
     epoch = 0
     cost_function = get_loss
 
-    #redo this
+    tensorboard_tag = name
+    tensorboard_dir = os.path.join(model_dir, "tensorboard", name).replace("\\", "/")
+    
     info_file = os.path.join(model_dir, name, "info.txt").replace("\\", "/")
     model_file = os.path.join(model_dir, name, "epoch_").replace("\\", "/")
     model_dir = os.path.join(model_dir, name).replace("\\", "/")
     optimizer_file = os.path.join(model_dir, "optimizer_epoch").replace("\\", "/")
     scheduler_file = os.path.join(model_dir, "scheduler_epoch").replace("\\", "/")
-        
-    tensorboard_tag = name
-    tensorboard_dir = os.path.join(model_dir, "tensorboard").replace("\\", "/")
+
     writer = SummaryWriter(log_dir=tensorboard_dir, filename_suffix="_"+tensorboard_tag)
 
     #load weights
