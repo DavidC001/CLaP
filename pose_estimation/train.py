@@ -108,6 +108,10 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
     optimizer_file = os.path.join(model_dir, "optimizer_epoch").replace("\\", "/")
     scheduler_file = os.path.join(model_dir, "scheduler_epoch").replace("\\", "/")
 
+    #create folder for model
+    if not os.path.exists(model_dir):
+        os.makedirs(model_dir)
+
     writer = SummaryWriter(log_dir=tensorboard_dir, filename_suffix="_"+tensorboard_tag)
 
     #load weights
