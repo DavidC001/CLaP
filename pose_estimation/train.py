@@ -71,6 +71,7 @@ def test_step(net, data_loader, cost_function, device='cuda'):
             # output = output[0].view(-1,3)
             # output = output - output.mean(dim=0)
             # rotation_matrix = find_rotation_mat(output, poses)
+            # # print (rotation_matrix)
             # output = torch.mm(output, rotation_matrix)
             # fig = plt.figure()
             # ax = fig.add_subplot(111, projection='3d')

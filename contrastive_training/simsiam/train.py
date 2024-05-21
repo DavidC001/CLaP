@@ -93,11 +93,11 @@ def val_step(net, data_loader, cost_function, device='cuda'):
 
 
 def train_simsiam(model_dir="trained_models", name = "simsiam",  dataset_dir="datasets", datasets="panoptic", t=0,
-                  batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, epochs=100, save_every=10):
+                  batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, epochs=100, save_every=10, base_model='resnet18'):
     
     train_loader, val_loader, test_loader = get_dataLoaders(batch_size)
 
-    net = get_siam_net()
+    net = get_siam_net(base_model=base_model)
     net.to(device)
 
 

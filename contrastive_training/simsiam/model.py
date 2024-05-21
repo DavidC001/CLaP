@@ -56,13 +56,20 @@ class SiamMLP(nn.Module):
 
         return x, projections.detach(), predictions
 
-from torchvision.models import resnet50, ResNet50_Weights
+from torchvision.models import resnet50, ResNet50_Weights, resnet18, ResNet18_Weights
 
 
-def get_siam_net():
-    weights = ResNet50_Weights.DEFAULT
-    model = resnet50(weights=weights)
-    model = SiamMLP(model, 2048, 2048, 2048, 512)
+def get_siam_net(base_model='resnet18'):
+    if base_model == 'resnet50':
+        weights = ResNet50_Weights.DEFAULT
+        model = resnet50(weights=weights)
+        model = SiamMLP(model, 2048, 2048, 2048, 512)
+    elif base_model == 'resnet18':
+        weights = ResNet18_Weights.DEFAULT
+        model = resnet18(weights=weights)
+        model = SiamMLP(model, 512, 512, 512, 128)
+    else:
+        raise ValueError("Invalid base model")
     model = nn.DataParallel(model)
 
     return model

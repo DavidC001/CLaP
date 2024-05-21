@@ -11,7 +11,7 @@ train_functions = {
     "LASCon": train_LASCon
 }
 
-def contrastive_train(model, params, device='cuda', datasets=["panoptic"], models_dir="trained_models", datasets_dir="datasets"):
+def contrastive_train(model, params, device='cuda', datasets=["panoptic"], models_dir="trained_models", datasets_dir="datasets", base_model='resnet18'):
     assert model in train_functions, f"Model {model} not found in {train_functions.keys()}"
     
     print(f"Training {model}")
@@ -28,7 +28,8 @@ def contrastive_train(model, params, device='cuda', datasets=["panoptic"], model
             momentum=params["momentum"],
             t=params["temperature"],
             epochs=params["epochs"],
-            save_every = params["save_every"]
+            save_every = params["save_every"],
+            base_model=base_model
     )
     
     print(f"{model} training done")

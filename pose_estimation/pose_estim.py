@@ -30,7 +30,7 @@ def parseArgs(args):
     
     return args
 
-def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_dir="datasets"):
+def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_dir="datasets", base_model="resnet18"):
     #skip if specified
     if "skip" not in args:
         args["skip"] = False
@@ -40,7 +40,7 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
     
     assert "dataset" in args, "dataset not found in args"
 
-    train_loader, val_loader, test_loader = getDatasetLoader(dataset=args["dataset"], batch_size=args["batch_size"], datasets_dir=datasets_dir)
+    train_loader, val_loader, test_loader = getDatasetLoader(dataset=args["dataset"], batch_size=args["batch_size"], datasets_dir=datasets_dir, base_model=base_model)
     
     for model in models:
         if model in args:
@@ -55,7 +55,8 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
                             model_type=model,
                             layers=params['architecture'],
                             out_dim=out_joints[args['dataset']]*3,
-                            device=device
+                            device=device,
+                            base_model=base_model
                         )
                     # print(pretrained)
                         

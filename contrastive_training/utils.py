@@ -5,11 +5,11 @@ from dataloaders.datasets import contrastive_datasets
 from dataloaders.datasets import combineDataSets
 
 #import RN50 transforms
-from torchvision.models.resnet import  ResNet50_Weights
+from torchvision.models.resnet import  ResNet18_Weights, ResNet50_Weights
 
 train_data, val_data, test_data = None, None, None
 
-def load_datasets(datasets, dataset_dir="datasets"):
+def load_datasets(datasets, dataset_dir="datasets", base_model="resnet18"):
     global train_data, val_data, test_data
 
     # normalize = T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
@@ -19,7 +19,12 @@ def load_datasets(datasets, dataset_dir="datasets"):
     #                         T.ToTensor(),
     #                         normalize])
     
-    transforms = ResNet50_Weights.DEFAULT.transforms()
+    if base_model == "resnet50":
+        transforms = ResNet50_Weights.DEFAULT.transforms()
+    elif base_model == "resnet18":
+        transforms = ResNet18_Weights.DEFAULT.transforms()
+    else:
+        raise ValueError("Invalid base model")
     transforms = T.Compose([T.ToPILImage(), transforms])
 
     train, val, test = [], [], []

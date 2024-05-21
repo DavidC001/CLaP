@@ -25,9 +25,12 @@ def main(args):
     
     if 'datasets_dir' not in data: datasets_dir = 'datasets'
     else: datasets_dir = data['datasets_dir']
+
+    if 'base_model' not in data: base_model = 'resnet18'
+    else: base_model = data['base_model']
     
-    contrastive_pretraining(args=data["contrastive"], device=device, models_dir=models_dir, datasets_dir=datasets_dir)
-    pose_estimation(args=data["pose_estimation"], device=device, models_dir=models_dir, datasets_dir=datasets_dir)
+    contrastive_pretraining(args=data["contrastive"], device=device, models_dir=models_dir, datasets_dir=datasets_dir, base_model=base_model)
+    pose_estimation(args=data["pose_estimation"], device=device, models_dir=models_dir, datasets_dir=datasets_dir, base_model=base_model)
 
     
 

@@ -109,12 +109,12 @@ def val_step(net, data_loader, cost_function, t, device='cuda'):
 
 
 def train_simclr(model_dir= "trained_models",name = "simclr", dataset_dir="datasets", datasets=["panoptic"],
-                  batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, t=0.6, epochs=100, save_every=10):
+                  batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, t=0.6, epochs=100, save_every=10, base_model='resnet18'):
     
     
     train_loader, val_loader, test_loader = get_dataLoaders(batch_size)
 
-    net = get_simclr_net()
+    net = get_simclr_net(base_model=base_model)
     net.to(device)
 
     optimizer, scheduler = get_optimizer(net, lr=learning_rate, wd=weight_decay, momentum=momentum, epochs=epochs)

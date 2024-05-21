@@ -88,8 +88,8 @@ def get_loss(output, pose, weights=None, norm_factor=0.2, device='cuda'):
     
     #print ("output\n", output)
     #print ("pose\n", pose)
-    #mean squared error for each batch
-    loss = torch.mean((pose - output)**2)
+    #L1 loss error for each batch
+    loss = torch.mean(torch.abs(pose - output))
     # breakpoint()
     #print(loss)
 

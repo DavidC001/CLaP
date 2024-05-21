@@ -6,7 +6,7 @@ import re
 import torch
 import torchvision.transforms as T
 from dataloaders.datasets import pose_datasets
-from torchvision.models.resnet import  ResNet50_Weights
+from torchvision.models.resnet import  ResNet50_Weights, ResNet18_Weights
 
 def getLatestModel(path):
     path = path.replace("\\", "/")
@@ -26,7 +26,7 @@ def getLatestModel(path):
     return path
         
 
-def getDatasetLoader(dataset, batch_size, datasets_dir="datasets"):
+def getDatasetLoader(dataset, batch_size, datasets_dir="datasets", base_model="resnet18"):
     # normalize = T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     # transforms = T.Compose([T.ToPILImage(),
     #                         T.Resize(256),
@@ -34,7 +34,12 @@ def getDatasetLoader(dataset, batch_size, datasets_dir="datasets"):
     #                         T.ToTensor(),
     #                         normalize])
 
-    transforms = ResNet50_Weights.DEFAULT.transforms()
+    if base_model == "resnet50":
+        transforms = ResNet50_Weights.DEFAULT.transforms()
+    elif base_model == "resnet18":
+        transforms = ResNet18_Weights.DEFAULT.transforms()
+    else:
+        raise ValueError("Invalid base model")
     transforms = T.Compose([T.ToPILImage(), transforms])
 
     train, val, test = pose_datasets[dataset](transforms, datasets_dir)
