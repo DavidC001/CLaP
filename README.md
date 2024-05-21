@@ -4,6 +4,8 @@ A Course Project as part of course final exam Submitted By:
 - Sofia Lorengo
 - Alessia Pivotto
 
+To execute the project run contrastive_HPE.py script with argument '--experiment file' with file being a json like "experiments/cluster.json" 
+
 ## Abstract
 
 ## Dataset
