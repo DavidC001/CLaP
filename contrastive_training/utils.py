@@ -25,7 +25,13 @@ def load_datasets(datasets, dataset_dir="datasets", base_model="resnet18"):
         transforms = ResNet18_Weights.DEFAULT.transforms()
     else:
         raise ValueError("Invalid base model")
-    transforms = T.Compose([T.ToPILImage(), transforms])
+    transforms = T.Compose([
+        T.ToPILImage(), 
+        T.AugMix(),
+        transforms
+    ])
+                            
+
 
     train, val, test = [], [], []
     
