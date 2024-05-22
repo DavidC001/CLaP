@@ -7,6 +7,9 @@ import random
 import matplotlib.pyplot as plt
 import torchvision.transforms as T
 
+#PIL image
+from PIL import Image
+
 import h5py
 
 generator = torch.Generator().manual_seed(42)
@@ -23,20 +26,17 @@ class ContrastiveSkiDataset(Dataset):
 
         paths = []
 
-        motion_seq = os.listdir(self.data_path)
-        no_dir = ['license.txt', 'load_h5_example.py', 'README.txt', 'load_h5_example.m']
-
         #train or test
         if mode == 'train':
-          dir = '/train'
+          dir = 'train'
         else:
-          dir = '/test'
+          dir = 'test'
 
         for seq in (os.listdir(os.path.join(self.data_path, dir).replace('\\', '/'))):
           if os.path.exists(os.path.join(self.data_path, dir, seq, 'cam_00').replace('\\', '/')):
-            data_path = os.path.join(self.data_path, dir, seq, 'cam_00').replace('\\', '/')
-          for lists in (os.listdir(data_path)):
-            paths.append(os.path.join(data_path, lists).replace('\\', '/'))
+            image_path = os.path.join(self.data_path, dir, seq, 'cam_00').replace('\\', '/')
+            for lists in (os.listdir(image_path)):
+                paths.append(os.path.join(image_path, lists).replace('\\', '/'))
 
         self.data = {'paths': paths}
 
@@ -45,10 +45,10 @@ class ContrastiveSkiDataset(Dataset):
 
     def get_second_view(self, image_path):
         """Randomly gets another camera view"""
-        split = image_path.split('/cam_00')
-        random = random.randint(0, 5)
+        split = image_path.split('/cam_0')
+        rand = random.randint(0, 5)
 
-        second_path = split[0] + '/cam_0' + str(random) + split[1]
+        second_path = split[0] + '/cam_0' + str(rand) + split[1][1:]
 
         return second_path
 
@@ -60,32 +60,30 @@ class ContrastiveSkiDataset(Dataset):
         sample = dict()
 
         image1_path = self.data['paths'][idx]
-        image2_path = self.get_second_view(image1_path)
 
-        #make the first image random
-        while True:
-          image1_path = self.get_second_view(image1_path)
-          if image1_path != image2_path:
-            break
-
-
-        for i in range(0, 10):
-            if os.path.isfile(image2_path):
-                image2 = cv2.imread(image2_path)
-                image2 =cv2.cvtColor(image2, cv2.COLOR_BGR2RGB)
-                image2 = self.transform(image2)
+        for i in range(10):
+            new_image_path = self.get_second_view(image1_path)
+            if os.path.exists(new_image_path):
+                image1_path = new_image_path
                 break
-            else:
-                image2_path = self.get_second_view(image1_path)
-        else:
-            # apply random rotation on the first image if the second view cannot be found in 10 iterations
-            image2 = cv2.imread(image1_path)
-            image2 =cv2.cvtColor(image2, cv2.COLOR_BGR2RGB)
-            image2 = self.transform(image2)
-            image2 = T.RandomRotation(45)(image2)
-
         image1 = cv2.imread(image1_path)
         image1 =cv2.cvtColor(image1, cv2.COLOR_BGR2RGB)
+
+        image2_path = None
+        for i in range(10):
+            new_image_path = self.get_second_view(image1_path)
+            if os.path.exists(new_image_path) and new_image_path != image1_path:
+                image2_path = new_image_path
+                break
+
+        if image2_path is None:
+            #random rotation
+            image2 = T.RandomRotation(45)(Image.fromarray(image1))
+        else:
+            image2 = cv2.imread(image2_path)
+            image2 =cv2.cvtColor(image2, cv2.COLOR_BGR2RGB)
+
+        image2 = self.transform(image2)
         image1 = self.transform(image1)
 
         sample['image1'] = image1
@@ -179,9 +177,6 @@ class PoseSkiDataset(Dataset):
         self.transform = transform
 
         paths = []
-
-        motion_seq = os.listdir(data_path)
-        no_dir = ['license.txt', 'load_h5_example.py', 'README.txt', 'load_h5_example.m']
 
         #train or test
         if mode == 'train':
