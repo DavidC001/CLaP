@@ -94,8 +94,8 @@ def val_step(net, data_loader, cost_function, t, device='cuda'):
     with torch.no_grad():
         for batch_idx, batch in enumerate(tqdm(data_loader)):
 
-            image1 = batch['image1'].to(device)
-            image2 = batch['image2'].to(device)
+            image1 = batch['image1']
+            image2 = batch['image2']
 
             _, image1_encoddings = net(image1)
             _, image2_encoddings = net(image2)

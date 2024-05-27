@@ -51,8 +51,8 @@ def train_step(net, data_loader, optimizer, cost_function, device='cuda'):
 
     for batch_idx, batch in enumerate(tqdm(data_loader)):
 
-        image1 = batch['image1'].to(device)
-        image2 = batch['image2'].to(device)
+        image1 = batch['image1']
+        image2 = batch['image2']
 
         x1, z1, p1 = net(image1)
         x2, z2, p2 = net(image2)
