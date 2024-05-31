@@ -161,6 +161,7 @@ cython_debug/
 
 #dataset files
 datasets/
+davide.cavicchini.datasets/
 
 #trained_models
 trained_models/

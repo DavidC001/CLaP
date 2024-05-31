@@ -78,9 +78,10 @@ def get_loss(emb, poses, t):
 
     #calculate denominator
     denom = torch.sum(sim, dim=1) - torch.diagonal(sim, 0)
+    denom = denom.to(sim.device)
 
     #use LASCon loss
-    lablesSim = label_similarity(poses)
+    lablesSim = label_similarity(poses).to(sim.device)
     
     loss_vec = - torch.log(sim / denom) * lablesSim
 
@@ -94,8 +95,8 @@ def train_step(net, data_loader, optimizer, cost_function, t, device='cuda'):
 
     for batch_idx, batch in enumerate(tqdm(data_loader)):
 
-        images = batch['image'].to(device)
-        poses = batch['poses_3d'].to(device)
+        images = batch['image']
+        poses = batch['poses_3d']
 
         _, image_encoddings = net(images)
 
