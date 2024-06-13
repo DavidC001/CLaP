@@ -21,14 +21,15 @@ def getLatestModel(path):
     path = path.replace("\\", "/")
     try:
         files = os.listdir(path)
+        # print(files)
         #remove non weight files
         files = [file for file in files if '.pt' in file]
-        if len(files) > 1:
+        if len(files) > 0:
             epoch = max([int(re.findall(r'\d+', file)[0]) for file in files])
         else:
             raise Exception("No model found")
 
-        path = os.path.join(path, "epoch_"+str(epoch)+".pth").replace("\\", "/")
+        path = os.path.join(path, "epoch_"+str(epoch)+".pt").replace("\\", "/")
     except:
         path = None
     
