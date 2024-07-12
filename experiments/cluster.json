@@ -5,47 +5,47 @@
     "base_model": "resnet18",
     "contrastive":{
         "skip": false,
-        "datasets": ["panoptic"],
+        "datasets": ["skiPose"],
         "simclr":{
             "train": true,
-            "name": "simclr_18",
+            "name": "simclr_18_complete_pairs",
             "batch_size": 256,
             "learning_rate": 0.5,
             "weight_decay": 0.000001,
             "momentum": 0.9,
             "temperature": 0.5,
             "epochs": 20,
-            "save_every": 1
+            "save_every": 5
         },
         "simsiam":{
             "train": true,
-            "name": "simsiam_18",
+            "name": "simsiam_18_complete_pairs",
             "batch_size": 256,
             "learning_rate": 0.1,
             "weight_decay": 0.000001,
             "momentum": 0.9,
             "epochs": 20,
-            "save_every": 1
+            "save_every": 5
         },
         "MoCo":{
             "train": false,
-            "name": "moco_18",
+            "name": "moco_18_complete_pairs",
             "batch_size": 256,
             "learning_rate": 0.03,
             "weight_decay": 0.000001,
             "momentum": 0.9,
             "epochs": 20,
-            "save_every": 1
+            "save_every": 5
         },
         "LASCon":{
             "train": false,
-            "name": "LASCon_18",
+            "name": "LASCon_18_complete_pairs",
             "batch_size": 512,
             "learning_rate": 0.001,
             "weight_decay": 0.000001,
             "momentum": 0.9,
             "epochs": 20,
-            "save_every": 1
+            "save_every": 5
         }
     },
     "pose_estimation":{
@@ -54,58 +54,58 @@
         "batch_size": 256,
         "simclr":{
             "train": false,
-            "name": "simclr_estimator_18",
-            "pretrained_name": "simclr_18",
-            "architecture": [],
+            "name": "simclr_estimator_18_complete_pairs",
+            "pretrained_name": "simclr_18_complete_pairs",
+            "architecture": [128],
             "learning_rate": 0.001,
             "weight_decay": 0.000001,
             "momentum": 0.9,
             "epochs": 20,
-            "save_every": 1
+            "save_every": 5
         },
         "simsiam":{
             "train": false,
-            "name": "simsiam_estimator_18",
-            "pretrained_name": "simsiam_18",
-            "architecture": [],
+            "name": "simsiam_estimator_18_complete_pairs",
+            "pretrained_name": "simsiam_18_complete_pairs",
+            "architecture": [128],
             "learning_rate": 0.001,
             "weight_decay": 0.000001,
             "momentum": 0.9,
             "epochs": 20,
-            "save_every": 1
+            "save_every": 5
         },
         "MoCo":{
             "train": false,
-            "name": "moco_estimator_18",
-            "pretrained_name": "moco_18",
-            "architecture": [],
-            "learning_rate": 0.8,
-            "weight_decay": 0.000001,
-            "momentum": 0.9,
-            "epochs": 20,
-            "save_every": 1
-        },
-        "LASCon":{
-            "train": false,
-            "name": "LASCon_estimator_18",
-            "pretrained_name": "LASCon_18",
-            "architecture": [],
+            "name": "moco_estimator_18_complete_pairs",
+            "pretrained_name": "moco_18_complete_pairs",
+            "architecture": [128],
             "learning_rate": 0.001,
             "weight_decay": 0.000001,
             "momentum": 0.9,
             "epochs": 20,
-            "save_every": 1
+            "save_every": 5
+        },
+        "LASCon":{
+            "train": false,
+            "name": "LASCon_estimator_18_complete_pairs",
+            "pretrained_name": "LASCon_18_complete_pairs",
+            "architecture": [128],
+            "learning_rate": 0.001,
+            "weight_decay": 0.000001,
+            "momentum": 0.9,
+            "epochs": 20,
+            "save_every": 5
         },
         "resnet":{
             "train": true,
             "name": "resnet_estimator_18",
-            "architecture": [],
+            "architecture": [128],
             "pretrained_name": "resnet",
             "learning_rate": 0.001,
             "weight_decay": 0.000001,
             "momentum": 0.9,
             "epochs": 5,
-            "save_every": 1
+            "save_every": 5
         }
     }
 }

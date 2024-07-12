@@ -1,3 +1,5 @@
+import os
+import json
 import sys
 sys.path.append(".")
 
@@ -47,10 +49,14 @@ def contrastive_pretraining(args, device='cuda', models_dir="trained_models", da
     for model in models:
         if model in args:
             params = args[model]
+            params["datasets"] = args['datasets']
             params = check_arguments_contrastive(params)
             
             if params['train']:
                 try:
+                    #save parameters to file
+                    with open(f"{models_dir}/{params['name']}_{model}_params.json", 'w') as f:
+                        json.dump(params, f)
                     contrastive_train(device=device,  model=model, params=params, datasets=args['datasets'], models_dir=models_dir, datasets_dir=datasets_dir, base_model=base_model)
                 except Exception as e:
                     print(f"Error in training {model}: {e}") 

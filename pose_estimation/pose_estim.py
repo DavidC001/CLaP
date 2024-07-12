@@ -2,6 +2,7 @@ import sys
 sys.path.append(".")
 
 import os
+import json
 from pose_estimation.models import models, getPoseEstimModel
 from pose_estimation.functions import get_optimizer
 from dataloaders.datasets import out_joints 
@@ -65,10 +66,16 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
     for model in models:
         if model in args:
             params = parseArgs(args[model])
+            params["dataset"] = args["dataset"]
+            params["batch_size"] = args["batch_size"]
+
             if (params["train"]):
                 print(f"Training {model}")
 
                 try:
+                    #save parameters to file
+                    with open(f"{models_dir}/{params['name']}_{model}_params.json", 'w') as f:
+                        json.dump(params, f)
 
                     pretrained = getPoseEstimModel(
                             path = getLatestModel(os.path.join(models_dir, params['pretrained_name'])),
