@@ -91,6 +91,79 @@ class ContrastiveSkiDataset(Dataset):
 
         return sample
 
+class CompleteContrastiveSkiDataset(Dataset):
+    def __init__(self, transform, dataset_dir="datasets", mode="train"):
+
+        # change this to the path where the dataset is stored
+        self.data_path = dataset_dir+"/Ski-PosePTZ-CameraDataset-png"
+        self.training_dir = []
+
+        self.transform = transform
+
+        poses = {}
+        cameras = ["cam_00", "cam_01", "cam_02", "cam_03", "cam_04", "cam_05"]
+
+        #train or test
+        if mode == 'train':
+          dir = 'train'
+        else:
+          dir = 'test'
+
+        for seq in (os.listdir(os.path.join(self.data_path, dir).replace('\\', '/'))):
+            #if seq is a directory
+            if os.path.exists(os.path.join(self.data_path, dir, seq, 'cam_00').replace('\\', '/')):
+                poses[seq] = {}
+                for cam in cameras:
+                    if os.path.exists(os.path.join(self.data_path, dir, seq, cam).replace('\\', '/')):
+                        image_path = os.path.join(self.data_path, dir, seq, cam).replace('\\', '/')
+                        for image in (os.listdir(image_path)):
+                            if image not in poses[seq]:
+                                poses[seq][image] = []
+                            poses[seq][image].append(os.path.join(image_path, image).replace('\\', '/'))
+
+        #generate all possible pairs inside the same sequence with different cameras
+        paths = []
+        for seq in poses:
+            for image in poses[seq]:
+                if len(poses[seq][image]) > 1:
+                    for i in range(len(poses[seq][image])):
+                        for j in range(i+1, len(poses[seq][image])):
+                            paths.append((poses[seq][image][i], poses[seq][image][j]))
+                else:
+                    paths.append((poses[seq][image][0], None))
+
+        breakpoint()
+        self.data = {'paths': paths}
+
+    def __len__(self):
+        return len(self.data['paths'])
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        sample = dict()
+
+        image1_path = self.data['paths'][idx][0]
+        image1 = cv2.imread(image1_path)
+        image1 =cv2.cvtColor(image1, cv2.COLOR_BGR2RGB)
+
+        image2_path = self.data['paths'][idx][1]
+        if image2_path is None:
+            #random rotation
+            image2 = T.RandomRotation(45)(Image.fromarray(image1))
+        else:
+            image2 = cv2.imread(image2_path)
+            image2 =cv2.cvtColor(image2, cv2.COLOR_BGR2RGB)
+
+        image2 = self.transform(image2)
+        image1 = self.transform(image1)
+
+        sample['image1'] = image1
+        sample['image2'] = image2
+
+        return sample
+
 
 def getContrastiveDatasetSki(transform, dataset_dir="datasets"):
     """
@@ -103,8 +176,8 @@ def getContrastiveDatasetSki(transform, dataset_dir="datasets"):
     Returns:
         tuple: A tuple containing the train and test datasets.
     """
-    dataset = ContrastiveSkiDataset(transform, dataset_dir, mode="train")
-    test = ContrastiveSkiDataset(transform, dataset_dir, mode="test")
+    dataset = CompleteContrastiveSkiDataset(transform, dataset_dir, mode="train")
+    test = CompleteContrastiveSkiDataset(transform, dataset_dir, mode="test")
 
     num_samples = len(dataset)
 
