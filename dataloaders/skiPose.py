@@ -132,7 +132,7 @@ class CompleteContrastiveSkiDataset(Dataset):
                 else:
                     paths.append((poses[seq][image][0], None))
 
-        breakpoint()
+        # breakpoint()
         self.data = {'paths': paths}
 
     def __len__(self):
