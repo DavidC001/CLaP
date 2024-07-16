@@ -260,7 +260,7 @@ for file in os.listdir(path):
             epoch = e
 
 
-path = path + 'epoch_{:d}.pth'.format(epoch)
+path = path + 'epoch_{:d}.pt'.format(epoch)
 
 #path = 'trained_models/ver1.pt'
 

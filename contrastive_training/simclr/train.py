@@ -139,11 +139,11 @@ def train_simclr(model_dir= "trained_models",name = "simclr", dataset_dir="datas
 
     #load latest model
     if epoch > 0:
-        net.load_state_dict(torch.load(model_dir+ '/' + name+'/epoch_{:d}.pth'.format(epoch)))
+        net.load_state_dict(torch.load(model_dir+ '/' + name+'/epoch_{:d}.pt'.format(epoch)))
         #load optimizer
-        optimizer.load_state_dict(torch.load(model_dir+ '/' + name+'/epoch_{:d}_optimizer.pth'.format(epoch)))
+        optimizer.load_state_dict(torch.load(model_dir+ '/' + name+'/epoch_{:d}_optimizer.pt'.format(epoch)))
         #load scheduler
-        scheduler.load_state_dict(torch.load(model_dir+ '/' + name+'/epoch_{:d}_scheduler.pth'.format(epoch)))
+        scheduler.load_state_dict(torch.load(model_dir+ '/' + name+'/epoch_{:d}_scheduler.pt'.format(epoch)))
 
     for e in range(epoch, epochs):
         train_loss = train_step(net, train_loader, optimizer, cost_function, t, device)
@@ -161,9 +161,9 @@ def train_simclr(model_dir= "trained_models",name = "simclr", dataset_dir="datas
         writer.flush()
 
         if (e+1) % save_every == 0:
-            torch.save(net.state_dict(), model_dir+ '/'+name+'/epoch_{:d}.pth'.format(e+1))
-            torch.save(optimizer.state_dict(), model_dir+'/'+name+'/epoch_{:d}_optimizer.pth'.format(e+1))
-            torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pth'.format(e+1))
+            torch.save(net.state_dict(), model_dir+ '/'+name+'/epoch_{:d}.pt'.format(e+1))
+            torch.save(optimizer.state_dict(), model_dir+'/'+name+'/epoch_{:d}_optimizer.pt'.format(e+1))
+            torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pt'.format(e+1))
 
     #calculate test loss
     test_loss = val_step(net, test_loader, cost_function, t, device)
@@ -174,9 +174,9 @@ def train_simclr(model_dir= "trained_models",name = "simclr", dataset_dir="datas
         
     #save final model (if not saved already)
     if epochs % save_every != 0:
-        torch.save(net.state_dict(), model_dir+ '/'+name+'/epoch_{:d}.pth'.format(epochs))
-        torch.save(optimizer.state_dict(), model_dir+'/'+name+'/epoch_{:d}_optimizer.pth'.format(epochs))
-        torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pth'.format(epochs))
+        torch.save(net.state_dict(), model_dir+ '/'+name+'/epoch_{:d}.pt'.format(epochs))
+        torch.save(optimizer.state_dict(), model_dir+'/'+name+'/epoch_{:d}_optimizer.pt'.format(epochs))
+        torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pt'.format(epochs))
 
 if __name__ == "__main__":
     train_simclr(name = "simclr", batch_size=180, epochs=100, learning_rate=0.3)
