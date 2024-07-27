@@ -3,6 +3,7 @@ import torch
 from torch.utils.data import Dataset
 import cv2
 import random
+from tqdm import tqdm
 
 import matplotlib.pyplot as plt
 import torchvision.transforms as T
@@ -69,7 +70,7 @@ class ContrastivePanopticDataset(Dataset):
         camera = split[1].split('_')
         view = int(camera[-1]) # id of the first view
 
-        second_view = random.randint(0, view) if view > 15 else random.randint(view + 1, 30) # randomly get second view id that is smaller or bigger than the first one
+        second_view = random.randint(0, view) if view > 15 else random.randint(view + 1, 31) # randomly get second view id that is smaller or bigger than the first one
 
         camera[2] = str(second_view) if second_view > 9 else '0' + str(second_view)
         camera = '_'.join(camera)
@@ -117,6 +118,107 @@ class ContrastivePanopticDataset(Dataset):
 
         return sample
 
+class CompleteContrastivePanopticDataset(Dataset):
+    def __init__(self, transform, dataset_dir="datasets"):
+
+        #open green_images.txt
+        self.no_files = []
+        with open(dataset_dir+"/green_images.txt") as f:
+            for line in f:
+                self.no_files.append(line.strip())
+
+        # change this to the path where the dataset is stored
+        self.data_path = dataset_dir+"/ProcessedPanopticDataset/"
+        self.training_dir = []
+
+        self.transform = transform
+
+        paths = []
+
+        motion_seq = os.listdir(self.data_path)
+        no_dir = ['scripts','python','matlab','.git','glViewer.py','README.md','matlab',
+                'README_kinoptic.md', '171204_pose3']
+        
+        print("Loading the sequences")
+        for dir in tqdm(motion_seq):
+            if dir not in no_dir:
+                if 'haggling' in dir:
+                    continue
+                elif dir == '171204_pose2' or dir =='171204_pose5' or dir =='171026_cello3':
+                    if os.path.exists(os.path.join(self.data_path,dir, 'hdJoints')):
+                        data_path = os.path.join(self.data_path,dir, 'hdJoints')
+                        for lists in (os.listdir(data_path)):
+                            if lists.replace('json','jpg') in self.no_files:
+                                # print("removing: ", lists.replace('json','jpg'))
+                                continue
+                            paths.append(os.path.join(data_path,lists.split('.json')[0]).replace('\\', '/'))
+                elif 'ian' in dir:
+                    continue
+                else:
+                    if os.path.exists(os.path.join(self.data_path,dir,'hdJoints')):
+                        data_path = os.path.join(self.data_path,dir,'hdJoints')
+                        for lists in (os.listdir(data_path)):
+                            if lists.replace('json','jpg') in self.no_files:
+                                # print("removing: ", lists.replace('json','jpg'))
+                                continue
+                            paths.append(os.path.join(data_path,lists.split('.json')[0]).replace('\\', '/'))
+                            
+
+        print("generating data pairs")
+        # generate all possible pairs of images from different camera views if they belong to the same sequence
+        self.pairs = []
+        for path in tqdm(paths):
+            found_pair = False
+            # try all possible views
+            for i in range(0, 31):
+                # get the second view
+                split = path.split('/hdJoints')
+                image1_path = split[0] + '/hdImages' + split[-1] + '.jpg'
+                camera = image1_path.split(';')[1].split('_')
+                camera[2] = str(i) if i > 9 else '0' + str(i)
+                camera = '_'.join(camera)
+
+                image2_path = image1_path.split(';')[0] + ';' + camera + ";" + ";".join(image1_path.split(';')[2:])
+                if os.path.isfile(image2_path) and image1_path != image2_path:
+                    self.pairs.append((image1_path, image2_path))
+                    found_pair = True
+            if not found_pair:
+                # if no pair is found, apply random rotation on the first image
+                self.pairs.append((image1_path, image1_path))
+            # breakpoint()
+
+        # breakpoint()
+
+    def __len__(self):
+        return len(self.pairs)
+    
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        sample = dict()
+
+        image1_path, image2_path = self.pairs[idx]
+
+        image1 = cv2.imread(image1_path)
+        image1 =cv2.cvtColor(image1, cv2.COLOR_BGR2RGB)
+        image1 = self.transform(image1)
+
+        image2 = cv2.imread(image2_path)
+        image2 =cv2.cvtColor(image2, cv2.COLOR_BGR2RGB)
+        image2 = self.transform(image2)
+
+        if image1_path == image2_path:
+            # apply random rotation on the first image if the second view is the same as the first one
+            image1 = T.RandomRotation(45)(image1)
+
+        sample['image1'] = image1
+        sample['image2'] = image2
+        # breakpoint()
+
+        return sample
+
+
 
 def getContrastiveDatasetPanoptic(transform, dataset_dir="datasets", batch_size=1, shuffle=False):
     """
@@ -132,7 +234,7 @@ def getContrastiveDatasetPanoptic(transform, dataset_dir="datasets", batch_size=
         training_data (torch.utils.data.Dataset): The training dataset.
         val_data (torch.utils.data.Dataset): The validation dataset.
     """
-    dataset = ContrastivePanopticDataset(transform, dataset_dir)
+    dataset = CompleteContrastivePanopticDataset(transform, dataset_dir)
 
     num_samples = len(dataset)
 

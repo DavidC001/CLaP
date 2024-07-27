@@ -27,7 +27,8 @@ def load_datasets(datasets, dataset_dir="datasets", base_model="resnet18"):
         raise ValueError("Invalid base model")
     transforms = T.Compose([
         T.ToPILImage(), 
-        T.AugMix(),
+        # data augmentation
+        T.AutoAugment(),
         transforms
     ])
                             
