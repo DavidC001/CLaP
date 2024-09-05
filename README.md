@@ -6,20 +6,6 @@ A Course Project as part of course final exam Submitted By:
 
 To execute the project run contrastive_HPE.py script with argument '--experiment file' with file being a json like "experiments/cluster.json" 
 
-## Abstract
-
-## Dataset
-
-## Methodologies
-
-### SimCLR
-
-### SimSiam
-
-### MoCo
-
-### LASCon
-
 ## Project Structure
 ```
   ├── contrastive_training   # contrastive pre-training files
@@ -45,4 +31,4 @@ To execute the project run contrastive_HPE.py script with argument '--experiment
   ├── ...           
   └── README.md          # this file
 ```
-## Results
+
