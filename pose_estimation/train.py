@@ -114,22 +114,23 @@ def test_step(net, data_loader, cost_function, device='cuda'):
 
     return cumulative_loss / samples
 
-def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, epochs, save_every=10, device='cuda', model_dir="trained_models", name="model"):
+def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, epochs, save_every=10, device='cuda', model_dir="trained_models", name="model", patience = 2):
     """
     Train the pose estimation model.
 
     Parameters:
-    - model: torch.nn.Module, network model
-    - optimizer: torch.optim.Optimizer, optimizer
-    - scheduler: torch.optim.lr_scheduler, scheduler
-    - train_loader: torch.utils.data.DataLoader, training data loader
-    - val_loader: torch.utils.data.DataLoader, validation data loader
-    - test_loader: torch.utils.data.DataLoader, test data loader
-    - epochs: int, number of epochs
-    - save_every: int, save every n epochs, default is 10
-    - device: str, device, default is 'cuda'
-    - model_dir: str, directory to save the trained models, default is 'trained_models'
-    - name: str, model name, default is 'model'
+        model: torch.nn.Module, network model
+        optimizer: torch.optim.Optimizer, optimizer
+        scheduler: torch.optim.lr_scheduler, scheduler
+        train_loader: torch.utils.data.DataLoader, training data loader
+        val_loader: torch.utils.data.DataLoader, validation data loader
+        test_loader: torch.utils.data.DataLoader, test data loader
+        epochs: int, number of epochs
+        save_every: int, save every n epochs, default is 10
+        device: str, device, default is 'cuda'
+        model_dir: str, directory to save the trained models, default is 'trained_models'
+        name: str, model name, default is 'model'
+        patience: int, patience for early stopping, default is 2
     
     """
     net = model
@@ -172,6 +173,8 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
         scheduler.load_state_dict(torch.load(scheduler_file+str(epoch)+'.pt'))
 
 
+    patience_counter = 0
+    min_val_loss = 1000000
     for e in range(epoch, epochs):
 
         train_loss = training_step(net, train_loader, optimizer, cost_function, device)
@@ -202,10 +205,20 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
         writer.add_scalar(tensorboard_tag+'/lr', scheduler.get_last_lr()[0], e+1)
         writer.flush()
 
-    if epochs % save_every != 0:
-        torch.save(net.state_dict(), model_file+str(epochs)+'.pt')
-        torch.save(optimizer.state_dict(), optimizer_file+str(epochs)+'.pt')
-        torch.save(scheduler.state_dict(), scheduler_file+str(epochs)+'.pt')
+        if e > 0:
+            if val_loss > min_val_loss:
+                patience_counter += 1
+            else:
+                patience_counter = 0
+                min_val_loss = val_loss
+        
+        if patience_counter >= patience:
+            print("Early stopping")
+            break
+
+    torch.save(net.state_dict(), model_file+str(epochs)+'.pt')
+    torch.save(optimizer.state_dict(), optimizer_file+str(epochs)+'.pt')
+    torch.save(scheduler.state_dict(), scheduler_file+str(epochs)+'.pt')
 
     print('After training:')
     train_loss = test_step(net, train_loader, cost_function, device)
