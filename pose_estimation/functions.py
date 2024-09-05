@@ -84,7 +84,7 @@ def get_loss(output, pose, weights=None, norm_factor=0.2, device='cuda'):
         #print ("output before\n", output)
         for i in range(batch_size):
             #print(output[i])
-            rotation_matrix = find_rotation_mat(output[i], pose[i])
+            rotation_matrix = find_rotation_mat(pose[i], output[i])
             
             batch_rotation_matrix[i] = rotation_matrix
 
