@@ -4,30 +4,34 @@ sys.path.append('.')
 import argparse
 import json
 import torch
+import numpy as np
 
 from contrastive_training.contrastive import contrastive_pretraining
 from pose_estimation.pose_estim import pose_estimation
 
 import random
 random.seed(0)
+torch.manual_seed(0)
+np.random.seed(0)
 
 def main(args):
     #read experiment json file
     with open(args.experiment) as f:
         data = json.load(f)
     
-    #get the required parameters
-    if 'device' not in data: device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    else: device = data['device']
-    
-    if 'models_dir' not in data: models_dir = 'trained_models'
-    else: models_dir = data['models_dir']
-    
-    if 'datasets_dir' not in data: datasets_dir = 'datasets'
-    else: datasets_dir = data['datasets_dir']
+    default_args = {
+        "device": "cuda" if torch.cuda.is_available() else "cpu",
+        "models_dir": "trained_models",
+        "datasets_dir": "datasets",
+        "base_model": "resnet18"
+    }
+    args = {**default_args, **data}
 
-    if 'base_model' not in data: base_model = 'resnet18'
-    else: base_model = data['base_model']
+    #get the required parameters
+    device = data['device']
+    models_dir = data['models_dir']
+    datasets_dir = data['datasets_dir']
+    base_model = data['base_model']
     
     contrastive_pretraining(args=data["contrastive"], device=device, models_dir=models_dir, datasets_dir=datasets_dir, base_model=base_model)
     pose_estimation(args=data["pose_estimation"], device=device, models_dir=models_dir, datasets_dir=datasets_dir, base_model=base_model)

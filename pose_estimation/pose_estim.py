@@ -23,20 +23,17 @@ def parseArgs(args):
     assert 'name' in args, 'name not found for args'
     assert 'pretrained_name' in args, 'pretrained model name not found in args'
 
-    if 'train' not in args:
-        args['train'] = True
-    if 'batch_size' not in args:
-        args['batch_size'] = 1024
-    if 'learning_rate' not in args:
-        args['learning_rate'] = 0.01
-    if 'weight_decay' not in args:
-        args['weight_decay'] = 0.000001
-    if 'momentum' not in args:
-        args['momentum'] = 0.9
-    if 'epochs' not in args:
-        args['epochs'] = 20
-    if 'save_every' not in args:
-        args['save_every'] = 10
+    default_args = {
+        'train': True,
+        'batch_size': 1024,
+        'learning_rate': 0.01,
+        'weight_decay': 0.000001,
+        'momentum': 0.9,
+        'epochs': 20,
+        'save_every': 10
+    }
+
+    args = {**default_args, **args}
     
     return args
 
@@ -53,9 +50,7 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
 
     """
     #skip if specified
-    if "skip" not in args:
-        args["skip"] = False
-    if args['skip']:
+    if "skip" in args and args["skip"]:
         print("Skipping pose estimation training")
         return
     

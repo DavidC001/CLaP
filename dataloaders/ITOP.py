@@ -56,7 +56,7 @@ class ContrastiveKinectDataset(Dataset):
         return sample
     
 
-def getContrastiveDatasetKinect(transform, dataset_dir="datasets"):
+def getContrastiveDatasetKinect(transform, dataset_dir="datasets", use_complete=False, drop=0):
     """
     Returns a tuple of train and test datasets for contrastive learning using Kinect data.
 
@@ -67,6 +67,8 @@ def getContrastiveDatasetKinect(transform, dataset_dir="datasets"):
     Returns:
         tuple: A tuple containing the train and test datasets.
     """
+    if use_complete:
+        raise NotImplementedError("Complete pairs not supported for Kinect dataset")
     train = ContrastiveKinectDataset(transform, dataset_dir, mode="train")
     num_samples = len(train)
 

@@ -10,6 +10,7 @@ import torchvision.transforms as T
 
 import json
 import numpy as np
+import math
 
 
 generator = torch.Generator().manual_seed(42)
@@ -119,7 +120,7 @@ class ContrastivePanopticDataset(Dataset):
         return sample
 
 class CompleteContrastivePanopticDataset(Dataset):
-    def __init__(self, transform, dataset_dir="datasets"):
+    def __init__(self, transform, dataset_dir="datasets", drop = 0.5):
 
         #open green_images.txt
         self.no_files = []
@@ -166,7 +167,7 @@ class CompleteContrastivePanopticDataset(Dataset):
 
         print("generating data pairs")
         # generate all possible pairs of images from different camera views if they belong to the same sequence
-        self.pairs = []
+        self.pairs = {}
         for path in tqdm(paths):
             found_pair = False
             # try all possible views
@@ -174,18 +175,33 @@ class CompleteContrastivePanopticDataset(Dataset):
                 # get the second view
                 split = path.split('/hdJoints')
                 image1_path = split[0] + '/hdImages' + split[-1] + '.jpg'
+
+                id = image1_path.split(';')
+                id.pop(1)
+                id = ';'.join(id)
+                
                 camera = image1_path.split(';')[1].split('_')
                 camera[2] = str(i) if i > 9 else '0' + str(i)
                 camera = '_'.join(camera)
-
                 image2_path = image1_path.split(';')[0] + ';' + camera + ";" + ";".join(image1_path.split(';')[2:])
-                if os.path.isfile(image2_path) and image1_path != image2_path:
-                    self.pairs.append((image1_path, image2_path))
+
+                if (os.path.isfile(image2_path) and image1_path != image2_path 
+                    and (image1_path, image2_path) not in self.pairs[id] and (image2_path, image1_path) not in self.pairs[id]):
+                    if id not in self.pairs:
+                        self.pairs[id] = [(image1_path, image2_path)]
+                    else:
+                        self.pairs[id].append((image1_path, image2_path))
                     found_pair = True
             if not found_pair:
                 # if no pair is found, apply random rotation on the first image
-                self.pairs.append((image1_path, image1_path))
+                self.pairs[id] = [(image1_path, image1_path)]
             # breakpoint()
+        
+        # drop randomly pairs from each id
+        for id in self.pairs:
+            self.pairs[id] = random.sample(self.pairs[id], math.ceil(len(self.pairs[id]) * (1 - drop)))
+
+        self.pairs = [(image1, image2) for id in self.pairs for image1, image2 in self.pairs[id]]
 
         # breakpoint()
 
@@ -220,21 +236,24 @@ class CompleteContrastivePanopticDataset(Dataset):
 
 
 
-def getContrastiveDatasetPanoptic(transform, dataset_dir="datasets", batch_size=1, shuffle=False):
+def getContrastiveDatasetPanoptic(transform, dataset_dir="datasets", use_complete=True, drop=0.5):
     """
     Returns training and validation datasets for clustering in the Panoptic dataset.
 
     Args:
         transform (callable): A function/transform that takes in an image and its annotations and returns a transformed version.
         dataset_dir (str, optional): The directory where the dataset is located. Defaults to "datasets".
-        batch_size (int, optional): The batch size for the dataloaders. Defaults to 1.
-        shuffle (bool, optional): Whether to shuffle the data. Defaults to False.
+        use_complete (bool, optional): Whether to use complete pairs. Defaults to True.
+        drop (float, optional): The percentage of pairs to drop. Defaults to 0.5.
 
     Returns:
         training_data (torch.utils.data.Dataset): The training dataset.
         val_data (torch.utils.data.Dataset): The validation dataset.
     """
-    dataset = CompleteContrastivePanopticDataset(transform, dataset_dir)
+    if use_complete:
+        dataset = CompleteContrastivePanopticDataset(transform, dataset_dir, drop)
+    else:
+        dataset = ContrastivePanopticDataset(transform, dataset_dir)
 
     num_samples = len(dataset)
 
@@ -381,15 +400,13 @@ class PosePanopticDataset(Dataset):
 
         return sample
     
-def getPoseDatasetPanoptic(transform, dataset_dir="datasets", batch_size=1, shuffle=False):
+def getPoseDatasetPanoptic(transform, dataset_dir="datasets"):
     """
     Returns training and validation datasets for pose estimation in the Panoptic dataset.
 
     Args:
         transform (callable): A function/transform that takes in an image and its annotations and returns a transformed version.
         dataset_dir (str, optional): The directory where the dataset is located. Defaults to "datasets".
-        batch_size (int, optional): The batch size for the dataloaders. Defaults to 1.
-        shuffle (bool, optional): Whether to shuffle the data. Defaults to False.
 
     Returns:
         training_data (torch.utils.data.Dataset): The training dataset.

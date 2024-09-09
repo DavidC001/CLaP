@@ -6,6 +6,7 @@ import random
 
 import matplotlib.pyplot as plt
 import torchvision.transforms as T
+import math
 
 #PIL image
 from PIL import Image
@@ -92,7 +93,7 @@ class ContrastiveSkiDataset(Dataset):
         return sample
 
 class CompleteContrastiveSkiDataset(Dataset):
-    def __init__(self, transform, dataset_dir="datasets", mode="train"):
+    def __init__(self, transform, dataset_dir="datasets", mode="train", drop=0):
 
         # change this to the path where the dataset is stored
         self.data_path = dataset_dir+"/Ski-PosePTZ-CameraDataset-png"
@@ -126,9 +127,12 @@ class CompleteContrastiveSkiDataset(Dataset):
         for seq in poses:
             for image in poses[seq]:
                 if len(poses[seq][image]) > 1:
+                    paths_pose = []
                     for i in range(len(poses[seq][image])):
                         for j in range(i+1, len(poses[seq][image])):
-                            paths.append((poses[seq][image][i], poses[seq][image][j]))
+                            paths_pose.append((poses[seq][image][i], poses[seq][image][j]))
+                    #drop some pairs
+                    paths.extend(random.sample(paths_pose, math.ceil(len(paths_pose) * (1-drop))))
                 else:
                     paths.append((poses[seq][image][0], None))
 
@@ -165,19 +169,25 @@ class CompleteContrastiveSkiDataset(Dataset):
         return sample
 
 
-def getContrastiveDatasetSki(transform, dataset_dir="datasets"):
+def getContrastiveDatasetSki(transform, dataset_dir="datasets", use_complete=True, drop=0.5):
     """
     Returns a tuple of train and test datasets for contrastive learning using Ski data.
 
     Args:
         transform (torchvision.transforms.Transform): The data transformation to be applied to the dataset.
         dataset_dir (str, optional): The directory where the datasets are stored. Defaults to "datasets".
+        use_complete (bool, optional): Whether to use complete pairs. Defaults to True.
+        drop (float, optional): The percentage of pairs to drop. Defaults to 0.5.
 
     Returns:
         tuple: A tuple containing the train and test datasets.
     """
-    dataset = CompleteContrastiveSkiDataset(transform, dataset_dir, mode="train")
-    test = CompleteContrastiveSkiDataset(transform, dataset_dir, mode="test")
+    if use_complete:
+        dataset = CompleteContrastiveSkiDataset(transform, dataset_dir, mode="train", drop=drop)
+        test = CompleteContrastiveSkiDataset(transform, dataset_dir, mode="test", drop=drop)
+    else:
+        dataset = ContrastiveSkiDataset(transform, dataset_dir, mode="train")
+        test = ContrastiveSkiDataset(transform, dataset_dir, mode="test")
 
     num_samples = len(dataset)
 

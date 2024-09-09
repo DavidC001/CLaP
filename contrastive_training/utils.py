@@ -9,7 +9,17 @@ from torchvision.models.resnet import  ResNet18_Weights, ResNet50_Weights
 
 train_data, val_data, test_data = None, None, None
 
-def load_datasets(datasets, dataset_dir="datasets", base_model="resnet18"):
+def load_datasets(datasets, use_complete, drop,dataset_dir="datasets", base_model="resnet18"):
+    """
+    Prepares the datasets for contrastive training.
+
+    Parameters:
+        datasets: list, datasets to load
+        use_complete: bool, use complete pairs
+        drop: float, drop pairs
+        dataset_dir: str, directory to save the datasets, default is 'datasets'
+        base_model: str, base model, default is 'resnet18'
+    """
     global train_data, val_data, test_data
 
     # normalize = T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
@@ -36,8 +46,9 @@ def load_datasets(datasets, dataset_dir="datasets", base_model="resnet18"):
 
     train, val, test = [], [], []
     
-    for dataset in datasets:
-        train_data, val_data, test_data = contrastive_datasets[dataset](transforms, dataset_dir=dataset_dir)
+    assert len(datasets) == len(drop), "Number of datasets and drop pairs should be the same"
+    for i, dataset in enumerate(datasets):
+        train_data, val_data, test_data = contrastive_datasets[dataset](transforms, dataset_dir=dataset_dir, use_complete=use_complete, drop=drop[i])
         train.append(train_data)
         val.append(val_data)
         test.append(test_data)
@@ -48,6 +59,15 @@ def load_datasets(datasets, dataset_dir="datasets", base_model="resnet18"):
     test_data = combineDataSets(*test)
 
 def get_dataLoaders(batch_size):
+    """
+    Get the data loaders for the datasets.
+
+    Parameters:
+        batch_size: int, batch size
+
+    Returns:
+        train_loader, val_loader, test_loader
+    """
     global train_data, val_data, test_data
 
     assert train_data is not None, "Dataset not loaded"
