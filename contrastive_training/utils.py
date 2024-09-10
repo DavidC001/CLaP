@@ -3,6 +3,7 @@ import torch.nn as nn
 import torchvision.transforms as T
 from dataloaders.datasets import contrastive_datasets
 from dataloaders.datasets import combineDataSets
+import os
 
 #import RN50 transforms
 from torchvision.models.resnet import  ResNet18_Weights, ResNet50_Weights
@@ -72,8 +73,10 @@ def get_dataLoaders(batch_size):
 
     assert train_data is not None, "Dataset not loaded"
 
-    train_loader = torch.utils.data.DataLoader(train_data, batch_size, shuffle=True)
-    val_loader = torch.utils.data.DataLoader(val_data, batch_size, shuffle=False)
-    test_loader = torch.utils.data.DataLoader(test_data, batch_size, shuffle=False)
+    available_workers = os.cpu_count() / 2
+
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size, shuffle=True, num_workers=available_workers)
+    val_loader = torch.utils.data.DataLoader(val_data, batch_size, shuffle=False, num_workers=available_workers)
+    test_loader = torch.utils.data.DataLoader(test_data, batch_size, shuffle=False, num_workers=available_workers)
 
     return train_loader, val_loader, test_loader

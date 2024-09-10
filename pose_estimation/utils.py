@@ -68,8 +68,10 @@ def getDatasetLoader(dataset, batch_size, datasets_dir="datasets", base_model="r
 
     train, val, test = pose_datasets[dataset](transforms, datasets_dir)
     
-    train_loader = torch.utils.data.DataLoader(train, batch_size, shuffle=True)
-    val_loader = torch.utils.data.DataLoader(val, batch_size, shuffle=False)
-    test_loader = torch.utils.data.DataLoader(test, batch_size, shuffle=False)
+    available_workers = os.cpu_count() / 2
+
+    train_loader = torch.utils.data.DataLoader(train, batch_size, shuffle=True, num_workers=available_workers)
+    val_loader = torch.utils.data.DataLoader(val, batch_size, shuffle=False, num_workers=available_workers)
+    test_loader = torch.utils.data.DataLoader(test, batch_size, shuffle=False, num_workers=available_workers)
 
     return train_loader, val_loader, test_loader
