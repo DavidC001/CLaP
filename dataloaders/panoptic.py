@@ -185,12 +185,12 @@ class CompleteContrastivePanopticDataset(Dataset):
                 camera = '_'.join(camera)
                 image2_path = image1_path.split(';')[0] + ';' + camera + ";" + ";".join(image1_path.split(';')[2:])
 
-                if (os.path.isfile(image2_path) and image1_path != image2_path 
-                    and (image1_path, image2_path) not in self.pairs[id] and (image2_path, image1_path) not in self.pairs[id]):
+                if (os.path.isfile(image2_path) and image1_path != image2_path):
                     if id not in self.pairs:
                         self.pairs[id] = [(image1_path, image2_path)]
-                    else:
+                    elif( (image1_path, image2_path) not in self.pairs[id] and (image2_path, image1_path) not in self.pairs[id]):
                         self.pairs[id].append((image1_path, image2_path))
+                        
                     found_pair = True
             if not found_pair:
                 # if no pair is found, apply random rotation on the first image
