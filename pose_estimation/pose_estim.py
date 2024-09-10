@@ -27,7 +27,7 @@ def parseArgs(args):
         'train': True,
         'batch_size': 1024,
         'learning_rate': 0.01,
-        'weight_decay': 0.000001,
+        'weight_decay': 0.01,
         'momentum': 0.9,
         'epochs': 20,
         'save_every': 10

@@ -19,7 +19,7 @@ def check_arguments_contrastive(args):
         "weight_decay": 0.000001,
         "momentum": 0.9,
         "temperature": 0.6,
-        "epochs": 100,
+        "epochs": 5,
         "save_every": 10
     }
 
