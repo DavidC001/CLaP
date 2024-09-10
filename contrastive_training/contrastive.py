@@ -15,7 +15,7 @@ def check_arguments_contrastive(args):
     default_args = {
         "train": True,
         "batch_size": 256,
-        "learning_rate": 0.01,
+        "learning_rate": 0.02,
         "weight_decay": 0.000001,
         "momentum": 0.9,
         "temperature": 0.6,

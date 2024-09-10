@@ -5,6 +5,7 @@ import argparse
 import json
 import torch
 import numpy as np
+import os
 
 from contrastive_training.contrastive import contrastive_pretraining
 from pose_estimation.pose_estim import pose_estimation
@@ -32,6 +33,10 @@ def main(args):
     models_dir = data['models_dir']
     datasets_dir = data['datasets_dir']
     base_model = data['base_model']
+
+    # if it doesn't exist, create the directory to save the models
+    if not os.path.exists(models_dir):
+        os.makedirs(models_dir)
     
     contrastive_pretraining(args=data["contrastive"], device=device, models_dir=models_dir, datasets_dir=datasets_dir, base_model=base_model)
     pose_estimation(args=data["pose_estimation"], device=device, models_dir=models_dir, datasets_dir=datasets_dir, base_model=base_model)
@@ -44,5 +49,5 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Contrastive training')
     parser.add_argument('--experiment', type=str, help='Path to the experiment json file', required=True)
     args = parser.parse_args()
-    
+
     main(args)
