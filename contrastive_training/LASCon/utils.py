@@ -4,6 +4,7 @@ import torchvision.transforms as T
 from dataloaders.datasets import pose_datasets
 from dataloaders.datasets import combineDataSets
 import os
+import math
 
 
 def get_dataLoaders(datasets, batch_size, dataset_dir="datasets"):
@@ -29,7 +30,7 @@ def get_dataLoaders(datasets, batch_size, dataset_dir="datasets"):
     val_data = combineDataSets(*val)
     test_data = combineDataSets(*test)
 
-    available_workers = os.cpu_count() / 2
+    available_workers = math.ceil(os.cpu_count() / 2)
     
     train_loader = torch.utils.data.DataLoader(train_data, batch_size, shuffle=True, num_workers=available_workers)
     val_loader = torch.utils.data.DataLoader(val_data, batch_size, shuffle=False, num_workers=available_workers)

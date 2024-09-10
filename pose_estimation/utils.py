@@ -7,6 +7,7 @@ import torch
 import torchvision.transforms as T
 from dataloaders.datasets import pose_datasets
 from torchvision.models.resnet import  ResNet50_Weights, ResNet18_Weights
+import math
 
 def getLatestModel(path):
     """
@@ -68,7 +69,7 @@ def getDatasetLoader(dataset, batch_size, datasets_dir="datasets", base_model="r
 
     train, val, test = pose_datasets[dataset](transforms, datasets_dir)
     
-    available_workers = os.cpu_count() / 2
+    available_workers = math.ceil(os.cpu_count() / 2)
 
     train_loader = torch.utils.data.DataLoader(train, batch_size, shuffle=True, num_workers=available_workers)
     val_loader = torch.utils.data.DataLoader(val, batch_size, shuffle=False, num_workers=available_workers)
