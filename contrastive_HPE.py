@@ -15,6 +15,10 @@ random.seed(0)
 torch.manual_seed(0)
 np.random.seed(0)
 
+#disable the warning
+import warnings
+warnings.filterwarnings("ignore")
+
 def main(args):
     #read experiment json file
     with open(args.experiment) as f:

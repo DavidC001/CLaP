@@ -101,10 +101,12 @@ def get_loss(output, pose, weights=None, norm_factor=0.2, device='cuda'):
     
     #print ("output\n", output)
     #print ("pose\n", pose)
-    #L1 loss error for each batch
-    loss = torch.mean(torch.abs(pose - output))
+    # mean joint error
     # breakpoint()
-    #print(loss)
+    output = output.view(-1, 1, 3)
+    pose = pose.view(-1, 1, 3)
+    loss = torch.mean(torch.cdist(output, pose, p=2))
+    # breakpoint()
 
     # add L2 normalization factor for weights
     if weights is not None:

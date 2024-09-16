@@ -8,7 +8,6 @@ import torchvision.transforms as T
 import torch.nn.functional as F
 from torch import nn
 
-from flash.core.optimizers import LARS
 from torch.optim import Adam
 
 from tqdm import tqdm
