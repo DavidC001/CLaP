@@ -24,7 +24,7 @@ class Linear(nn.Module):
     """
     Linear layer with ReLU activation function for the pose estimation model.
     """
-    def __init__(self, layers, output_dim=48, base_model='resnet18'):
+    def __init__(self, layers, output_dim=48, base_model='resnet18', layer_norm=True):
         """
         Initialize the Linear layer.
 
@@ -32,6 +32,7 @@ class Linear(nn.Module):
         - layers: list, list of layer dimensions
         - output_dim: int, output dimension, default is 48
         - base_model: str, base model, default is 'resnet18'
+        - layer_norm: bool, whether to use layer normalization, default is True
         """
         super(Linear, self).__init__()
         self.layers = nn.Sequential()
@@ -43,16 +44,21 @@ class Linear(nn.Module):
         else:
             raise ValueError("Invalid base model")
         layers.append(output_dim)
+        if layer_norm:
+            self.LN = nn.LayerNorm(layers[0])
         for i in range(len(layers)-1):
             self.layers.add_module('linear'+str(i), nn.Linear(layers[i], layers[i+1]))
             if i < len(layers)-2:
                 self.layers.add_module('relu'+str(i), nn.ReLU())
+        # breakpoint()
 
     def forward(self, x):
+        if hasattr(self, 'LN'):
+            x = self.LN(x)
         z = self.layers(x)
         return z
 
-def getPoseEstimModel(path, model_type, layers, out_dim, device='cpu', base_model='resnet18'):
+def getPoseEstimModel(path, model_type, layers, out_dim, device='cpu', base_model='resnet18', layer_norm=True):
     """
     Get the pose estimation model.
 
@@ -63,6 +69,7 @@ def getPoseEstimModel(path, model_type, layers, out_dim, device='cpu', base_mode
     - out_dim: int, output dimension
     - device: str, device, default is 'cpu'
     - base_model: str, base model, default is 'resnet18'
+    - layer_norm: bool, whether to use layer normalization, default is True
 
     Returns:
     - base: torch.nn.Module, pose estimation model with the specified weights
@@ -84,6 +91,6 @@ def getPoseEstimModel(path, model_type, layers, out_dim, device='cpu', base_mode
     
     if model_type == 'simsiam' or model_type == 'MoCo':
         base.module = base.module.base
-    base.module.fc = Linear(layers, out_dim, base_model)
+    base.module.fc = Linear(layers, out_dim, base_model, layer_norm)
 
     return base.to(device)

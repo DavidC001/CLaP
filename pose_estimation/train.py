@@ -6,7 +6,7 @@ from torch.utils.tensorboard import SummaryWriter
 import torch
 import re
 from pose_estimation.functions import get_loss
-
+from copy import deepcopy
 
 
 def training_step(net, data_loader, optimizer, cost_function, device='cuda'):
@@ -114,6 +114,7 @@ def test_step(net, data_loader, cost_function, device='cuda'):
 
     return cumulative_loss / samples
 
+
 def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, epochs, save_every=10, device='cuda', model_dir="trained_models", name="model", patience = 2):
     """
     Train the pose estimation model.
@@ -137,7 +138,7 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
     epoch = 0
     cost_function = get_loss
 
-    tensorboard_tag = name
+    tensorboard_tag = "estimator"
     tensorboard_dir = os.path.join(model_dir, "tensorboard", name).replace("\\", "/")
     
     info_file = os.path.join(model_dir, name, "info.txt").replace("\\", "/")
@@ -150,7 +151,7 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)
 
-    writer = SummaryWriter(log_dir=tensorboard_dir, filename_suffix="_"+tensorboard_tag)
+    writer = SummaryWriter(log_dir=tensorboard_dir, filename_suffix="_"+name)
 
     #load weights
     if os.path.exists(model_dir):
@@ -175,6 +176,7 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
 
     patience_counter = 0
     min_val_loss = 1000000
+    best_model = None
     for e in range(epoch, epochs):
 
         train_loss = training_step(net, train_loader, optimizer, cost_function, device)
@@ -211,19 +213,18 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
             else:
                 patience_counter = 0
                 min_val_loss = val_loss
+                best_model = deepcopy(net)
         
         if patience_counter >= patience:
             print("Early stopping")
             break
 
-    torch.save(net.state_dict(), model_file+str(epochs)+'.pt')
-    torch.save(optimizer.state_dict(), optimizer_file+str(epochs)+'.pt')
-    torch.save(scheduler.state_dict(), scheduler_file+str(epochs)+'.pt')
+    torch.save(best_model.state_dict(), model_file+str(epochs)+'.pt')
 
     print('After training:')
-    train_loss = test_step(net, train_loader, cost_function, device)
-    val_loss = test_step(net, val_loader, cost_function, device)
-    test_loss = test_step(net, test_loader, cost_function, device)
+    train_loss = test_step(best_model, train_loader, cost_function, device)
+    val_loss = test_step(best_model, val_loader, cost_function, device)
+    test_loss = test_step(best_model, test_loader, cost_function, device)
 
     print('\tTraining loss {:.5f}'.format(train_loss))
     print('\tValidation loss {:.5f}'.format(val_loss))
@@ -238,5 +239,11 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
     f.write('\tTest loss {:.5f}\n'.format(test_loss))
     f.write('-----------------------------------------------------\n')
     f.close()
+
+    
+    writer.add_scalar(tensorboard_tag+'/final_train_loss', train_loss, 0)
+    writer.add_scalar(tensorboard_tag+'/final_val_loss', val_loss, 0)
+    writer.add_scalar(tensorboard_tag+'/final_test_loss', test_loss, 0)
+    writer.flush()
 
     writer.close()

@@ -19,18 +19,19 @@ def parseArgs(args):
     Returns:
     - args: dict, updated arguments for the pose estimation model
     """
-    assert 'architecture' in args, 'estimator head architecture not found in args'
     assert 'name' in args, 'name not found for args'
     assert 'pretrained_name' in args, 'pretrained model name not found in args'
 
     default_args = {
+        'architecture': [],
         'train': True,
         'batch_size': 1024,
         'learning_rate': 0.01,
         'weight_decay': 0.01,
         'momentum': 0.9,
         'epochs': 20,
-        'save_every': 10
+        'save_every': 10,
+        'LN': False
     }
 
     args = {**default_args, **args}
@@ -65,7 +66,7 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
             params["batch_size"] = args["batch_size"]
 
             if (params["train"]):
-                print(f"Training {model}")
+                print(f"Training {model}, {params['name']}")
 
                 try:
                     #save parameters to file
@@ -77,6 +78,7 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
                             model_type=model,
                             layers=params['architecture'],
                             out_dim=out_joints[args['dataset']]*3,
+                            layer_norm = params['LN'],
                             device=device,
                             base_model=base_model
                         )
