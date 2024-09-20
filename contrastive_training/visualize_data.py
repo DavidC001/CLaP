@@ -9,8 +9,8 @@ import torchvision.transforms as T
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-dataset = "panoptic"
-path = 'trained_models/simclr_both_biggerBatch/'
+dataset = "skiPose"
+path = 'trained_models/simclr_50_skiPan/'
 #both_bigger batch huge bias on skin color!
 
 
