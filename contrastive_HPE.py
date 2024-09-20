@@ -7,6 +7,11 @@ import torch
 import numpy as np
 import os
 
+#disable the warning
+import warnings
+warnings.filterwarnings("ignore")
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 from contrastive_training.contrastive import contrastive_pretraining
 from pose_estimation.pose_estim import pose_estimation
 
@@ -15,9 +20,6 @@ random.seed(0)
 torch.manual_seed(0)
 np.random.seed(0)
 
-#disable the warning
-import warnings
-warnings.filterwarnings("ignore")
 
 def main(args):
     #read experiment json file
