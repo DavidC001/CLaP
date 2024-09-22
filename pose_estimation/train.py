@@ -218,8 +218,11 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
         if patience_counter >= patience:
             print("Early stopping")
             break
-
-    torch.save(best_model.state_dict(), model_file+str(epochs)+'.pt')
+    
+    if (best_model):
+        torch.save(best_model.state_dict(), model_file+str(e+1)+'.pt')
+    else:
+        best_model = net
 
     print('After training:')
     train_loss = test_step(best_model, train_loader, cost_function, device)
