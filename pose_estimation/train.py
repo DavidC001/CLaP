@@ -161,23 +161,24 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
         if len(files) > 1:
             epoch = max([int(re.findall(r'\d+', file)[0]) for file in files])
             net.load_state_dict(torch.load(model_file+str(epoch)+'.pt', map_location=torch.device('cuda')))
-            print("Loaded weights from epoch", epoch)
+            print("\tLoaded weights from epoch", epoch)
         else:
-            print("No weights found")
+            print("\tNo weights found")
             f = open(info_file, "w")
             f.close()
 
         
     if os.path.exists(optimizer_file+str(epoch)+'.pt'):
-        print("Loaded optimizer from epoch", epoch)
         optimizer.load_state_dict(torch.load(optimizer_file+str(epoch)+'.pt'))
+        print("\tLoaded optimizer from epoch", epoch)
         scheduler.load_state_dict(torch.load(scheduler_file+str(epoch)+'.pt'))
+        print("\tLoaded scheduler from epoch", epoch)
 
-
+    print("\tStarting Training:")
     patience_counter = 0
     min_val_loss = 1000000
     best_model = None
-    for e in range(epoch, epochs):
+    for e in tqdm(range(epoch, epochs)):
 
         train_loss = training_step(net, train_loader, optimizer, cost_function, device)
         val_loss = test_step(net, val_loader, cost_function, device)
