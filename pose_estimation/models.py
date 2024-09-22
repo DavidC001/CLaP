@@ -27,7 +27,7 @@ class Linear(nn.Module):
     Linear layer with GELU activation function for the pose estimation model.
     """
 
-    def __init__(self, layers, output_dim=48, base_model="resnet18", layer_norm=True):
+    def __init__(self, layers, output_dim=48, base_model="resnet18", layer_norm=True, activation="gelu"):
         """
         Initialize the Linear layer.
 
@@ -36,6 +36,7 @@ class Linear(nn.Module):
         - output_dim: int, output dimension, default is 48
         - base_model: str, base model, default is 'resnet18'
         - layer_norm: bool, whether to use layer normalization, default is True
+        - activation: str, activation function, default is 'gelu'
         """
         super(Linear, self).__init__()
         self.layers = nn.Sequential()
@@ -54,7 +55,7 @@ class Linear(nn.Module):
                 "linear" + str(i), nn.Linear(layers[i], layers[i + 1])
             )
             if i < len(layers) - 2:
-                self.layers.add_module("gelu" + str(i), nn.GELU())
+                self.layers.add_module("gelu" + str(i), nn.GELU() if activation == "gelu" else nn.ReLU())
 
     def forward(self, x):
         if hasattr(self, "LN"):
@@ -71,6 +72,7 @@ def getPoseEstimModel(
     device="cpu",
     base_model="resnet18",
     layer_norm=True,
+    activation="gelu",
 ):
     """
     Get the pose estimation model.
@@ -83,6 +85,7 @@ def getPoseEstimModel(
     - device: str, device, default is 'cpu'
     - base_model: str, base model, default is 'resnet18'
     - layer_norm: bool, whether to use layer normalization, default is True
+    - activation: str, activation function, default is 'gelu'
 
     Returns:
     - base: torch.nn.Module, pose estimation model with the specified weights
@@ -104,6 +107,6 @@ def getPoseEstimModel(
 
     if model_type == "simsiam" or model_type == "MoCo":
         base.module = base.module.base
-    base.module.fc = Linear(layers, out_dim, base_model, layer_norm)
+    base.module.fc = Linear(layers, out_dim, base_model, layer_norm, activation)
 
     return base.to(device)

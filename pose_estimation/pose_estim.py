@@ -31,7 +31,8 @@ def parseArgs(args):
         'momentum': 0.9,
         'epochs': 20,
         'save_every': 10,
-        'LN': False
+        'LN': False,
+        'activation': 'gelu'
     }
 
     args = {**default_args, **args}
@@ -79,6 +80,7 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
                             layers=params['architecture'],
                             out_dim=out_joints[args['dataset']]*3,
                             layer_norm = params['LN'],
+                            activation = params['activation'],
                             device=device,
                             base_model=base_model
                         )
