@@ -115,7 +115,7 @@ def test_step(net, data_loader, cost_function, device='cuda'):
     return cumulative_loss / samples
 
 
-def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, epochs, save_every=10, device='cuda', model_dir="trained_models", name="model", patience = 2):
+def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, epochs, save_every=10, device='cuda', model_dir="trained_models", name="model", patience = 5):
     """
     Train the pose estimation model.
 
@@ -178,12 +178,13 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
     patience_counter = 0
     min_val_loss = 1000000
     best_model = None
+    
     for e in tqdm(range(epoch, epochs)):
 
         train_loss = training_step(net, train_loader, optimizer, cost_function, device)
         val_loss = test_step(net, val_loader, cost_function, device)
 
-        scheduler.step()
+        scheduler.step(val_loss)
 
         print('Epoch: {:d}'.format(e+1))
         print('\tTraining loss {:.5f}'.format(train_loss))
@@ -205,7 +206,7 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
 
         writer.add_scalar(tensorboard_tag+'/Loss/train', train_loss, e+1)
         writer.add_scalar(tensorboard_tag+'/Loss/val', val_loss, e+1)
-        writer.add_scalar(tensorboard_tag+'/lr', scheduler.get_last_lr()[0], e+1)
+        writer.add_scalar(tensorboard_tag+'/lr', optimizer.param_groups[0]["lr"] , e+1)
         writer.flush()
 
         if e > 0:

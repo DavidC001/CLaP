@@ -146,7 +146,7 @@ def get_optimizer(net, learning_rate, weight_decay, momentum=0.0, T_max = 20):
     optimizer = AdamW(final_layer_weights, weight_decay=weight_decay, lr=learning_rate, eps=1e-6)
     #optimizer = SGD([ {'params': final_layer_weights, 'lr': learning_rate} ], weight_decay=weight_decay, momentum=momentum)
 
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=T_max)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=1)
 
     return optimizer, scheduler
 
