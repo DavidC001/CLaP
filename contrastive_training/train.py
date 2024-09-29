@@ -8,28 +8,23 @@ from contrastive_training.LASCon.train import train_LASCon
 train_functions = {
     "simclr": train_simclr,
     "simsiam": train_simsiam,
-    "LASCon": train_LASCon
+    "lascon": train_LASCon,
+    "moco": lambda **args : NotImplementedError
 }
 
-def contrastive_train(model, params, device='cuda', datasets=["panoptic"], models_dir="trained_models", datasets_dir="datasets", base_model='resnet18'):
+def contrastive_train(params, name, device='cuda', datasets=["panoptic"], models_dir="trained_models", datasets_dir="datasets"):
+    model = params["model"]
     assert model in train_functions, f"Model {model} not found in {train_functions.keys()}"
     
     print(f"Training {model}")
 
     train_functions[model](
+            **params,
             model_dir=models_dir,
             dataset_dir=datasets_dir,
             datasets=datasets,
-            name = params["name"], 
-            batch_size=params["batch_size"],
+            name = name, 
             device=device,
-            learning_rate=params["learning_rate"],
-            weight_decay=params["weight_decay"],
-            momentum=params["momentum"],
-            t=params["temperature"],
-            epochs=params["epochs"],
-            save_every = params["save_every"],
-            base_model=base_model
     )
     
     print(f"{model} training done")

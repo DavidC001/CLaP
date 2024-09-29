@@ -38,14 +38,13 @@ def main(args):
     device = data['device']
     models_dir = data['models_dir']
     datasets_dir = data['datasets_dir']
-    base_model = data['base_model']
 
     # if it doesn't exist, create the directory to save the models
     if not os.path.exists(models_dir):
         os.makedirs(models_dir)
     
-    contrastive_pretraining(args=data["contrastive"], device=device, models_dir=models_dir, datasets_dir=datasets_dir, base_model=base_model)
-    pose_estimation(args=data["pose_estimation"], device=device, models_dir=models_dir, datasets_dir=datasets_dir, base_model=base_model)
+    contrastive_pretraining(args=data["contrastive"], device=device, models_dir=models_dir, datasets_dir=datasets_dir)
+    pose_estimation(args=data["pose_estimation"], device=device, models_dir=models_dir, datasets_dir=datasets_dir)
 
     
 

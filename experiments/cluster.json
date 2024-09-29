@@ -2,111 +2,75 @@
     "device": "cuda",
     "models_dir": "trained_models",
     "datasets_dir": "datasets",
-    "base_model": "resnet50",
     "contrastive":{
         "skip": false,
-        "datasets": ["panoptic", "skiPose"],
+        "datasets": ["skiPose"],
         "use_complete_pairs": true,
-        "drop_pairs": [0.5,0],
-        "simclr":{
-            "train": true,
-            "name": "simclr_50_skiPan.5_lowerLR",
-            "batch_size": 256,
-            "learning_rate": 0.05,
-            "weight_decay": 1e-4,
-            "momentum": 0.9,
-            "temperature": 0.5,
-            "epochs": 5,
-            "save_every": 5
-        },
-        "simsiam":{
-            "train": true,
-            "name": "simsiam_50_skiPan.5_lowerLR",
-            "batch_size": 256,
-            "learning_rate": 0.05,
-            "weight_decay": 1e-4,
-            "momentum": 0.9,
-            "epochs": 5,
-            "save_every": 5
-        },
-        "MoCo":{
-            "train": false,
-            "name": "moco_18_complete_pairs",
-            "batch_size": 256,
-            "learning_rate": 0.03,
-            "weight_decay": 1e-6,
-            "momentum": 0.9,
-            "epochs": 20,
-            "save_every": 5
-        },
-        "LASCon":{
-            "train": false,
-            "name": "LASCon_18_complete_pairs",
-            "batch_size": 512,
-            "learning_rate": 1e-3,
-            "weight_decay": 1e-2,
-            "epochs": 20,
-            "save_every": 5
+        "drop_pairs": [0],
+        "experiments": {
+            "simclr_50_skiPan.5_lowerLR":{
+                "model": "simclr",
+                "base_model": "resnet50",
+                "batch_size": 128,
+                "learning_rate_encoder": 0.2,
+                "learning_rate_head": 0.2,
+                "weight_decay": 1e-4,
+                "momentum": 0.9,
+                "temperature": 0.5,
+                "epochs": 5,
+                "save_every": 5
+            },
+            "simsiam_50_skiPan.5_lowerLR":{
+                "model": "simsiam",
+                "base_model": "resnet50",
+                "batch_size": 128,
+                "learning_rate_encoder": 0.2,
+                "learning_rate_head": 0.2,
+                "weight_decay": 1e-4,
+                "momentum": 0.9,
+                "epochs": 5,
+                "save_every": 5
+            }
         }
     },
     "pose_estimation":{
         "skip": false,
         "dataset": "skiPose",
         "batch_size": 64,
-        "simclr":{
-            "train": true,
-            "name": "simclr50SkiPan.5_lowerLR_estim_ski",
-            "pretrained_name": "simclr_50_skiPan.5_lowerLR",
-            "architecture": [],
-            "learning_rate": 1e-3,
-            "weight_decay": 1e-2,
-            "epochs": 10,
-            "save_every": 5,
-            "LN": false
-        },
-        "simsiam":{
-            "train": true,
-            "name": "simsiam50SkiPan.5_lowerLR_estim_ski",
-            "pretrained_name": "simsiam_50_skiPan.5_lowerLR",
-            "architecture": [],
-            "learning_rate": 1e-3,
-            "weight_decay": 1e-2,
-            "epochs": 10,
-            "save_every": 5,
-            "LN": false
-        },
-        "resnet":{
-            "train": true,
-            "name": "resnet50_estim_ski_JE",
-            "architecture": [],
-            "pretrained_name": "resnet",
-            "learning_rate": 1e-3,
-            "weight_decay": 1e-2,
-            "epochs": 10,
-            "save_every": 5,
-            "LN": false
-        },
-        "MoCo":{
-            "train": false,
-            "name": "moco_estimator_18_complete_pairs",
-            "pretrained_name": "moco_18_complete_pairs",
-            "architecture": [128],
-            "learning_rate": 1e-3,
-            "weight_decay": 1e-2,
-            "epochs": 20,
-            "save_every": 5,
-            "LN": false
-        },
-        "LASCon":{
-            "train": false,
-            "name": "LASCon_estimator_18_complete_pairs",
-            "pretrained_name": "LASCon_18_complete_pairs",
-            "architecture": [128],
-            "learning_rate": 1e-3,
-            "weight_decay": 1e-2,
-            "epochs": 20,
-            "save_every": 5,
-            "LN": false
+        "experiments":{
+            "simclr50SkiPan.5_lowerLR_estim_ski":{
+                "base_model":"resnet50",
+                "model":"simclr",
+                "pretrained_name": "simclr_50_skiPan.5_lowerLR",
+                "architecture": [128],
+                "learning_rate": 1e-3,
+                "weight_decay": 1e-2,
+                "epochs": 10,
+                "save_every": 5,
+                "LN": true
+            },
+            "simsiam50SkiPan.5_lowerLR_estim_ski":{
+                "base_model":"resnet50",
+                "model":"simsiam",
+                "pretrained_name": "simsiam_50_skiPan.5_lowerLR",
+                "architecture": [128],
+                "learning_rate": 1e-3,
+                "weight_decay": 1e-2,
+                "epochs": 10,
+                "save_every": 5,
+                "LN": true
+            },
+            "resnet50_estim_ski_JE":{
+                "base_model":"resnet50",
+                "model":"resnet",
+                "pretrained_name": "resnet",
+                "architecture": [128],
+                "learning_rate": 1e-3,
+                "weight_decay": 1e-2,
+                "epochs": 10,
+                "save_every": 5,
+                "LN": true
+            }
         }
     }
 }

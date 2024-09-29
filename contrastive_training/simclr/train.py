@@ -19,7 +19,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 
 
-def get_optimizer(model, lr, wd, momentum, epochs):
+def get_optimizer(model, lr_encoder, lr_head, wd, momentum, epochs):
     final_layer_weights = []
     rest_of_the_net_weights = []
 
@@ -30,8 +30,8 @@ def get_optimizer(model, lr, wd, momentum, epochs):
             rest_of_the_net_weights.append(param)
 
     optimizer = LARS([
-        {'params': rest_of_the_net_weights, 'lr': lr},
-        {'params': final_layer_weights, 'lr': lr}
+        {'params': rest_of_the_net_weights, 'lr': lr_encoder},
+        {'params': final_layer_weights, 'lr': lr_head}
     ], weight_decay=wd, momentum=momentum)
 
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=1e-6)
@@ -108,16 +108,19 @@ def val_step(net, data_loader, cost_function, t, device='cuda'):
     return cumulative_loss / samples
 
 
-def train_simclr(model_dir= "trained_models",name = "simclr", dataset_dir="datasets", datasets=["panoptic"],
-                  batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, t=0.6, epochs=100, save_every=10, base_model='resnet18'):
-    
+def train_simclr(model_dir= "trained_models",name = "simclr",
+                  batch_size=1024, device='cuda', 
+                  learning_rate_encoder=0.01, learning_rate_head=0.1,
+                  weight_decay=0.000001, momentum=0.9, temperature=0.6, 
+                  epochs=100, save_every=10, base_model='resnet18', 
+                  **others):
     
     train_loader, val_loader, test_loader = get_dataLoaders(batch_size)
 
     net = get_simclr_net(base_model=base_model)
     net.to(device)
 
-    optimizer, scheduler = get_optimizer(net, lr=learning_rate, wd=weight_decay, momentum=momentum, epochs=epochs)
+    optimizer, scheduler = get_optimizer(net, lr_encoder=learning_rate_encoder, lr_head=learning_rate_head, wd=weight_decay, momentum=momentum, epochs=epochs)
 
     cost_function = get_loss
 
@@ -146,8 +149,8 @@ def train_simclr(model_dir= "trained_models",name = "simclr", dataset_dir="datas
         scheduler.load_state_dict(torch.load(model_dir+ '/' + name+'/epoch_{:d}_scheduler.pt'.format(epoch)))
 
     for e in range(epoch, epochs):
-        train_loss = train_step(net, train_loader, optimizer, cost_function, t, device)
-        val_loss = val_step(net, val_loader, cost_function, t, device)
+        train_loss = train_step(net, train_loader, optimizer, cost_function, temperature, device)
+        val_loss = val_step(net, val_loader, cost_function, temperature, device)
 
         scheduler.step()
 
@@ -166,7 +169,7 @@ def train_simclr(model_dir= "trained_models",name = "simclr", dataset_dir="datas
             torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pt'.format(e+1))
 
     #calculate test loss
-    test_loss = val_step(net, test_loader, cost_function, t, device)
+    test_loss = val_step(net, test_loader, cost_function, temperature, device)
     print('Test loss {:.5f}'.format(test_loss))
     writer.add_scalar("loss/test", test_loss, 0)
     

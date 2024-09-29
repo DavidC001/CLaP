@@ -115,7 +115,7 @@ def get_loss(output, pose, weights=None, norm_factor=0.2, device='cuda'):
 
     return loss
 
-def get_optimizer(net, learning_rate, weight_decay, momentum=0.0, T_max = 20):
+def get_optimizer(net, learning_rate, weight_decay):
     """
     Get the optimizer and scheduler for the network.
 
@@ -123,8 +123,6 @@ def get_optimizer(net, learning_rate, weight_decay, momentum=0.0, T_max = 20):
     - net: torch.nn.Module, network model
     - learning_rate: float, learning rate
     - weight_decay: float, weight decay
-    - momentum: float, momentum, default is 0.0
-    - T_max: int, maximum number of iterations, default is 20
 
     Returns:
     - optimizer: torch.optim, optimizer

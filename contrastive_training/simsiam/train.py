@@ -18,12 +18,12 @@ from torch.utils.tensorboard import SummaryWriter
 
 generator = torch.Generator().manual_seed(42)
 
-def get_optimizer(model, lr, wd, momentum, epochs):
+def get_optimizer(model, lr_encoder, lr_head, wd, momentum, epochs):
 
     optimizer = SGD([
-        {'params': model.base.parameters()},
-        {'params': model.predictor.parameters()}
-    ], lr=lr, weight_decay=wd, momentum=momentum)
+        {'params': model.base.parameters(), 'lr':lr_encoder},
+        {'params': model.predictor.parameters(), 'lr':lr_head}
+    ], weight_decay=wd, momentum=momentum)
 
     scheduler = CosineAnnealingLR(optimizer, T_max=epochs, eta_min=1e-6)
 
@@ -92,8 +92,12 @@ def val_step(net, data_loader, cost_function, device='cuda'):
     return cumulative_loss / samples
 
 
-def train_simsiam(model_dir="trained_models", name = "simsiam",  dataset_dir="datasets", datasets="panoptic", t=0,
-                  batch_size=1024, device='cuda', learning_rate=0.01, weight_decay=0.000001, momentum=0.9, epochs=100, save_every=10, base_model='resnet18'):
+def train_simsiam(model_dir="trained_models", name = "simsiam",
+                  batch_size=1024, device='cuda', 
+                  learning_rate_encoder=0.01, learning_rate_head=0.1,
+                  weight_decay=0.000001, momentum=0.9, epochs=100, 
+                  save_every=10, base_model='resnet18', 
+                  **others):
     
     train_loader, val_loader, test_loader = get_dataLoaders(batch_size)
 
@@ -102,7 +106,7 @@ def train_simsiam(model_dir="trained_models", name = "simsiam",  dataset_dir="da
 
 
 
-    optimizer, scheduler = get_optimizer(net.module, lr=learning_rate, wd=weight_decay, momentum=momentum, epochs=epochs)
+    optimizer, scheduler = get_optimizer(net.module, lr_encoder=learning_rate_encoder, lr_head=learning_rate_head, wd=weight_decay, momentum=momentum, epochs=epochs)
 
     cost_function = get_loss
 

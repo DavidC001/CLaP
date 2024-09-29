@@ -234,7 +234,6 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
     print('\tTraining loss {:.5f}'.format(train_loss))
     print('\tValidation loss {:.5f}'.format(val_loss))
     print('\tTest loss {:.5f}'.format(test_loss))
-    print('-----------------------------------------------------')
 
     #write information to file
     f = open(info_file, "a")

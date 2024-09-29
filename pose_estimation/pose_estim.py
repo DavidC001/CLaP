@@ -19,14 +19,14 @@ def parseArgs(args):
     Returns:
     - args: dict, updated arguments for the pose estimation model
     """
-    assert 'name' in args, 'name not found for args'
+    assert 'model' in args, 'Need to define the model type (simclr, simsiam, moco, lascon, resnet)'
+    assert 'base_model' in args, 'Need to define the model backbone encoder (resnet50 - resnet18)'
     assert 'pretrained_name' in args, 'pretrained model name not found in args'
 
     default_args = {
         'architecture': [],
-        'train': True,
         'batch_size': 1024,
-        'learning_rate': 0.01,
+        'learning_rate': 0.001,
         'weight_decay': 0.01,
         'momentum': 0.9,
         'epochs': 20,
@@ -39,7 +39,7 @@ def parseArgs(args):
     
     return args
 
-def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_dir="datasets", base_model="resnet18"):
+def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_dir="datasets"):
     """
     Train the pose estimation model.
 
@@ -58,61 +58,66 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
     
     assert "dataset" in args, "dataset not found in args"
 
-    train_loader, val_loader, test_loader = getDatasetLoader(dataset=args["dataset"], batch_size=args["batch_size"], datasets_dir=datasets_dir, base_model=base_model)
+    dataset = args["dataset"]
     
-    for model in models:
-        if model in args:
-            params = parseArgs(args[model])
-            params["dataset"] = args["dataset"]
-            params["batch_size"] = args["batch_size"]
+    print("POSE ESTIMATION TRAINING")
 
-            if (params["train"]):
-                print(f"Training {model}, {params['name']}")
+    experiments = args["experiments"]
+    print("---------------------------")
+    for exp_name in experiments:
+        params = parseArgs(experiments[exp_name])
+        print(f"Training {exp_name}")
 
-                try:
-                    #save parameters to file
-                    with open(f"{models_dir}/{params['name']}_{model}_params.json", 'w') as f:
-                        json.dump(params, f)
+        try:
+            train_loader, val_loader, test_loader = getDatasetLoader(
+                dataset=dataset, 
+                batch_size=args["batch_size"], 
+                datasets_dir=datasets_dir, 
+                base_model=params["base_model"]
+                )
+            
+            #save parameters to file
+            with open(f"{models_dir}/{exp_name}_params.json", 'w') as f:
+                json.dump(params, f)
 
-                    pretrained = getPoseEstimModel(
-                            path = getLatestModel(os.path.join(models_dir, params['pretrained_name'])),
-                            model_type=model,
-                            layers=params['architecture'],
-                            out_dim=out_joints[args['dataset']]*3,
-                            layer_norm = params['LN'],
-                            activation = params['activation'],
-                            device=device,
-                            base_model=base_model
-                        )
-                    # print(pretrained)
+            pretrained = getPoseEstimModel(
+                    path = getLatestModel(os.path.join(models_dir, params['pretrained_name'])),
+                    model_type=params["model"],
+                    layers=params['architecture'],
+                    out_dim=out_joints[dataset]*3,
+                    layer_norm = params['LN'],
+                    activation = params['activation'],
+                    device=device,
+                    base_model=params['base_model']
+                )
+            # print(pretrained)
                         
-                    optim, scheduler = get_optimizer(
-                            net=pretrained,
-                            learning_rate=params["learning_rate"],
-                            momentum=params["momentum"],
-                            weight_decay=params["weight_decay"],
-                            T_max=params["epochs"]
-                        )
+            optim, scheduler = get_optimizer(
+                    net=pretrained,
+                    learning_rate=params["learning_rate"],
+                    momentum=params["momentum"]
+                )
 
-                    train(
-                            model=pretrained,
-                            optimizer= optim,
-                            scheduler=scheduler,
-                            train_loader=train_loader,
-                            val_loader=val_loader,
-                            test_loader=test_loader,
-                            epochs=params["epochs"],
-                            save_every=params["save_every"],
-                            device=device,
-                            model_dir=models_dir,
-                            name=params["name"]
-                        )
-                    
-                    print(f"{model} training done")
+            train(
+                    name=exp_name,
+                    model=pretrained,
+                    optimizer= optim,
+                    scheduler=scheduler,
+                    train_loader=train_loader,
+                    val_loader=val_loader,
+                    test_loader=test_loader,
+                    epochs=params["epochs"],
+                    save_every=params["save_every"],
+                    device=device,
+                    model_dir=models_dir,
+                )
 
-                except Exception as e:
-                    print(f"Error training {model}: {e}")
-                    continue
+        except Exception as e:
+            print(f"Error training {exp_name}: {e}")
+
+        
+        print(f"Finished {exp_name}")
+        print("---------------------------")
                     
 
 if __name__ == '__main__':
