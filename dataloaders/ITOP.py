@@ -123,6 +123,7 @@ class ClusterKinectDataset(Dataset):
         image = self.transform(image)
 
         sample['image'] = image
+        sample['path'] = image_path
 
         return sample
 

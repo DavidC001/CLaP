@@ -245,6 +245,7 @@ class ClusterSkiDataset(Dataset):
         image =cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = self.transform(image)
 
+        sample['path'] = image_path
         sample['image'] = image
 
         return sample
