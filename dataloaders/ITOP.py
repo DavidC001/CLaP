@@ -85,13 +85,14 @@ def getContrastiveDatasetKinect(transform, dataset_dir="datasets", use_complete=
 
 
 class ClusterKinectDataset(Dataset):
-    def __init__(self, transform, dataset_dir="datasets"):
+    def __init__(self, transform, dataset_dir="datasets", set = "train"):
         #print("ClusterKinectDataset")
 
         views = ['side', 'top']
 
         for view in views:
-            self.data_path = dataset_dir+"/ITOP/"+view+"_test_images"
+            self.data_path = dataset_dir+"/ITOP/"+view+"_"+set+"_images"
+                
             self.transform = transform
 
             paths = []

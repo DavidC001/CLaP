@@ -202,7 +202,7 @@ def getContrastiveDatasetSki(transform, dataset_dir="datasets", use_complete=Tru
 
 
 class ClusterSkiDataset(Dataset):
-    def __init__(self, transform, dataset_dir="datasets"):
+    def __init__(self, transform, dataset_dir="datasets", set="train"):
 
         # change this to the path where the dataset is stored
         self.data_path = dataset_dir+"/Ski-PosePTZ-CameraDataset-png"
@@ -210,10 +210,13 @@ class ClusterSkiDataset(Dataset):
         paths = []
 
         motion_seq = os.listdir(self.data_path)
-        no_dir = ['license.txt', 'load_h5_example.py', 'README.txt', 'load_h5_example.m']
+        if set == 'train':
+            no_dir = ['license.txt', 'load_h5_example.py', 'README.txt', 'load_h5_example.m', 'test']
+        else:
+            no_dir = ['license.txt', 'load_h5_example.py', 'README.txt', 'load_h5_example.m', 'train']
 
         #train and test
-        for dir in motion_seq:
+        for dir in motion_seq: 
           if dir not in no_dir:
             #seq_000 type of directory
             for seq in (os.listdir(os.path.join(self.data_path, dir).replace('\\', '/'))):
@@ -264,20 +267,20 @@ class PoseSkiDataset(Dataset):
 
         #train or test
         if mode == 'train':
-          dir = '/train'
+            dir = '/train'
         else:
-          dir = '/test'
+            dir = '/test'
 
         path_file = data_path+dir+'/labels.h5'
         h5_label_file = h5py.File(path_file, 'r')
 
         #load image's path in order
         for index in range(0,len(h5_label_file['cam'])):
-          seq   = int(h5_label_file['seq'][index])
-          cam   = int(h5_label_file['cam'][index])
-          frame = int(h5_label_file['frame'][index])
-          image_path = data_path+dir+'/seq_{:03d}/cam_{:02d}/image_{:06d}.png'.format(seq,cam,frame)
-          paths.append(image_path.replace('\\','/'))
+            seq   = int(h5_label_file['seq'][index])
+            cam   = int(h5_label_file['cam'][index])
+            frame = int(h5_label_file['frame'][index])
+            image_path = data_path+dir+'/seq_{:03d}/cam_{:02d}/image_{:06d}.png'.format(seq,cam,frame)
+            paths.append(image_path.replace('\\','/'))
 
         self.data = {'paths': paths}
 

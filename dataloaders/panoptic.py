@@ -269,7 +269,7 @@ def getContrastiveDatasetPanoptic(transform, dataset_dir="datasets", use_complet
 
 
 class ClusterPanopticDataset(Dataset):
-    def __init__(self, transform, dataset_dir="datasets"):
+    def __init__(self, transform, dataset_dir="datasets", set = ''):
 
         #open green_images.txt
         no_files = []
