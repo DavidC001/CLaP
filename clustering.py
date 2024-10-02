@@ -22,10 +22,9 @@ def extract_representations(model, loader):
     with torch.no_grad():
         for data in tqdm(loader):
             images = data['image']
-            images = images.to(model.device).unsqueeze(0)
+            images = images.to(device).unsqueeze(0)
             outputs = model(images).squeeze()
             representations.append(outputs.detach().cpu())
-            
     return representations
 
 def kmeans_clustering(representations, n_clusters):
