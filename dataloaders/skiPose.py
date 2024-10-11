@@ -202,12 +202,14 @@ def getContrastiveDatasetSki(transform, dataset_dir="datasets", use_complete=Tru
 
 
 class ClusterSkiDataset(Dataset):
-    def __init__(self, transform, dataset_dir="datasets", set="train"):
+    def __init__(self, transform, dataset_dir="datasets", set="train", use_cluster="NONE"):
 
         # change this to the path where the dataset is stored
         self.data_path = dataset_dir+"/Ski-PosePTZ-CameraDataset-png"
 
         paths = []
+
+        
 
         motion_seq = os.listdir(self.data_path)
         if set == 'train':
@@ -255,7 +257,7 @@ class ClusterSkiDataset(Dataset):
 
 class PoseSkiDataset(Dataset):
 
-    def __init__(self, transform, dataset_dir="datasets", mode = "train"):
+    def __init__(self, transform, dataset_dir="datasets", mode = "train", use_cluster="NONE"):
 
         # change this to the path where the dataset is stored
         data_path = dataset_dir+"/Ski-PosePTZ-CameraDataset-png"
@@ -273,14 +275,26 @@ class PoseSkiDataset(Dataset):
 
         path_file = data_path+dir+'/labels.h5'
         h5_label_file = h5py.File(path_file, 'r')
-
+        included_images = []
+        
+        if not use_cluster.startswith("RANDOM") and use_cluster != "NONE":
+            with open(use_cluster, 'r') as f:
+                included_images = f.readlines()
+        
         #load image's path in order
         for index in range(0,len(h5_label_file['cam'])):
             seq   = int(h5_label_file['seq'][index])
             cam   = int(h5_label_file['cam'][index])
             frame = int(h5_label_file['frame'][index])
             image_path = data_path+dir+'/seq_{:03d}/cam_{:02d}/image_{:06d}.png'.format(seq,cam,frame)
-            paths.append(image_path.replace('\\','/'))
+            if len(included_images) == 0 or image_path in included_images:
+                paths.append(image_path.replace('\\','/'))
+
+        if use_cluster.startswith("RANDOM"):
+            percent = int(use_cluster.split("_")[-1])
+            num_samples = len(paths)
+            paths = random.sample(paths, math.ceil(num_samples * percent / 100))
+            
 
         self.data = {'paths': paths}
 

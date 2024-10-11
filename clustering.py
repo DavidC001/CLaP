@@ -64,7 +64,7 @@ def get_dataSet(dataset, dataset_dir, base_model):
         transforms
     ])
 
-    train = cluster_datasets[dataset](transforms, dataset_dir=dataset_dir)
+    train = cluster_datasets[dataset](transforms, dataset_dir=dataset_dir, set = 'train')
 
     return train
 

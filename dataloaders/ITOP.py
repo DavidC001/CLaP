@@ -1,3 +1,4 @@
+import math
 import os
 import torch
 from torch.utils.data import Dataset
@@ -130,7 +131,7 @@ class ClusterKinectDataset(Dataset):
 
 
 class PoseKinectDataset(Dataset):
-    def __init__(self, transform, dataset_dir="datasets", mode="train"):
+    def __init__(self, transform, dataset_dir="datasets", mode="train", use_cluster="NONE"):
 
         self.transform = transform
 
@@ -142,23 +143,36 @@ class PoseKinectDataset(Dataset):
             dir = '/test'
         
         views = ['side', 'top']
+        included_images = []
+        
+        if not use_cluster.startswith("RANDOM") and use_cluster != "NONE":
+            with open(use_cluster, 'r') as f:
+                included_images = f.readlines()
 
         for view in views:
             paths[view] = []
             data_path = dataset_dir+"/ITOP/ITOP_"+view+"_"+mode+"_labels.h5"
+            
             h5_label_file = h5py.File(data_path, 'r')
 
             for id in h5_label_file['id']:
                 # print(id)
                 id = id.decode('utf-8')
                 image_path = dataset_dir+"/ITOP/"+view+"_"+mode+"_images/"+str(id)+".jpg"
-                if os.path.exists(image_path):
+                if os.path.exists(image_path) and (len(included_images)==0 or id in included_images):
                     paths[view].append(image_path)
                 else:
-                    print("Image not found: ", image_path)
+                    print("Image not found or excluded: ", image_path)
 
         self.data = {'paths': paths}
-        self.mode = mode
+        if use_cluster.startswith("RANDOM"):
+            percent = int(use_cluster.split("_")[-1])
+            num_samples = len(self.data['paths']['side'])
+            num_samples = math.ceil(num_samples * percent / 100)
+            self.data['paths']['side'] = random.sample(self.data['paths']['side'], num_samples)
+            num_samples = len(self.data['paths']['top'])
+            num_samples = math.ceil(num_samples * percent / 100)
+            self.data['paths']['top'] = random.sample(self.data['paths']['top'], num_samples)
 
     def __len__(self):
         return len(self.data['paths']['side']+self.data['paths']['top'])
@@ -178,8 +192,10 @@ class PoseKinectDataset(Dataset):
         root = image_path.split("/ITOP/")[0]
         path_file = root+"/ITOP/ITOP_"+view+"_"+self.mode+"_labels.h5"
 
+        id = int(image_path.split('/')[-1].split('.')[0])
+
         h5_label_file = h5py.File(path_file, 'r')
-        joint_3d = h5_label_file["real_world_coordinates"][idx]
+        joint_3d = h5_label_file["real_world_coordinates"][id]
 
         sample = dict()
         sample['image'] = self.transform(image)

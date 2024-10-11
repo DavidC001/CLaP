@@ -310,7 +310,7 @@ class ClusterPanopticDataset(Dataset):
         return sample
 
 class PosePanopticDataset(Dataset):
-    def __init__(self, transform, dataset_dir="datasets"):
+    def __init__(self, transform, dataset_dir="datasets", use_cluster="NONE"):
 
         # change this to the path where the dataset is stored
         self.data_path = dataset_dir+"/ProcessedPanopticDataset"
@@ -319,7 +319,13 @@ class PosePanopticDataset(Dataset):
         self.transform = transform
 
         paths = []
-        
+
+        included_images = []
+
+        if not use_cluster.startswith("RANDOM") and use_cluster != "NONE":
+            with open(use_cluster, 'r') as f:
+                included_images = f.readlines()
+                
         #open green_images.txt
         no_files = []
         with open(dataset_dir+"/green_images.txt") as f:
@@ -338,20 +344,24 @@ class PosePanopticDataset(Dataset):
                     joint_path = os.path.join(self.data_path,dir,'hdJoints').replace('\\', '/')
                     if os.path.exists(joint_path):
                         for lists in (os.listdir(joint_path)):
-                            if lists.replace('json','jpg') in no_files:
-                                continue
-                            paths.append(os.path.join(joint_path,lists.split('.json')[0]).replace('\\', '/'))
+                            if not lists.replace('json','jpg') in no_files:
+                                if len(included_images) == 0 or lists in included_images:
+                                    paths.append(os.path.join(joint_path,lists.split('.json')[0]).replace('\\', '/'))
                 elif 'ian' in dir:
                     continue
                 else:
                     joint_path = os.path.join(self.data_path,dir,'hdJoints').replace('\\', '/')
                     if os.path.exists(joint_path):
                         for lists in (os.listdir(joint_path)):
-                            if lists.replace('json','jpg') in no_files:
-                                continue
-                            paths.append(os.path.join(joint_path,lists.split('.json')[0]).replace('\\', '/'))
+                            if not lists.replace('json','jpg') in no_files:
+                                if len(included_images) == 0 or lists in included_images:
+                                    paths.append(os.path.join(joint_path,lists.split('.json')[0]).replace('\\', '/'))
 
         self.data = {'paths': paths}
+
+        if use_cluster.startswith("RANDOM"):
+            percent = int(use_cluster.split("_")[-1])
+            self.data['paths'] = random.sample(self.data['paths'], math.ceil(len(self.data['paths']) * percent / 100))
 
     def __len__(self):
         return len(self.data['paths'])
