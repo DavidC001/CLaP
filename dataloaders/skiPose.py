@@ -15,7 +15,6 @@ import h5py
 
 generator = torch.Generator().manual_seed(42)
 
-
 class ContrastiveSkiDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets", mode="train"):
 
@@ -200,7 +199,6 @@ def getContrastiveDatasetSki(transform, dataset_dir="datasets", use_complete=Tru
 
     return train, val, test
 
-
 class ClusterSkiDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets", set="train", use_cluster="NONE"):
 
@@ -279,7 +277,9 @@ class PoseSkiDataset(Dataset):
         
         if not use_cluster.startswith("RANDOM") and use_cluster != "NONE":
             with open(use_cluster, 'r') as f:
-                included_images = f.readlines()
+                for line in f:
+                    included_images.append(line.strip())
+                print("Included images: ", len(included_images))
         
         #load image's path in order
         for index in range(0,len(h5_label_file['cam'])):
@@ -287,14 +287,16 @@ class PoseSkiDataset(Dataset):
             cam   = int(h5_label_file['cam'][index])
             frame = int(h5_label_file['frame'][index])
             image_path = data_path+dir+'/seq_{:03d}/cam_{:02d}/image_{:06d}.png'.format(seq,cam,frame)
+            # breakpoint()
             if len(included_images) == 0 or image_path in included_images:
                 paths.append(image_path.replace('\\','/'))
+                print("Image path: ", len(paths))
 
         if use_cluster.startswith("RANDOM"):
             percent = int(use_cluster.split("_")[-1])
             num_samples = len(paths)
             paths = random.sample(paths, math.ceil(num_samples * percent / 100))
-            
+            print("Random paths: ", len(paths))
 
         self.data = {'paths': paths}
 
@@ -356,3 +358,19 @@ def getPoseDatasetSki(transform, dataset_dir="datasets"):
     test = PoseSkiDataset(transform, dataset_dir, mode="test")
     
     return train, val, test
+
+if __name__ == '__main__':
+
+    transform = T.Compose([
+        T.ToPILImage(),
+        T.Resize((224,224)),
+        T.ToTensor()
+    ])
+    train = PoseSkiDataset(transform, dataset_dir="datasets", mode="train", use_cluster = "selected_images.txt")
+    print(len(train))
+    print(train[0])
+
+    with open("selected_images.txt", 'r') as f:
+        selected_images = f.readlines()
+    print(len(selected_images))
+    print(selected_images[0])

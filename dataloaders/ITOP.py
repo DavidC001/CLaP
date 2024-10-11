@@ -144,10 +144,11 @@ class PoseKinectDataset(Dataset):
         
         views = ['side', 'top']
         included_images = []
-        
+
         if not use_cluster.startswith("RANDOM") and use_cluster != "NONE":
             with open(use_cluster, 'r') as f:
-                included_images = f.readlines()
+                for line in f:
+                    included_images.append(line.strip())
 
         for view in views:
             paths[view] = []
