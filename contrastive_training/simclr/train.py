@@ -181,5 +181,7 @@ def train_simclr(model_dir= "trained_models",name = "simclr",
         torch.save(optimizer.state_dict(), model_dir+'/'+name+'/epoch_{:d}_optimizer.pt'.format(epochs))
         torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pt'.format(epochs))
 
+    return net
+
 if __name__ == "__main__":
     train_simclr(name = "simclr", batch_size=180, epochs=100, learning_rate=0.3)

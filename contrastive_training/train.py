@@ -4,6 +4,7 @@ sys.path.append(".")
 from contrastive_training.simsiam.train import train_simsiam
 from contrastive_training.simclr.train import train_simclr
 from contrastive_training.LASCon.train import train_LASCon
+from contrastive_training.clustering import get_selected_images
 
 train_functions = {
     "simclr": train_simclr,
@@ -18,7 +19,7 @@ def contrastive_train(params, name, device='cuda', datasets=["panoptic"], models
     
     print(f"Training {model}")
 
-    train_functions[model](
+    net = train_functions[model](
             **params,
             model_dir=models_dir,
             dataset_dir=datasets_dir,
@@ -26,9 +27,9 @@ def contrastive_train(params, name, device='cuda', datasets=["panoptic"], models
             name = name, 
             device=device,
     )
+
+    for dataset in datasets:
+        file = models_dir+"/"+name+"/"+dataset+"_selected_images.txt"
+        get_selected_images(net, model, params['base_model'], dataset, datasets_dir, file, params['n_clusters'], params['percentage'], device)
     
     print(f"{model} training done")
-
-
-if __name__ == "__main__":
-    contrastive_train()

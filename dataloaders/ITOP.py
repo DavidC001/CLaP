@@ -206,18 +206,19 @@ class PoseKinectDataset(Dataset):
         return sample
     
 
-def getPoseDatasetKinect(transform, dataset_dir="datasets"):
+def getPoseDatasetKinect(transform, dataset_dir="datasets", use_cluster="NONE"):
     """
     Returns a tuple of train and test datasets for pose estimation using Kinect data.
 
     Args:
         transform (torchvision.transforms.Transform): The data transformation to be applied to the dataset.
         dataset_dir (str, optional): The directory where the datasets are stored. Defaults to "datasets".
+        use_cluster (str, optional): The file containing the list of images to use. Defaults to "NONE" (use all images). RANDOM_percent will use a random percent of the images.
 
     Returns:
         tuple: A tuple containing the train and test datasets.
     """
-    train = PoseKinectDataset(transform, dataset_dir, mode="train")
+    train = PoseKinectDataset(transform, dataset_dir, mode="train", use_cluster=use_cluster)
     num_samples = len(train)
 
     training_samples = int(num_samples * 0.8 + 1)
@@ -226,6 +227,7 @@ def getPoseDatasetKinect(transform, dataset_dir="datasets"):
     train, val, = torch.utils.data.random_split(
         train, [training_samples, val_samples], generator=generator
     )
+    
     test = PoseKinectDataset(transform, dataset_dir, mode="test")
     return train, val, test
 

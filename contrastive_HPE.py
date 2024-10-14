@@ -46,7 +46,6 @@ def main(args):
     contrastive_pretraining(args=data["contrastive"], device=device, models_dir=models_dir, datasets_dir=datasets_dir)
     pose_estimation(args=data["pose_estimation"], device=device, models_dir=models_dir, datasets_dir=datasets_dir)
 
-    
 
 
 if __name__ == "__main__":

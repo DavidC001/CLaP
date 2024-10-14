@@ -37,7 +37,7 @@ def getLatestModel(path):
     return path
         
 
-def getDatasetLoader(dataset, batch_size, datasets_dir="datasets", base_model="resnet18"):
+def getDatasetLoader(dataset, batch_size, datasets_dir="datasets", base_model="resnet18", use_cluster="NONE"):
     """
     return the dataloader for the specified dataset.
 
@@ -46,6 +46,7 @@ def getDatasetLoader(dataset, batch_size, datasets_dir="datasets", base_model="r
     - batch_size: int, batch size
     - datasets_dir: str, directory to save the datasets, default is 'datasets'
     - base_model: str, base model, default is 'resnet18'
+    - use_cluster: str, use cluster, default is 'NONE' to use all the data. 'RANDOM_50' to use 50% of the data randomly
 
     Returns:
     - train_loader: torch.utils.data.DataLoader, training dataloader
@@ -67,7 +68,7 @@ def getDatasetLoader(dataset, batch_size, datasets_dir="datasets", base_model="r
         raise ValueError("Invalid base model")
     transforms = T.Compose([T.ToPILImage(), transforms])
 
-    train, val, test = pose_datasets[dataset](transforms, datasets_dir)
+    train, val, test = pose_datasets[dataset](transforms, datasets_dir, use_cluster)
     
     available_workers = math.ceil(os.cpu_count() / 2)
 

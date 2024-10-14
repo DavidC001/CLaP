@@ -8,28 +8,32 @@
         "use_complete_pairs": true,
         "drop_pairs": [0],
         "experiments": {
-            "simclr_50_skiPan.5_lowerLR":{
+            "simclr_50_ski":{
                 "model": "simclr",
                 "base_model": "resnet50",
-                "batch_size": 128,
+                "batch_size": 64,
                 "learning_rate_encoder": 0.2,
-                "learning_rate_head": 0.2,
+                "learning_rate_head": 0.5,
                 "weight_decay": 1e-4,
                 "momentum": 0.9,
                 "temperature": 0.5,
                 "epochs": 5,
-                "save_every": 5
+                "save_every": 1,
+                "n_clusters": 20,
+                "percentage": 10
             },
-            "simsiam_50_skiPan.5_lowerLR":{
+            "simsiam_50_ski":{
                 "model": "simsiam",
                 "base_model": "resnet50",
-                "batch_size": 128,
+                "batch_size": 64,
                 "learning_rate_encoder": 0.2,
-                "learning_rate_head": 0.2,
+                "learning_rate_head": 0.5,
                 "weight_decay": 1e-4,
                 "momentum": 0.9,
                 "epochs": 5,
-                "save_every": 5
+                "save_every": 1,
+                "n_clusters": 20,
+                "percentage": 10
             }
         }
     },
@@ -38,38 +42,44 @@
         "dataset": "skiPose",
         "batch_size": 64,
         "experiments":{
-            "simclr50SkiPan.5_lowerLR_estim_ski":{
+            "simclr50Ski_estim_ski_10%":{
                 "base_model":"resnet50",
                 "model":"simclr",
-                "pretrained_name": "simclr_50_skiPan.5_lowerLR",
+                "pretrained_name": "simclr_50_ski",
                 "architecture": [128],
                 "learning_rate": 1e-3,
                 "weight_decay": 1e-2,
-                "epochs": 10,
-                "save_every": 5,
-                "LN": true
+                "epochs": 100,
+                "save_every": 10,
+                "LN": true,
+                "activation": "gelu",
+                "use_cluster": "FILE"
             },
-            "simsiam50SkiPan.5_lowerLR_estim_ski":{
+            "simsiam50Ski_estim_ski_10%":{
                 "base_model":"resnet50",
                 "model":"simsiam",
-                "pretrained_name": "simsiam_50_skiPan.5_lowerLR",
+                "pretrained_name": "simsiam_50_ski",
                 "architecture": [128],
                 "learning_rate": 1e-3,
                 "weight_decay": 1e-2,
-                "epochs": 10,
-                "save_every": 5,
-                "LN": true
+                "epochs": 100,
+                "save_every": 10,
+                "LN": true,
+                "activation": "gelu",
+                "use_cluster": "FILE"
             },
-            "resnet50_estim_ski_JE":{
+            "resnet50_estim_ski_10%":{
                 "base_model":"resnet50",
                 "model":"resnet",
                 "pretrained_name": "resnet",
                 "architecture": [128],
                 "learning_rate": 1e-3,
                 "weight_decay": 1e-2,
-                "epochs": 10,
-                "save_every": 5,
-                "LN": true
+                "epochs": 0,
+                "save_every": 10,
+                "LN": true,
+                "activation": "gelu",
+                "use_cluster": "RANDOM_10"
             }
         }
     }

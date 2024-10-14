@@ -279,7 +279,6 @@ class PoseSkiDataset(Dataset):
             with open(use_cluster, 'r') as f:
                 for line in f:
                     included_images.append(line.strip())
-                print("Included images: ", len(included_images))
         
         #load image's path in order
         for index in range(0,len(h5_label_file['cam'])):
@@ -290,13 +289,11 @@ class PoseSkiDataset(Dataset):
             # breakpoint()
             if len(included_images) == 0 or image_path in included_images:
                 paths.append(image_path.replace('\\','/'))
-                print("Image path: ", len(paths))
 
         if use_cluster.startswith("RANDOM"):
             percent = int(use_cluster.split("_")[-1])
             num_samples = len(paths)
             paths = random.sample(paths, math.ceil(num_samples * percent / 100))
-            print("Random paths: ", len(paths))
 
         self.data = {'paths': paths}
 
@@ -333,18 +330,19 @@ class PoseSkiDataset(Dataset):
 
         return sample
 
-def getPoseDatasetSki(transform, dataset_dir="datasets"):
+def getPoseDatasetSki(transform, dataset_dir="datasets", use_cluster="NONE"):
     """
     Returns a tuple of train and test datasets for pose estimation using Ski data.
 
     Args:
         transform (torchvision.transforms.Transform): The data transformation to be applied to the dataset.
         dataset_dir (str, optional): The directory where the datasets are stored. Defaults to "datasets".
+        use_cluster (str, optional): The file containing the list of images to use. Defaults to "NONE" (use all images). RANDOM_percent will use a random percent of the images
 
     Returns:
         tuple: A tuple containing the train and test datasets.
     """
-    train = PoseSkiDataset(transform, dataset_dir, mode="train")
+    train = PoseSkiDataset(transform, dataset_dir, mode="train", use_cluster=use_cluster)
     
     num_samples = len(train)
 

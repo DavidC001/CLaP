@@ -8,15 +8,23 @@ from tqdm import tqdm
 from torchvision.models.resnet import resnet50
 
 #wrap function to get selected images from clusters
-def get_selected_images(model, base_model, dataset, dataset_dir, name_file, device = 'cuda'):
+def get_selected_images(model, model_type, base_model, dataset, dataset_dir, name_file, n_clusters, percentage, device = 'cuda'):
+    if model_type == "simclr" or model_type == "lascon":
+        model.module.fc = torch.nn.Identity()
+    elif model_type == "simsiam" or model_type == "MoCo":
+        model.module = model.module.base
+        model.module.fc = torch.nn.Identity()
+    else:
+        raise ValueError("Invalid model type")
+
     cluster_data = get_dataSet(dataset, dataset_dir, base_model)
-    representations = extract_representations(model, cluster_data)
-    kmeans = kmeans_clustering(representations, 10)
-    selected_images = select_images_from_clusters(kmeans, cluster_data, 10)
+    representations = extract_representations(model, cluster_data, device)
+    kmeans = kmeans_clustering(representations, n_clusters)
+    selected_images = select_images_from_clusters(kmeans, cluster_data, percentage)
     write_to_file(selected_images, name_file)
     return selected_images
 
-def extract_representations(model, loader):
+def extract_representations(model, loader, device):
     model.eval()
     representations = []
     with torch.no_grad():
@@ -32,11 +40,11 @@ def kmeans_clustering(representations, n_clusters):
     kmeans.fit(representations)
     return kmeans
 
-def select_images_from_clusters(kmeans, dataset, n_clusters):
+def select_images_from_clusters(kmeans, dataset, percentage):
     labels = kmeans.labels_
     selected_images = []
 
-    n = int(len(dataset) * 0.2 / n_clusters)
+    n = int(len(dataset) * percentage) / len(np.unique(labels))
 
     for cluster in np.unique(labels):
         indices = np.where(labels == cluster)[0]
@@ -72,9 +80,8 @@ if __name__ == '__main__':
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     model = resnet50(pretrained=True).to(device)
-    model.device = device
     base_model = 'resnet50'
     dataset = 'skiPose'
     dataset_dir = 'datasets'
     name_file = 'selected_images.txt'
-    get_selected_images(model, base_model, dataset, dataset_dir, name_file)
+    get_selected_images(model, base_model, dataset, dataset_dir, name_file, device)

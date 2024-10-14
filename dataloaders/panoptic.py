@@ -411,24 +411,25 @@ class PosePanopticDataset(Dataset):
 
         return sample
     
-def getPoseDatasetPanoptic(transform, dataset_dir="datasets"):
+def getPoseDatasetPanoptic(transform, dataset_dir="datasets", use_cluster="NONE"):
     """
     Returns training and validation datasets for pose estimation in the Panoptic dataset.
 
     Args:
         transform (callable): A function/transform that takes in an image and its annotations and returns a transformed version.
         dataset_dir (str, optional): The directory where the dataset is located. Defaults to "datasets".
+        use_cluster (str, optional): The file containing the list of images to use. Defaults to "NONE" (use all images). RANDOM_percent will use a random percent of the images.
 
     Returns:
         training_data (torch.utils.data.Dataset): The training dataset.
         val_data (torch.utils.data.Dataset): The validation dataset.
     """
-    dataset = PosePanopticDataset(transform, dataset_dir)
+    dataset = PosePanopticDataset(transform, dataset_dir, use_cluster)
 
     num_samples = len(dataset)
 
-    training_samples = int(num_samples * 0.6 + 1)
-    val_samples = int(num_samples * 0.2 + 1)
+    training_samples = int(num_samples * 0.7 + 1)
+    val_samples = int(num_samples * 0.15 + 1)
     test_samples = num_samples - training_samples - val_samples
 
     training_data, val_data, test_data = torch.utils.data.random_split(
