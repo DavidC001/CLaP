@@ -339,24 +339,18 @@ class PosePanopticDataset(Dataset):
 
         for dir in motion_seq:
             if dir not in no_dir:
-                if 'haggling' in dir:
-                    continue
-                elif dir == '171204_pose2' or dir =='171204_pose5' or dir =='171026_cello3':
-                    joint_path = os.path.join(self.data_path,dir,'hdJoints').replace('\\', '/')
-                    if os.path.exists(joint_path):
-                        for lists in (os.listdir(joint_path)):
-                            if not lists.replace('json','jpg') in no_files:
-                                if len(included_images) == 0 or lists in included_images:
-                                    paths.append(os.path.join(joint_path,lists.split('.json')[0]).replace('\\', '/'))
-                elif 'ian' in dir:
+                if 'haggling' in dir or 'ian' in dir:
                     continue
                 else:
                     joint_path = os.path.join(self.data_path,dir,'hdJoints').replace('\\', '/')
                     if os.path.exists(joint_path):
                         for lists in (os.listdir(joint_path)):
                             if not lists.replace('json','jpg') in no_files:
-                                if len(included_images) == 0 or lists in included_images:
+                                if len(included_images) == 0:
                                     paths.append(os.path.join(joint_path,lists.split('.json')[0]).replace('\\', '/'))
+                                elif lists in included_images:
+                                    for i in range(included_images.count(lists)):
+                                        paths.append(os.path.join(joint_path,lists.split('.json')[0]).replace('\\', '/'))
 
         self.data = {'paths': paths}
 

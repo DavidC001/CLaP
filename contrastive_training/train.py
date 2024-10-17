@@ -29,7 +29,7 @@ def contrastive_train(params, name, device='cuda', datasets=["panoptic"], models
     )
 
     for dataset in datasets:
-        file = models_dir+"/"+name+"/"+dataset+"_selected_images.txt"
+        file = f"{models_dir}/{name}/{dataset}_selected_images_{params['n_clusters']}C_{params["percentage"]}%.txt"
         get_selected_images(net, model, params['base_model'], dataset, datasets_dir, file, params['n_clusters'], params['percentage'], device)
     
     print(f"{model} training done")

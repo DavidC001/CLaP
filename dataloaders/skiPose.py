@@ -264,6 +264,7 @@ class PoseSkiDataset(Dataset):
         self.transform = transform
 
         paths = []
+        self.idxs = []
 
         #train or test
         if mode == 'train':
@@ -285,10 +286,17 @@ class PoseSkiDataset(Dataset):
             seq   = int(h5_label_file['seq'][index])
             cam   = int(h5_label_file['cam'][index])
             frame = int(h5_label_file['frame'][index])
+
             image_path = data_path+dir+'/seq_{:03d}/cam_{:02d}/image_{:06d}.png'.format(seq,cam,frame)
             # breakpoint()
-            if len(included_images) == 0 or image_path in included_images:
+            if len(included_images) == 0:
+                self.idxs.append(index)
                 paths.append(image_path.replace('\\','/'))
+            elif image_path in included_images:
+                # repeat for the number of times the image is repeated in included_images
+                for i in range(included_images.count(image_path)):
+                    paths.append(image_path.replace('\\','/'))
+                    self.idxs.append(index)
 
         if use_cluster.startswith("RANDOM"):
             percent = int(use_cluster.split("_")[-1])
@@ -301,8 +309,7 @@ class PoseSkiDataset(Dataset):
         return len(self.data['paths'])
 
     def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
+
 
         sample = dict()
 
@@ -316,14 +323,14 @@ class PoseSkiDataset(Dataset):
         #load the joints position
         path_file = self.data['paths'][idx].split('/seq')[0]+'/labels.h5'
         h5_label_file = h5py.File(path_file, 'r')
-        poses_3d = (h5_label_file['3D'][idx])
+        poses_3d = (h5_label_file['3D'][self.idxs[idx]]).reshape([-1,3])
 
         sample['poses_3d'] =  poses_3d
 
         #camera param
-        intrinsic = h5_label_file['cam_intrinsic'][idx].reshape([-1,3])
-        traslation = h5_label_file['cam_position'][idx]
-        rotation = h5_label_file ['R_cam_2_world'][idx].reshape([3,3])
+        intrinsic = h5_label_file['cam_intrinsic'][self.idxs[idx]].reshape([-1,3])
+        traslation = h5_label_file['cam_position'][self.idxs[idx]]
+        rotation = h5_label_file ['R_cam_2_world'][self.idxs[idx]].reshape([3,3])
         cam = {'K':intrinsic, 'R':rotation, 't':traslation}
 
         sample['cam'] = cam

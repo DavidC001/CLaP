@@ -160,8 +160,12 @@ class PoseKinectDataset(Dataset):
                 # print(id)
                 id = id.decode('utf-8')
                 image_path = dataset_dir+"/ITOP/"+view+"_"+mode+"_images/"+str(id)+".jpg"
-                if os.path.exists(image_path) and (len(included_images)==0 or id in included_images):
-                    paths[view].append(image_path)
+                if os.path.exists(image_path):
+                    if (len(included_images)==0):
+                        paths[view].append(image_path)
+                    elif id in included_images:
+                        for i in range(included_images.count(id)):
+                            paths[view].append(image_path)
                 else:
                     print("Image not found or excluded: ", image_path)
 

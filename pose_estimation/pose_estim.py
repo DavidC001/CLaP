@@ -31,7 +31,8 @@ def parseArgs(args):
         'epochs': 20,
         'save_every': 10,
         'LN': False,
-        'activation': 'gelu'
+        'activation': 'gelu',
+        'use_cluster': 'NONE'
     }
 
     args = {**default_args, **args}

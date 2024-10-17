@@ -3,7 +3,7 @@
     "models_dir": "trained_models",
     "datasets_dir": "datasets",
     "contrastive":{
-        "skip": false,
+        "skip": true,
         "datasets": ["skiPose"],
         "use_complete_pairs": true,
         "drop_pairs": [0],
@@ -42,19 +42,6 @@
         "dataset": "skiPose",
         "batch_size": 64,
         "experiments":{
-            "simclr50Ski_estim_ski_10%":{
-                "base_model":"resnet50",
-                "model":"simclr",
-                "pretrained_name": "simclr_50_ski",
-                "architecture": [128],
-                "learning_rate": 1e-3,
-                "weight_decay": 1e-2,
-                "epochs": 100,
-                "save_every": 10,
-                "LN": true,
-                "activation": "gelu",
-                "use_cluster": "FILE"
-            },
             "simsiam50Ski_estim_ski_10%":{
                 "base_model":"resnet50",
                 "model":"simsiam",
@@ -66,7 +53,46 @@
                 "save_every": 10,
                 "LN": true,
                 "activation": "gelu",
-                "use_cluster": "FILE"
+                "use_cluster": "./trained_models/simsiam_50_ski/skiPose_selected_images_20C_10%.txt"
+            },
+            "simclr50Ski_estim_ski_10%":{
+                "base_model":"resnet50",
+                "model":"simclr",
+                "pretrained_name": "simclr_50_ski",
+                "architecture": [128],
+                "learning_rate": 1e-3,
+                "weight_decay": 1e-2,
+                "epochs": 100,
+                "save_every": 10,
+                "LN": true,
+                "activation": "gelu",
+                "use_cluster": "./trained_models/simclr_50_ski/skiPose_selected_images_20C_10%.txt"
+            },
+            "simsiam50Ski_estim_ski_random10%":{
+                "base_model":"resnet50",
+                "model":"simsiam",
+                "pretrained_name": "simsiam_50_ski",
+                "architecture": [128],
+                "learning_rate": 1e-3,
+                "weight_decay": 1e-2,
+                "epochs": 100,
+                "save_every": 10,
+                "LN": true,
+                "activation": "gelu",
+                "use_cluster": "RANDOM_10"
+            },
+            "simclr50Ski_estim_ski_random10%":{
+                "base_model":"resnet50",
+                "model":"simclr",
+                "pretrained_name": "simclr_50_ski",
+                "architecture": [128],
+                "learning_rate": 1e-3,
+                "weight_decay": 1e-2,
+                "epochs": 100,
+                "save_every": 10,
+                "LN": true,
+                "activation": "gelu",
+                "use_cluster": "RANDOM_10"
             },
             "resnet50_estim_ski_10%":{
                 "base_model":"resnet50",
@@ -75,11 +101,37 @@
                 "architecture": [128],
                 "learning_rate": 1e-3,
                 "weight_decay": 1e-2,
-                "epochs": 0,
+                "epochs": 100,
                 "save_every": 10,
                 "LN": true,
                 "activation": "gelu",
                 "use_cluster": "RANDOM_10"
+            },
+            "resnet50_estim_ski_siam10%":{ 
+                "base_model":"resnet50",
+                "model":"resnet",
+                "pretrained_name": "resnet",
+                "architecture": [128],
+                "learning_rate": 1e-3,
+                "weight_decay": 1e-2,
+                "epochs": 100,
+                "save_every": 10,
+                "LN": true,
+                "activation": "gelu",
+                "use_cluster": "./trained_models/simsiam_50_ski/skiPose_selected_images_20c_10%.txt"
+            },
+            "resnet50_estim_ski_full":{
+                "base_model":"resnet50",
+                "model":"resnet",
+                "pretrained_name": "resnet",
+                "architecture": [128],
+                "learning_rate": 1e-3,
+                "weight_decay": 1e-2,
+                "epochs": 100,
+                "save_every": 10,
+                "LN": true,
+                "activation": "gelu",
+                "use_cluster": "NONE"
             }
         }
     }

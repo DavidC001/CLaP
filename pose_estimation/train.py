@@ -115,7 +115,7 @@ def test_step(net, data_loader, cost_function, device='cuda'):
     return cumulative_loss / samples
 
 
-def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, epochs, save_every=10, device='cuda', model_dir="trained_models", name="model", patience = 5):
+def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, epochs, save_every=10, device='cuda', model_dir="trained_models", name="model", patience = 3):
     """
     Train the pose estimation model.
 
