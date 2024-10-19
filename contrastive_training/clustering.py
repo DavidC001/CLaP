@@ -7,16 +7,12 @@ from torchvision.models.resnet import  ResNet18_Weights, ResNet50_Weights
 from tqdm import tqdm
 from torchvision.models.resnet import resnet50
 import math
+from copy import deepcopy
 
 #wrap function to get selected images from clusters
-def get_selected_images(model, model_type, base_model, dataset, dataset_dir, name_file, n_clusters, percentage, device = 'cuda'):
-    if model_type == "simclr" or model_type == "lascon":
-        model.module.fc = torch.nn.Identity()
-    elif model_type == "simsiam" or model_type == "MoCo":
-        model.module = model.module.base
-        model.module.fc = torch.nn.Identity()
-    else:
-        raise ValueError("Invalid model type")
+def get_selected_images(trained_model, base_model, dataset, dataset_dir, name_file, n_clusters, percentage, device = 'cuda'):
+    model = deepcopy(trained_model)
+    model.module.fc = torch.nn.Identity()
 
     cluster_data = get_dataSet(dataset, dataset_dir, base_model)
     representations = extract_representations(model, cluster_data, device)

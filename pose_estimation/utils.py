@@ -69,11 +69,9 @@ def getDatasetLoader(dataset, batch_size, datasets_dir="datasets", base_model="r
     transforms = T.Compose([T.ToPILImage(), transforms])
 
     train, val, test = pose_datasets[dataset](transforms, datasets_dir, use_cluster)
-    
-    available_workers = math.ceil(os.cpu_count() / 2)
 
-    train_loader = torch.utils.data.DataLoader(train, batch_size, shuffle=True, num_workers=available_workers)
-    val_loader = torch.utils.data.DataLoader(val, batch_size, shuffle=False, num_workers=available_workers)
-    test_loader = torch.utils.data.DataLoader(test, batch_size, shuffle=False, num_workers=available_workers)
+    train_loader = torch.utils.data.DataLoader(train, batch_size, shuffle=True)
+    val_loader = torch.utils.data.DataLoader(val, batch_size, shuffle=False)
+    test_loader = torch.utils.data.DataLoader(test, batch_size, shuffle=False)
 
     return train_loader, val_loader, test_loader

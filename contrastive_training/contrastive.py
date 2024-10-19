@@ -21,9 +21,7 @@ def check_arguments_contrastive(args):
         "momentum": 0.9,
         "temperature": 0.5,
         "epochs": 5,
-        "save_every": 10,
-        "n_clusters": 10,
-        "percentage": 20,
+        "save_every": 10
     }
 
     args = {**default_args, **args}

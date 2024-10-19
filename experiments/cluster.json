@@ -18,9 +18,7 @@
                 "momentum": 0.9,
                 "temperature": 0.5,
                 "epochs": 5,
-                "save_every": 1,
-                "n_clusters": 20,
-                "percentage": 10
+                "save_every": 1
             },
             "simsiam_50_ski":{
                 "model": "simsiam",
@@ -31,9 +29,7 @@
                 "weight_decay": 1e-4,
                 "momentum": 0.9,
                 "epochs": 5,
-                "save_every": 1,
-                "n_clusters": 20,
-                "percentage": 10
+                "save_every": 1
             }
         }
     },
@@ -94,7 +90,20 @@
                 "activation": "gelu",
                 "use_cluster": "RANDOM_10"
             },
-            "resnet50_estim_ski_10%":{
+            "resnet50_estim_ski_10%":{ 
+                "base_model":"resnet50",
+                "model":"resnet",
+                "pretrained_name": "resnet",
+                "architecture": [128],
+                "learning_rate": 1e-3,
+                "weight_decay": 1e-2,
+                "epochs": 100,
+                "save_every": 10,
+                "LN": true,
+                "activation": "gelu",
+                "use_cluster": "./trained_models/resnet50/skiPose_selected_images_20C_10%.txt"
+            },
+            "resnet50_estim_ski_random10%":{
                 "base_model":"resnet50",
                 "model":"resnet",
                 "pretrained_name": "resnet",
@@ -118,7 +127,7 @@
                 "save_every": 10,
                 "LN": true,
                 "activation": "gelu",
-                "use_cluster": "./trained_models/simsiam_50_ski/skiPose_selected_images_20c_10%.txt"
+                "use_cluster": "./trained_models/simsiam_50_ski/skiPose_selected_images_20C_10%.txt"
             },
             "resnet50_estim_ski_full":{
                 "base_model":"resnet50",

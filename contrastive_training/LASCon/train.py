@@ -201,7 +201,5 @@ def train_LASCon(model_dir= "trained_models",name = "LASCon", dataset_dir="datas
         torch.save(optimizer.state_dict(), model_dir+'/'+name+'/epoch_{:d}_optimizer.pt'.format(epochs))
         torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pt'.format(epochs))
 
-    return net
-
 if __name__ == "__main__":
     train_LASCon(name = "LASCon", datasets=["skiPose"],batch_size=650, epochs=100, learning_rate=0.3)

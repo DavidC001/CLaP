@@ -9,6 +9,8 @@ from dataloaders.datasets import out_joints
 from pose_estimation.train import train
 from pose_estimation.utils import getLatestModel, getDatasetLoader
 
+from contrastive_training.clustering import get_selected_images
+
 def parseArgs(args):
     """
     Parse the arguments for the pose estimation model.
@@ -69,16 +71,6 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
         print(f"Training {exp_name}")
 
         try:
-            use_cluster = params["use_cluster"]
-            if use_cluster == "FILE": use_cluster = f"{models_dir}/{params['pretrained_name']}/{dataset}_selected_images.txt"
-            train_loader, val_loader, test_loader = getDatasetLoader(
-                dataset=dataset, 
-                batch_size=args["batch_size"], 
-                datasets_dir=datasets_dir, 
-                base_model=params["base_model"],
-                use_cluster=use_cluster
-                )
-            
             #save parameters to file
             with open(f"{models_dir}/{exp_name}_params.json", 'w') as f:
                 json.dump(params, f)
@@ -94,7 +86,21 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
                     base_model=params['base_model']
                 )
             # print(pretrained)
-                        
+
+            use_cluster = params["use_cluster"]
+            if not os.path.exists(use_cluster):
+                n_clusters = int(use_cluster.split("_")[-2][:-1])
+                percentage = int(use_cluster.split("_")[-1][:-5])
+                get_selected_images(pretrained, params['base_model'], dataset, datasets_dir, use_cluster, n_clusters, percentage, device)
+
+            train_loader, val_loader, test_loader = getDatasetLoader(
+                dataset=dataset, 
+                batch_size=args["batch_size"], 
+                datasets_dir=datasets_dir, 
+                base_model=params["base_model"],
+                use_cluster=use_cluster
+                )
+             
             optim, scheduler = get_optimizer(
                     net=pretrained,
                     learning_rate=params["learning_rate"],
