@@ -88,7 +88,7 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
             # print(pretrained)
 
             use_cluster = params["use_cluster"]
-            if not os.path.exists(use_cluster):
+            if use_cluster!="NONE" and not use_cluster.startswith("RANDOM") and not os.path.exists(use_cluster):
                 n_clusters = int(use_cluster.split("_")[-2][:-1])
                 percentage = int(use_cluster.split("_")[-1][:-5])
                 get_selected_images(pretrained, params['base_model'], dataset, datasets_dir, use_cluster, n_clusters, percentage, device)
