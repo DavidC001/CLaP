@@ -28,7 +28,3 @@ def contrastive_train(params, name, device='cuda', datasets=["panoptic"], models
     )
     
     print(f"{model} training done")
-
-
-if __name__ == "__main__":
-    contrastive_train()

@@ -15,7 +15,6 @@ import h5py
 
 generator = torch.Generator().manual_seed(42)
 
-
 class ContrastiveSkiDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets", mode="train"):
 
@@ -200,14 +199,15 @@ def getContrastiveDatasetSki(transform, dataset_dir="datasets", use_complete=Tru
 
     return train, val, test
 
-
 class ClusterSkiDataset(Dataset):
-    def __init__(self, transform, dataset_dir="datasets", set="train"):
+    def __init__(self, transform, dataset_dir="datasets", set="train", use_cluster="NONE"):
 
         # change this to the path where the dataset is stored
         self.data_path = dataset_dir+"/Ski-PosePTZ-CameraDataset-png"
 
         paths = []
+
+        
 
         motion_seq = os.listdir(self.data_path)
         if set == 'train':
@@ -255,7 +255,7 @@ class ClusterSkiDataset(Dataset):
 
 class PoseSkiDataset(Dataset):
 
-    def __init__(self, transform, dataset_dir="datasets", mode = "train"):
+    def __init__(self, transform, dataset_dir="datasets", mode = "train", use_cluster="NONE"):
 
         # change this to the path where the dataset is stored
         data_path = dataset_dir+"/Ski-PosePTZ-CameraDataset-png"
@@ -264,6 +264,7 @@ class PoseSkiDataset(Dataset):
         self.transform = transform
 
         paths = []
+        self.idxs = []
 
         #train or test
         if mode == 'train':
@@ -273,14 +274,34 @@ class PoseSkiDataset(Dataset):
 
         path_file = data_path+dir+'/labels.h5'
         h5_label_file = h5py.File(path_file, 'r')
-
+        included_images = []
+        
+        if not use_cluster.startswith("RANDOM") and use_cluster != "NONE":
+            with open(use_cluster, 'r') as f:
+                for line in f:
+                    included_images.append(line.strip())
+        
         #load image's path in order
         for index in range(0,len(h5_label_file['cam'])):
             seq   = int(h5_label_file['seq'][index])
             cam   = int(h5_label_file['cam'][index])
             frame = int(h5_label_file['frame'][index])
+
             image_path = data_path+dir+'/seq_{:03d}/cam_{:02d}/image_{:06d}.png'.format(seq,cam,frame)
-            paths.append(image_path.replace('\\','/'))
+            # breakpoint()
+            if len(included_images) == 0:
+                self.idxs.append(index)
+                paths.append(image_path.replace('\\','/'))
+            elif image_path in included_images:
+                # repeat for the number of times the image is repeated in included_images
+                for i in range(included_images.count(image_path)):
+                    paths.append(image_path.replace('\\','/'))
+                    self.idxs.append(index)
+
+        if use_cluster.startswith("RANDOM"):
+            percent = int(use_cluster.split("_")[-1])
+            num_samples = len(paths)
+            paths = random.sample(paths, math.ceil(num_samples * percent / 100))
 
         self.data = {'paths': paths}
 
@@ -288,8 +309,7 @@ class PoseSkiDataset(Dataset):
         return len(self.data['paths'])
 
     def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
+
 
         sample = dict()
 
@@ -303,32 +323,33 @@ class PoseSkiDataset(Dataset):
         #load the joints position
         path_file = self.data['paths'][idx].split('/seq')[0]+'/labels.h5'
         h5_label_file = h5py.File(path_file, 'r')
-        poses_3d = (h5_label_file['3D'][idx])
+        poses_3d = (h5_label_file['3D'][self.idxs[idx]]).reshape([-1,3])
 
         sample['poses_3d'] =  poses_3d
 
         #camera param
-        intrinsic = h5_label_file['cam_intrinsic'][idx].reshape([-1,3])
-        traslation = h5_label_file['cam_position'][idx]
-        rotation = h5_label_file ['R_cam_2_world'][idx].reshape([3,3])
+        intrinsic = h5_label_file['cam_intrinsic'][self.idxs[idx]].reshape([-1,3])
+        traslation = h5_label_file['cam_position'][self.idxs[idx]]
+        rotation = h5_label_file ['R_cam_2_world'][self.idxs[idx]].reshape([3,3])
         cam = {'K':intrinsic, 'R':rotation, 't':traslation}
 
         sample['cam'] = cam
 
         return sample
 
-def getPoseDatasetSki(transform, dataset_dir="datasets"):
+def getPoseDatasetSki(transform, dataset_dir="datasets", use_cluster="NONE"):
     """
     Returns a tuple of train and test datasets for pose estimation using Ski data.
 
     Args:
         transform (torchvision.transforms.Transform): The data transformation to be applied to the dataset.
         dataset_dir (str, optional): The directory where the datasets are stored. Defaults to "datasets".
+        use_cluster (str, optional): The file containing the list of images to use. Defaults to "NONE" (use all images). RANDOM_percent will use a random percent of the images
 
     Returns:
         tuple: A tuple containing the train and test datasets.
     """
-    train = PoseSkiDataset(transform, dataset_dir, mode="train")
+    train = PoseSkiDataset(transform, dataset_dir, mode="train", use_cluster=use_cluster)
     
     num_samples = len(train)
 
@@ -342,3 +363,19 @@ def getPoseDatasetSki(transform, dataset_dir="datasets"):
     test = PoseSkiDataset(transform, dataset_dir, mode="test")
     
     return train, val, test
+
+if __name__ == '__main__':
+
+    transform = T.Compose([
+        T.ToPILImage(),
+        T.Resize((224,224)),
+        T.ToTensor()
+    ])
+    train = PoseSkiDataset(transform, dataset_dir="datasets", mode="train", use_cluster = "selected_images.txt")
+    print(len(train))
+    print(train[0])
+
+    with open("selected_images.txt", 'r') as f:
+        selected_images = f.readlines()
+    print(len(selected_images))
+    print(selected_images[0])

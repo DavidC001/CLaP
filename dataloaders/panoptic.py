@@ -310,7 +310,7 @@ class ClusterPanopticDataset(Dataset):
         return sample
 
 class PosePanopticDataset(Dataset):
-    def __init__(self, transform, dataset_dir="datasets"):
+    def __init__(self, transform, dataset_dir="datasets", use_cluster="NONE"):
 
         # change this to the path where the dataset is stored
         self.data_path = dataset_dir+"/ProcessedPanopticDataset"
@@ -319,7 +319,14 @@ class PosePanopticDataset(Dataset):
         self.transform = transform
 
         paths = []
-        
+
+        included_images = []
+
+        if not use_cluster.startswith("RANDOM") and use_cluster != "NONE":
+            with open(use_cluster, 'r') as f:
+                for line in f:
+                    included_images.append(line.strip())
+                
         #open green_images.txt
         no_files = []
         with open(dataset_dir+"/green_images.txt") as f:
@@ -332,26 +339,24 @@ class PosePanopticDataset(Dataset):
 
         for dir in motion_seq:
             if dir not in no_dir:
-                if 'haggling' in dir:
-                    continue
-                elif dir == '171204_pose2' or dir =='171204_pose5' or dir =='171026_cello3':
-                    joint_path = os.path.join(self.data_path,dir,'hdJoints').replace('\\', '/')
-                    if os.path.exists(joint_path):
-                        for lists in (os.listdir(joint_path)):
-                            if lists.replace('json','jpg') in no_files:
-                                continue
-                            paths.append(os.path.join(joint_path,lists.split('.json')[0]).replace('\\', '/'))
-                elif 'ian' in dir:
+                if 'haggling' in dir or 'ian' in dir:
                     continue
                 else:
                     joint_path = os.path.join(self.data_path,dir,'hdJoints').replace('\\', '/')
                     if os.path.exists(joint_path):
                         for lists in (os.listdir(joint_path)):
-                            if lists.replace('json','jpg') in no_files:
-                                continue
-                            paths.append(os.path.join(joint_path,lists.split('.json')[0]).replace('\\', '/'))
+                            if not lists.replace('json','jpg') in no_files:
+                                if len(included_images) == 0:
+                                    paths.append(os.path.join(joint_path,lists.split('.json')[0]).replace('\\', '/'))
+                                elif lists in included_images:
+                                    for i in range(included_images.count(lists)):
+                                        paths.append(os.path.join(joint_path,lists.split('.json')[0]).replace('\\', '/'))
 
         self.data = {'paths': paths}
+
+        if use_cluster.startswith("RANDOM"):
+            percent = int(use_cluster.split("_")[-1])
+            self.data['paths'] = random.sample(self.data['paths'], math.ceil(len(self.data['paths']) * percent / 100))
 
     def __len__(self):
         return len(self.data['paths'])
@@ -400,24 +405,25 @@ class PosePanopticDataset(Dataset):
 
         return sample
     
-def getPoseDatasetPanoptic(transform, dataset_dir="datasets"):
+def getPoseDatasetPanoptic(transform, dataset_dir="datasets", use_cluster="NONE"):
     """
     Returns training and validation datasets for pose estimation in the Panoptic dataset.
 
     Args:
         transform (callable): A function/transform that takes in an image and its annotations and returns a transformed version.
         dataset_dir (str, optional): The directory where the dataset is located. Defaults to "datasets".
+        use_cluster (str, optional): The file containing the list of images to use. Defaults to "NONE" (use all images). RANDOM_percent will use a random percent of the images.
 
     Returns:
         training_data (torch.utils.data.Dataset): The training dataset.
         val_data (torch.utils.data.Dataset): The validation dataset.
     """
-    dataset = PosePanopticDataset(transform, dataset_dir)
+    dataset = PosePanopticDataset(transform, dataset_dir, use_cluster)
 
     num_samples = len(dataset)
 
-    training_samples = int(num_samples * 0.6 + 1)
-    val_samples = int(num_samples * 0.2 + 1)
+    training_samples = int(num_samples * 0.7 + 1)
+    val_samples = int(num_samples * 0.15 + 1)
     test_samples = num_samples - training_samples - val_samples
 
     training_data, val_data, test_data = torch.utils.data.random_split(
@@ -425,3 +431,4 @@ def getPoseDatasetPanoptic(transform, dataset_dir="datasets"):
     )
 
     return training_data, val_data, test_data
+
