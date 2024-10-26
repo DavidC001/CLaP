@@ -43,14 +43,14 @@ def parseArgs(args):
 
 def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_dir="datasets"):
     """
-    Train the pose estimation model.
+    Train the pose estimation models.
 
     Parameters:
-    - args: dict, arguments for the pose estimation model
-    - device: str, device, default is 'cpu'
-    - models_dir: str, directory to save the trained models, default is 'trained_models'
-    - datasets_dir: str, directory to save the datasets, default is 'datasets'
-    - base_model: str, base model, default is 'resnet18'
+        args: dict, arguments for the pose estimation models
+        device: str, device, default is 'cpu'
+        models_dir: str, directory to save the trained models, default is 'trained_models'
+        datasets_dir: str, directory to save the datasets, default is 'datasets'
+        base_model: str, base model, default is 'resnet18'
 
     """
     #skip if specified

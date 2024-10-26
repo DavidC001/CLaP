@@ -98,6 +98,22 @@ def train_simsiam(model_dir="trained_models", name = "simsiam",
                   weight_decay=0.000001, momentum=0.9, epochs=100, 
                   save_every=10, base_model='resnet18', 
                   **others):
+    """
+    Train SimSiam model
+    
+    Parameters:
+        model_dir (str): Directory to save the model
+        name (str): Name of the model
+        batch_size (int): Batch size
+        device (str): Device to run the model on
+        learning_rate_encoder (float): Learning rate for the encoder
+        learning_rate_head (float): Learning rate for the head
+        weight_decay (float): Weight decay
+        momentum (float): Momentum
+        epochs (int): Number of epochs
+        save_every (int): Save model every n epochs
+        base_model (str): Base model to use for the SimSiam model
+    """
     
     train_loader, val_loader, test_loader = get_dataLoaders(batch_size)
 

@@ -9,6 +9,12 @@ from contrastive_training.utils import load_datasets
 models = ["simsiam", "simclr", "moco", "lascon"]
 
 def check_arguments_contrastive(args):
+    """
+    Check if the arguments for contrastive training are valid and add default values if not present
+
+    Parameters:
+        args (dict): Arguments for contrastive training
+    """
     #name is required
     assert 'model' in args, 'model not found in args (simsiam, simclr, moco, lascon)'
 
@@ -29,6 +35,15 @@ def check_arguments_contrastive(args):
     return args
 
 def contrastive_pretraining(args, device='cuda', models_dir="trained_models", datasets_dir="datasets"):
+    """
+    finetune the models on the given datasets using contrastive training
+
+    Parameters:
+        args (dict): Arguments for contrastive training
+        device (str): Device to train on
+        models_dir (str): Directory to save the model
+        datasets_dir (str): Directory where the datasets are stored
+    """
     assert "datasets" in args, 'datasets argument is required'
     if 'drop_pairs' in args:
         assert len(args['datasets']) == len(args['drop_pairs']), "Number of datasets and drop pairs should be the same"

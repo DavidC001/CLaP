@@ -64,6 +64,7 @@ def get_loss(geom_encoddings, app_encoddings, t):
 
 
 def train_step(net, data_loader, optimizer, cost_function, t, device='cuda'):
+
     samples = 0.
     cumulative_loss = 0.
     net.train()
@@ -114,6 +115,23 @@ def train_simclr(model_dir= "trained_models",name = "simclr",
                   weight_decay=0.000001, momentum=0.9, temperature=0.6, 
                   epochs=100, save_every=10, base_model='resnet18', 
                   **others):
+    """
+    Train a SimCLR model
+
+    Parameters
+        model_dir (str): directory to save the model
+        name (str): name of the model
+        batch_size (int): batch size
+        device (str): device to run the model on
+        learning_rate_encoder (float): learning rate for the resnet encoder
+        learning_rate_head (float): learning rate for the head
+        weight_decay (float): weight decay
+        momentum (float): momentum
+        temperature (float): temperature for the contrastive loss
+        epochs (int): number of epochs
+        save_every (int): save model every n epochs
+        base_model (str): base model to use for the encoder (resnet18 or resnet50)
+    """
     
     train_loader, val_loader, test_loader = get_dataLoaders(batch_size)
 
