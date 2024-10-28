@@ -90,21 +90,14 @@ def get_loss(output, pose, weights=None, norm_factor=0.2, device='cuda'):
 
     output = torch.bmm(output, batch_rotation_matrix)
     
-    #find scaling factor for each batch
-
-    # with torch.no_grad():
-    #     for i in range(batch_size):
-    #         scaling_factor[i] = find_scaling(pose[i], output[i])
-        
-    # for i in range(batch_size):
-    #     output[i] = output[i] * scaling_factor[i].item()
+    # rescale to -600, 600
+    output = output * 1200
+    pose = pose * 1200
     
-    #print ("output\n", output)
-    #print ("pose\n", pose)
-    # mean joint error
-    # breakpoint()
     output = output.view(-1, 1, 3)
     pose = pose.view(-1, 1, 3)
+    
+    # mean joint error
     loss = torch.mean(torch.cdist(output, pose, p=2))
     # breakpoint()
 

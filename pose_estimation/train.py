@@ -48,7 +48,7 @@ def training_step(net, data_loader, optimizer, cost_function, device='cuda'):
 
         optimizer.zero_grad()
 
-        samples += images.shape[0]
+        samples += 1
 
         
 
@@ -86,7 +86,7 @@ def test_step(net, data_loader, cost_function, device='cuda'):
             loss = cost_function(output, poses, device=device)
             cumulative_loss += loss.item()
 
-            samples += images.shape[0]
+            samples += 1
 
     return cumulative_loss / samples
 
