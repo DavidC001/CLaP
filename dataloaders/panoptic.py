@@ -432,3 +432,127 @@ def getPoseDatasetPanoptic(transform, dataset_dir="datasets", use_cluster="NONE"
 
     return training_data, val_data, test_data
 
+class ContrastivePanopticDatasetMoco(Dataset):
+    def __init__(self, transform, dataset_dir="datasets"):
+
+        open green_images.txt
+        self.no_files = []
+        with open(dataset_dir+"/green_images.txt") as f:
+            for line in f:
+                self.no_files.append(line.strip())
+
+        # change this to the path where the dataset is stored
+        self.data_path = dataset_dir+"/ProcessedPanopticDataset/"
+        self.training_dir = []
+
+        self.transform = transform
+
+        paths = []
+
+        motion_seq = os.listdir(self.data_path)
+        no_dir = ['scripts','python','matlab','.git','glViewer.py','README.md','matlab',
+                'README_kinoptic.md', '171204_pose3']
+
+        for dir in motion_seq:
+            if dir not in no_dir:
+                if 'haggling' in dir:
+                    continue
+                elif dir == '171204_pose2' or dir =='171204_pose5' or dir =='171026_cello3':
+                    if os.path.exists(os.path.join(self.data_path,dir, 'hdJoints')):
+                        data_path = os.path.join(self.data_path,dir, 'hdJoints')
+                        for lists in (os.listdir(data_path)):
+                            if lists.replace('json','jpg') in self.no_files:
+                                print("removing: ", lists.replace('json','jpg'))
+                                continue
+                            paths.append(os.path.join(data_path,lists.split('.json')[0]).replace('\\', '/'))
+                elif 'ian' in dir:
+                    continue
+                else:
+                    if os.path.exists(os.path.join(self.data_path,dir,'hdJoints')):
+                        data_path = os.path.join(self.data_path,dir,'hdJoints')
+                        for lists in (os.listdir(data_path)):
+                            if lists.replace('json','jpg') in self.no_files:
+                                print("removing: ", lists.replace('json','jpg'))
+                                continue
+                            paths.append(os.path.join(data_path,lists.split('.json')[0]).replace('\\', '/'))
+
+        self.data = {'paths': paths}
+
+    def __len__(self):
+        return len(self.data['paths'])
+
+    def get_all_view(self, image_path):
+        """Gets every camera view of the image"""
+        split = image_path.split(';')
+        camera = split[1].split('_')
+        view = int(camera[-1]) # id of the first view
+
+        paths = []
+
+        for i in range(0, 30):
+          if view != i:
+            camera[2] = str(i) if i > 9 else '0' + str(i)
+            path = '_'.join(camera)
+            split[1] = path
+            new_path = ';'.join(split)
+            image_name = image_path.split('/')[-1]
+            if image_name not in self.no_files:
+                paths.append(new_path)
+
+        return paths
+
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        sample = dict()
+        keys = []
+
+        path_split = self.data['paths'][idx].split('/hdJoints')
+        query_path = path_split[0] + '/hdImages' + path_split[-1] + '.jpg'
+        keys_path = self.get_all_view(query_path)
+
+        for i in range(0, len(keys_path)):
+            if os.path.isfile(keys_path[i]):
+                img = cv2.imread(keys_path[i])
+                img =cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                img = self.transform(img)
+                keys.append(img)
+
+
+        query = cv2.imread(query_path)
+        query =cv2.cvtColor(query, cv2.COLOR_BGR2RGB)
+        query = self.transform(query)
+
+        sample['query'] = query
+        sample['keys'] = keys
+
+        return sample
+
+def getContrastiveDatasetPanopticMoco(transform, dataset_dir="datasets"):
+    """
+    Returns training and validation datasets for clustering in the Panoptic dataset.
+
+    Args:
+        transform (callable): A function/transform that takes in an image and its annotations and returns a transformed version.
+        dataset_dir (str, optional): The directory where the dataset is located. Defaults to "datasets".
+
+    Returns:
+        training_data (torch.utils.data.Dataset): The training dataset.
+        val_data (torch.utils.data.Dataset): The validation dataset.
+    """
+    
+    dataset = ContrastivePanopticDatasetMoco(transform, dataset_dir)
+    
+    num_samples = len(dataset)
+
+    training_samples = int(num_samples * 0.6 + 1)
+    val_samples = int(num_samples * 0.2 + 1)
+    test_samples = num_samples - training_samples - val_samples
+
+    training_data, val_data, test_data = torch.utils.data.random_split(
+        dataset, [training_samples, val_samples, test_samples], generator=generator
+    )
+
+    return training_data, val_data, test_data
