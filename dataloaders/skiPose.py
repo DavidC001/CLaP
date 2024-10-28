@@ -379,3 +379,101 @@ if __name__ == '__main__':
         selected_images = f.readlines()
     print(len(selected_images))
     print(selected_images[0])
+
+class ContrastiveSkiDatasetMoco(Dataset):
+    def __init__(self, transform, dataset_dir="datasets", mode="train"):
+
+        # change this to the path where the dataset is stored
+        self.data_path = dataset_dir+"/Ski-PosePTZ-CameraDataset-png"
+        self.training_dir = []
+
+        self.transform = transform
+
+        paths = []
+
+        #train or test
+        if mode == 'train':
+          dir = 'train'
+        else:
+          dir = 'test'
+
+        for seq in (os.listdir(os.path.join(self.data_path, dir).replace('\\', '/'))):
+          if os.path.exists(os.path.join(self.data_path, dir, seq, 'cam_00').replace('\\', '/')):
+            image_path = os.path.join(self.data_path, dir, seq, 'cam_00').replace('\\', '/')
+            for lists in (os.listdir(image_path)):
+                paths.append(os.path.join(image_path, lists).replace('\\', '/'))
+
+        self.data = {'paths': paths}
+
+    def __len__(self):
+        return len(self.data['paths'])
+
+    def get_all_view(self, image_path):
+        """Gets every camera view of the image"""
+        split = image_path.split('/cam_0')
+        camera = split[1].split('/')
+        view = int(camera[0]) #id of the query
+
+        paths = []
+
+        for i in range(0, 6):
+          if view != i:
+            path = split[0] + '/cam_0' + str(i) + split[1][1:]
+            paths.append(path)
+
+        return paths
+
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        sample = dict()
+        keys = []
+
+        query_path = self.data['paths'][idx]
+        keys_path = self.get_all_view(query_path)
+
+        for i in range(0, len(keys_path)):
+          if os.path.isfile(keys_path[i]):
+            img = cv2.imread(keys_path[i])
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            img = self.transform(img)
+            keys.append(img)
+
+        query = cv2.imread(query_path)
+        query = cv2.cvtColor(query, cv2.COLOR_BGR2RGB)
+        query = self.transform(query)
+
+        sample['query'] = query
+        sample['keys'] = keys
+
+        return sample
+
+def getContrastiveDatasetSkiMoco(transform, dataset_dir="datasets"):
+    """
+    Returns a tuple of train and test datasets for contrastive learning using Ski data.
+
+    Args:
+        transform (torchvision.transforms.Transform): The data transformation to be applied to the dataset.
+        dataset_dir (str, optional): The directory where the datasets are stored. Defaults to "datasets".
+        use_complete (bool, optional): Whether to use complete pairs. Defaults to True.
+        drop (float, optional): The percentage of pairs to drop. Defaults to 0.5.
+
+    Returns:
+        tuple: A tuple containing the train and test datasets.
+    """
+
+    dataset = ContrastiveSkiDatasetMoco(transform, dataset_dir, mode="train")
+    test = ContrastiveSkiDatasetMoco(transform, dataset_dir, mode="test")
+
+    num_samples = len(dataset)
+
+    training_samples = int(num_samples * 0.8 + 1)
+    val_samples = num_samples - training_samples
+
+    train, val = torch.utils.data.random_split(
+        dataset, [training_samples, val_samples], generator=generator
+    )
+
+    return train, val, test
