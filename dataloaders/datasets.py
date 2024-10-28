@@ -26,6 +26,6 @@ class combineDataSets(torch.utils.data.Dataset):
 contrastive_datasets = {'ITOP': getContrastiveDatasetKinect, 'skiPose': getContrastiveDatasetSki, 'panoptic': getContrastiveDatasetPanoptic}
 cluster_datasets = {'ITOP': ClusterKinectDataset, 'skiPose': ClusterSkiDataset, 'panoptic': ClusterPanopticDataset}
 pose_datasets = {'ITOP': getPoseDatasetKinect, 'skiPose': getPoseDatasetSki, 'panoptic': getPoseDatasetPanoptic}
-moco_datasets = {'skiPose': getContrastiveDatasetSkiMoco, 'panoptic': getContrastiveDatasetPanopticMoco}
+moco_datasets = {'ITOP': lambda **args : NotImplementedError, 'skiPose': getContrastiveDatasetSkiMoco, 'panoptic': getContrastiveDatasetPanopticMoco}
 
 out_joints = {'ITOP': 15, 'skiPose': 17, 'panoptic': 19}
