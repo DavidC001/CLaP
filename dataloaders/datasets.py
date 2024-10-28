@@ -2,8 +2,8 @@ import sys
 sys.path.append(".")
 
 from dataloaders.ITOP import getContrastiveDatasetKinect, ClusterKinectDataset, getPoseDatasetKinect
-from dataloaders.skiPose import getContrastiveDatasetSki, ClusterSkiDataset, getPoseDatasetSki
-from dataloaders.panoptic import getContrastiveDatasetPanoptic, ClusterPanopticDataset, getPoseDatasetPanoptic
+from dataloaders.skiPose import getContrastiveDatasetSki, ClusterSkiDataset, getPoseDatasetSki, getContrastiveDatasetSkiMoco
+from dataloaders.panoptic import getContrastiveDatasetPanoptic, ClusterPanopticDataset, getPoseDatasetPanoptic, getContrastiveDatasetPanopticMoco
 
 import torch
 
@@ -26,5 +26,6 @@ class combineDataSets(torch.utils.data.Dataset):
 contrastive_datasets = {'ITOP': getContrastiveDatasetKinect, 'skiPose': getContrastiveDatasetSki, 'panoptic': getContrastiveDatasetPanoptic}
 cluster_datasets = {'ITOP': ClusterKinectDataset, 'skiPose': ClusterSkiDataset, 'panoptic': ClusterPanopticDataset}
 pose_datasets = {'ITOP': getPoseDatasetKinect, 'skiPose': getPoseDatasetSki, 'panoptic': getPoseDatasetPanoptic}
+moco_datasets = {'skiPose': getContrastiveDatasetSkiMoco, 'panoptic': getContrastiveDatasetPanopticMoco}
 
 out_joints = {'ITOP': 15, 'skiPose': 17, 'panoptic': 19}
