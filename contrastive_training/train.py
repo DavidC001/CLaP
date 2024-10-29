@@ -13,6 +13,17 @@ train_functions = {
 }
 
 def contrastive_train(params, name, device='cuda', datasets=["panoptic"], models_dir="trained_models", datasets_dir="datasets"):
+    """
+    Train a contrastive model with the given parameters
+
+    Parameters:
+        params (dict): Parameters for the model
+        name (str): Name of the model
+        device (str): Device to train on
+        datasets (list): List of datasets to use
+        models_dir (str): Directory to save the model
+        datasets_dir (str): Directory where the datasets are stored
+    """
     model = params["model"]
     assert model in train_functions, f"Model {model} not found in {train_functions.keys()}"
     

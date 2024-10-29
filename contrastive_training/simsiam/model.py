@@ -60,6 +60,15 @@ from torchvision.models import resnet50, ResNet50_Weights, resnet18, ResNet18_We
 
 
 def get_siam_net(base_model='resnet18'):
+    """
+    Get the SimSiam model with the specified base model
+
+    Parameters:
+        base_model (str): Base model to use for the SimSiam model
+
+    Returns:
+        nn.Module: SimSiam model
+    """
     if base_model == 'resnet50':
         weights = ResNet50_Weights.DEFAULT
         model = resnet50(weights=weights)

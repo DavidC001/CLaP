@@ -164,6 +164,7 @@ datasets/
 
 #trained_models
 trained_models/
+old_trained_models/
 
 #desktop.ini
 desktop.ini
