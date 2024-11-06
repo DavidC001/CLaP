@@ -24,6 +24,7 @@ def get_selected_images(trained_model, base_model, dataset, dataset_dir, name_fi
         percentage (float): Percentage of the dataset to select
         device (str): Device to run the model on
     """
+    np.random.seed(0)
     model = deepcopy(trained_model)
     model.module.fc = torch.nn.Identity()
 

@@ -12,12 +12,13 @@ train_functions = {
     "moco": lambda **args : NotImplementedError
 }
 
-def contrastive_train(params, name, device='cuda', datasets=["panoptic"], models_dir="trained_models", datasets_dir="datasets"):
+def contrastive_train(params, mode, name, device='cuda', datasets=["panoptic"], models_dir="trained_models", datasets_dir="datasets"):
     """
     Train a contrastive model with the given parameters
 
     Parameters:
         params (dict): Parameters for the model
+        mode (str): Mode of the dataset, can be 'simple'/'complete' or 'multi'
         name (str): Name of the model
         device (str): Device to train on
         datasets (list): List of datasets to use
@@ -31,6 +32,7 @@ def contrastive_train(params, name, device='cuda', datasets=["panoptic"], models
 
     train_functions[model](
             **params,
+            mode=mode,
             model_dir=models_dir,
             dataset_dir=datasets_dir,
             datasets=datasets,

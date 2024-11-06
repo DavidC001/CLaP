@@ -5,29 +5,29 @@
     "contrastive":{
         "skip": false,
         "datasets": ["skiPose"],
-        "use_complete_pairs": true,
+        "mode": "multi",
         "drop_pairs": [0],
         "experiments": {
+            "simsiam_18_ski":{
+                "model": "simsiam",
+                "base_model": "resnet18",
+                "batch_size": 128,
+                "learning_rate_encoder": 0.2,
+                "learning_rate_head": 0.5,
+                "weight_decay": 1e-4,
+                "momentum": 0.9,
+                "epochs": 5,
+                "save_every": 5
+            },
             "simclr_18_ski":{
                 "model": "simclr",
                 "base_model": "resnet18",
-                "batch_size": 64,
+                "batch_size": 128,
                 "learning_rate_encoder": 0.2,
                 "learning_rate_head": 0.5,
                 "weight_decay": 1e-4,
                 "momentum": 0.9,
                 "temperature": 0.5,
-                "epochs": 5,
-                "save_every": 5
-            },
-            "simsiam_18_ski":{
-                "model": "simsiam",
-                "base_model": "resnet18",
-                "batch_size": 64,
-                "learning_rate_encoder": 0.2,
-                "learning_rate_head": 0.5,
-                "weight_decay": 1e-4,
-                "momentum": 0.9,
                 "epochs": 5,
                 "save_every": 5
             }

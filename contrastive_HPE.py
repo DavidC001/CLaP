@@ -43,6 +43,7 @@ def main(args):
     if not os.path.exists(models_dir):
         os.makedirs(models_dir)
         os.makedirs(models_dir + "/resnet50")
+        os.makedirs(models_dir + "/resnet18")
     
     contrastive_pretraining(args=data["contrastive"], device=device, models_dir=models_dir, datasets_dir=datasets_dir)
     pose_estimation(args=data["pose_estimation"], device=device, models_dir=models_dir, datasets_dir=datasets_dir)

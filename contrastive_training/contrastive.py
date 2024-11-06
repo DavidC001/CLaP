@@ -50,7 +50,7 @@ def contrastive_pretraining(args, device='cuda', models_dir="trained_models", da
 
     default_args = {
         "skip": False,
-        "use_complete_pairs": True,
+        "mode": "simple",
         "drop_pairs": [0],
         "experiments": {}
     }
@@ -70,24 +70,21 @@ def contrastive_pretraining(args, device='cuda', models_dir="trained_models", da
     experiments = args["experiments"]
     print("---------------------------")
     for exp_name in experiments:
-        params = check_arguments_contrastive(experiments[exp_name])
-        print(f"training {exp_name}")
+            params = check_arguments_contrastive(experiments[exp_name])
+            print(f"training {exp_name}")
             
-        try:
             load_datasets(datasets, dataset_dir=datasets_dir, base_model=params["base_model"], 
-                            use_complete=args['use_complete_pairs'], drop=args['drop_pairs'])
+                            mode=args['mode'], drop=args['drop_pairs'])
             
             #save parameters to file
             with open(f"{models_dir}/{exp_name}_params.json", 'w') as f:
                 json.dump(params, f)
             
-            contrastive_train(params=params, 
+            contrastive_train(params=params, mode=args['mode'],
                               name=exp_name, datasets=datasets, 
                               models_dir=models_dir, datasets_dir=datasets_dir, 
                               device=device)
-        except Exception as e:
-            print(f"Error in training {exp_name}: {e}") 
         
-        print(f"Finished {exp_name}")
-        print("---------------------------")
+            print(f"Finished {exp_name}")
+            print("---------------------------")
             

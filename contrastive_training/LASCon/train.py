@@ -132,9 +132,10 @@ def val_step(net, data_loader, cost_function, t, device='cuda'):
 def train_LASCon(model_dir= "trained_models",name = "LASCon", dataset_dir="datasets", datasets=["panoptic"],
                   batch_size=1024, device='cuda', learning_rate_encoder=0.01, learning_rate_head=0.1,
                   weight_decay=0.000001, momentum=0.9, t=0.6, 
-                  epochs=100, save_every=10, base_model='resnet18', **others):
+                  epochs=100, save_every=10, base_model='resnet18', mode='simple',**others):
     
-    
+    if mode not in ['simple', 'complete']: 
+        raise ValueError("Invalid mode")
     train_loader, val_loader, test_loader = get_dataLoaders(batch_size=batch_size, datasets=datasets, dataset_dir=dataset_dir)
 
     net = get_simclr_net(base_model=base_model)
