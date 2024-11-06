@@ -12,24 +12,24 @@
                 "model": "simsiam",
                 "base_model": "resnet50",
                 "batch_size": 128,
-                "learning_rate_encoder": 0.2,
-                "learning_rate_head": 0.5,
+                "learning_rate_encoder": 0.5,
+                "learning_rate_head": 1,
                 "weight_decay": 1e-4,
                 "momentum": 0.9,
-                "epochs": 5,
-                "save_every": 1
+                "epochs": 50,
+                "save_every": 100
             },
             "simclr_50_ski":{
                 "model": "simclr",
                 "base_model": "resnet50",
                 "batch_size": 128,
-                "learning_rate_encoder": 0.2,
-                "learning_rate_head": 0.5,
+                "learning_rate_encoder": 0.5,
+                "learning_rate_head": 1,
                 "weight_decay": 1e-4,
                 "momentum": 0.9,
                 "temperature": 0.5,
-                "epochs": 5,
-                "save_every": 1
+                "epochs": 50,
+                "save_every": 100
             }
         }
     },
