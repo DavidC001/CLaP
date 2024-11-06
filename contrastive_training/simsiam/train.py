@@ -242,7 +242,7 @@ def train_simsiam(model_dir="trained_models", name = "simsiam",
             torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pt'.format(e+1))
 
     #calculate test loss
-    test_loss = val_step(net, test_loader, cost_function, device)
+    test_loss = val_step(net, test_loader, cost_function, mode, device)
     print('Test loss {:.5f}'.format(test_loss))
     writer.add_scalar("contrastive/simsiam/loss_test", test_loss, 0)
 

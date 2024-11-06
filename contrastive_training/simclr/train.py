@@ -265,7 +265,7 @@ def train_simclr(model_dir= "trained_models",name = "simclr",
             torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pt'.format(e+1))
 
     #calculate test loss
-    test_loss = val_step(net, test_loader, cost_function, temperature, device)
+    test_loss = val_step(net, test_loader, cost_function, temperature, mode, device)
     print('Test loss {:.5f}'.format(test_loss))
     writer.add_scalar("contrastive/simclr/loss_test", test_loss, 0)
     
