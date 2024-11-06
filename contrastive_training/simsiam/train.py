@@ -143,6 +143,18 @@ def val_step(net, data_loader, cost_function, mode, device='cuda'):
                 x2, z2, p2 = net(image2)
 
                 loss = cost_function(p1, z2, p2, z1)
+            else:
+                x, z, p = [], [], []
+                for images in batch['images']:
+                    images = images.to(device)
+                    x_, z_, p_ = net(images)
+                    x.append(x_)
+                    z.append(z_)
+                    p.append(p_)
+                x = torch.stack(x, dim=1)
+                z = torch.stack(z, dim=1)
+                p = torch.stack(p, dim=1)
+                loss = cost_function(p, z)
 
             cumulative_loss += loss.item()
 
