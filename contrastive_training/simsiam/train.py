@@ -128,7 +128,7 @@ def train_step(net, data_loader, optimizer, cost_function, mode, device='cuda'):
 
     return cumulative_loss / samples
 
-def val_step(net, data_loader, cost_function, device='cuda'):
+def val_step(net, data_loader, cost_function, mode, device='cuda'):
     samples = 0.
     cumulative_loss = 0.
     
