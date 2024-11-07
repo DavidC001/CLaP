@@ -416,12 +416,15 @@ class ContrastiveSkiDatasetMoco(Dataset):
 
         paths = []
 
+        query = random(0,6);
+        query_path = split[0] + '/cam_0' + str(query) + split[1][1:]
+
         for i in range(0, 6):
-          if view != i:
+          if query != i:
             path = split[0] + '/cam_0' + str(i) + split[1][1:]
             paths.append(path)
 
-        return paths
+        return query_path, paths
 
 
     def __getitem__(self, idx):
@@ -431,8 +434,8 @@ class ContrastiveSkiDatasetMoco(Dataset):
         sample = dict()
         keys = []
 
-        query_path = self.data['paths'][idx]
-        keys_path = self.get_all_view(query_path)
+        path = self.data['paths'][idx]
+        query_path, keys_path = self.get_all_view(path)
 
         for i in range(0, len(keys_path)):
           if os.path.isfile(keys_path[i]):
@@ -443,13 +446,21 @@ class ContrastiveSkiDatasetMoco(Dataset):
 
         query = cv2.imread(query_path)
         query = cv2.cvtColor(query, cv2.COLOR_BGR2RGB)
+
+
+        #i have to have exactly 5 view in the keys
+        for i in range(len(keys), 5):
+            # apply a rotation to query
+            img = cv2.rotate(query, cv2.ROTATE_90_CLOCKWISE)
+            img = self.transform(query)
+            keys.append(img)
+
         query = self.transform(query)
 
         sample['query'] = query
         sample['keys'] = keys
 
         return sample
-
 def getContrastiveDatasetSkiMoco(transform, dataset_dir="datasets"):
     """
     Returns a tuple of train and test datasets for contrastive learning using Ski data.
