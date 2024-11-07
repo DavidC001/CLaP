@@ -91,8 +91,8 @@ def get_loss(output, pose, weights=None, norm_factor=0.2, device='cuda'):
     output = torch.bmm(output, batch_rotation_matrix)
     
     # rescale to -600, 600
-    output = output * 1200
-    pose = pose * 1200
+    output = output * 600
+    pose = pose * 600
     
     output = output.view(-1, 1, 3)
     pose = pose.view(-1, 1, 3)
