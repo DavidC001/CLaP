@@ -1,6 +1,9 @@
 import sys
 sys.path.append(".")
 
+import torch
+import numpy as np
+import random
 import os
 import json
 from pose_estimation.models import models, getPoseEstimModel
@@ -43,14 +46,14 @@ def parseArgs(args):
 
 def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_dir="datasets"):
     """
-    Train the pose estimation model.
+    Train the pose estimation models.
 
     Parameters:
-    - args: dict, arguments for the pose estimation model
-    - device: str, device, default is 'cpu'
-    - models_dir: str, directory to save the trained models, default is 'trained_models'
-    - datasets_dir: str, directory to save the datasets, default is 'datasets'
-    - base_model: str, base model, default is 'resnet18'
+        args: dict, arguments for the pose estimation models
+        device: str, device, default is 'cpu'
+        models_dir: str, directory to save the trained models, default is 'trained_models'
+        datasets_dir: str, directory to save the datasets, default is 'datasets'
+        base_model: str, base model, default is 'resnet18'
 
     """
     #skip if specified
@@ -71,6 +74,10 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
         print(f"Training {exp_name}")
 
         try:
+            np.random.seed(0)
+            torch.manual_seed(0)
+            random.seed(0)
+
             #save parameters to file
             with open(f"{models_dir}/{exp_name}_params.json", 'w') as f:
                 json.dump(params, f)

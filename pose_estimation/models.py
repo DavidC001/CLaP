@@ -22,9 +22,9 @@ models = {
 }
 
 
-class Linear(nn.Module):
+class Estimator(nn.Module):
     """
-    Linear layer with GELU activation function for the pose estimation model.
+        Estimation layer for pose estimation.
     """
 
     def __init__(self, layers, output_dim=48, base_model="resnet18", layer_norm=True, activation="gelu"):
@@ -32,13 +32,13 @@ class Linear(nn.Module):
         Initialize the Linear layer.
 
         Parameters:
-        - layers: list, list of layer dimensions
-        - output_dim: int, output dimension, default is 48
-        - base_model: str, base model, default is 'resnet18'
-        - layer_norm: bool, whether to use layer normalization, default is True
-        - activation: str, activation function, default is 'gelu'
+            layers: list, list of layer dimensions
+            output_dim: int, output dimension, default is 48
+            base_model: str, base model, default is 'resnet18'
+            layer_norm: bool, whether to use layer normalization, default is True
+            activation: str, activation function, ['gelu', 'relu'], default is 'gelu'
         """
-        super(Linear, self).__init__()
+        super(Estimator, self).__init__()
         self.layers = nn.Sequential()
         # attach 2048 to the beginning of the list
         if base_model == "resnet50":
@@ -78,17 +78,17 @@ def getPoseEstimModel(
     Get the pose estimation model.
 
     Parameters:
-    - path: str, path to the model weights
-    - model_type: str, model type ['simsiam', 'simclr', 'MoCo', 'LASCon', 'resnet']
-    - layers: list, list of layer dimensions
-    - out_dim: int, output dimension
-    - device: str, device, default is 'cpu'
-    - base_model: str, base model, default is 'resnet18'
-    - layer_norm: bool, whether to use layer normalization, default is True
-    - activation: str, activation function, default is 'gelu'
+        path: str, path to the model weights
+        model_type: str, model type ['simsiam', 'simclr', 'MoCo', 'LASCon', 'resnet']
+        layers: list, list of layer dimensions
+        out_dim: int, output dimension
+        device: str, device, default is 'cpu'
+        base_model: str, base model, default is 'resnet18'
+        layer_norm: bool, whether to use layer normalization, default is True
+        activation: str, activation function, default is 'gelu'
 
     Returns:
-    - base: torch.nn.Module, pose estimation model with the specified weights
+        base: torch.nn.Module, pose estimation model with the specified weights
     """
     if model_type != "resnet":
         base = models[model_type](base_model)
@@ -107,6 +107,6 @@ def getPoseEstimModel(
 
     if model_type == "simsiam" or model_type == "MoCo":
         base.module = base.module.base
-    base.module.fc = Linear(layers, out_dim, base_model, layer_norm, activation)
+    base.module.fc = Estimator(layers, out_dim, base_model, layer_norm, activation)
 
     return base.to(device)

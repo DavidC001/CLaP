@@ -8,7 +8,16 @@ from dataloaders.panoptic import getContrastiveDatasetPanoptic, ClusterPanopticD
 import torch
 
 class combineDataSets(torch.utils.data.Dataset):
+    """
+    Combine multiple datasets into one dataset.
+    """
     def __init__(self, *datasets):
+        """
+        Initialize the dataset.
+
+        Parameters:
+            *datasets: list of datasets
+        """
         self.datasets = datasets
         self.lengths = [len(dataset) for dataset in datasets]
         self.length = sum(self.lengths)

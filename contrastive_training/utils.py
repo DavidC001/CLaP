@@ -12,13 +12,13 @@ from torchvision.models.resnet import  ResNet18_Weights, ResNet50_Weights
 
 train_data, val_data, test_data = None, None, None
 
-def load_datasets(datasets, use_complete, drop,dataset_dir="datasets", base_model="resnet18"):
+def load_datasets(datasets, mode, drop, dataset_dir="datasets", base_model="resnet18"):
     """
     Prepares the datasets for contrastive training.
 
     Parameters:
         datasets: list, datasets to load
-        use_complete: bool, use complete pairs
+        mode: str, mode of the dataset, can be either 'simple' 'complete' 'multi'
         drop: float, drop pairs
         dataset_dir: str, directory to save the datasets, default is 'datasets'
         base_model: str, base model, default is 'resnet18'
@@ -51,7 +51,7 @@ def load_datasets(datasets, use_complete, drop,dataset_dir="datasets", base_mode
     
     assert len(datasets) == len(drop), "Number of datasets and drop pairs should be the same"
     for i, dataset in enumerate(datasets):
-        train_data, val_data, test_data = contrastive_datasets[dataset](transforms, dataset_dir=dataset_dir, use_complete=use_complete, drop=drop[i])
+        train_data, val_data, test_data = contrastive_datasets[dataset](transforms, dataset_dir=dataset_dir, mode=mode, drop=drop[i])
         train.append(train_data)
         val.append(val_data)
         test.append(test_data)

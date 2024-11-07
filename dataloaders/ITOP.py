@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import torchvision.transforms as T
 import h5py 
 
-generator = torch.Generator().manual_seed(42)
+generator = torch.Generator()
 
 class ContrastiveKinectDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets", mode="train"):
@@ -57,18 +57,20 @@ class ContrastiveKinectDataset(Dataset):
         return sample
     
 
-def getContrastiveDatasetKinect(transform, dataset_dir="datasets", use_complete=False, drop=0):
+def getContrastiveDatasetKinect(transform, dataset_dir="datasets", mode="simple", drop=0):
     """
     Returns a tuple of train and test datasets for contrastive learning using Kinect data.
 
     Args:
         transform (torchvision.transforms.Transform): The data transformation to be applied to the dataset.
+        mode (str, optional): The mode of the dataset. Defaults to "simple".
         dataset_dir (str, optional): The directory where the datasets are stored. Defaults to "datasets".
 
     Returns:
         tuple: A tuple containing the train and test datasets.
     """
-    if use_complete:
+    generator.manual_seed(0)
+    if mode != "simple":
         raise NotImplementedError("Complete pairs not supported for Kinect dataset")
     train = ContrastiveKinectDataset(transform, dataset_dir, mode="train")
     num_samples = len(train)
@@ -222,6 +224,7 @@ def getPoseDatasetKinect(transform, dataset_dir="datasets", use_cluster="NONE"):
     Returns:
         tuple: A tuple containing the train and test datasets.
     """
+    generator.manual_seed(0)
     train = PoseKinectDataset(transform, dataset_dir, mode="train", use_cluster=use_cluster)
     num_samples = len(train)
 

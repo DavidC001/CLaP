@@ -16,6 +16,15 @@ class MLP(nn.Module):
 
 
 def get_simclr_net(base_model='resnet18'):
+    """
+    Get the SimCLR model with the specified base model
+
+    Parameters:
+        base_model (str): Base model to use for the encoder (resnet18 or resnet50)
+
+    Returns:
+        torch.nn.Module: SimCLR model
+    """
     if base_model == 'resnet50':
         weights = ResNet50_Weights.DEFAULT
         model = resnet50(weights=weights)

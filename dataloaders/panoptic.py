@@ -13,7 +13,7 @@ import numpy as np
 import math
 
 
-generator = torch.Generator().manual_seed(42)
+generator = torch.Generator()
 
 
 class ContrastivePanopticDataset(Dataset):
@@ -236,24 +236,27 @@ class CompleteContrastivePanopticDataset(Dataset):
 
 
 
-def getContrastiveDatasetPanoptic(transform, dataset_dir="datasets", use_complete=True, drop=0.5):
+def getContrastiveDatasetPanoptic(transform, dataset_dir="datasets", mode="complete", drop=0.5):
     """
     Returns training and validation datasets for clustering in the Panoptic dataset.
 
     Args:
         transform (callable): A function/transform that takes in an image and its annotations and returns a transformed version.
         dataset_dir (str, optional): The directory where the dataset is located. Defaults to "datasets".
-        use_complete (bool, optional): Whether to use complete pairs. Defaults to True.
+        mode (str, optional): The mode of the dataset. Can be "complete" or "simple". Defaults to "complete".
         drop (float, optional): The percentage of pairs to drop. Defaults to 0.5.
 
     Returns:
         training_data (torch.utils.data.Dataset): The training dataset.
         val_data (torch.utils.data.Dataset): The validation dataset.
     """
-    if use_complete:
+    generator.manual_seed(0)
+    if mode == "complete":
         dataset = CompleteContrastivePanopticDataset(transform, dataset_dir, drop)
-    else:
+    elif mode == "simple":
         dataset = ContrastivePanopticDataset(transform, dataset_dir)
+    else:
+        raise ValueError("Invalid mode. Choose between 'complete' and 'simple'.")
 
     num_samples = len(dataset)
 
@@ -418,6 +421,7 @@ def getPoseDatasetPanoptic(transform, dataset_dir="datasets", use_cluster="NONE"
         training_data (torch.utils.data.Dataset): The training dataset.
         val_data (torch.utils.data.Dataset): The validation dataset.
     """
+    generator.manual_seed(0)
     dataset = PosePanopticDataset(transform, dataset_dir, use_cluster)
 
     num_samples = len(dataset)

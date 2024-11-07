@@ -13,7 +13,7 @@ from PIL import Image
 
 import h5py
 
-generator = torch.Generator().manual_seed(42)
+generator = torch.Generator()
 
 class ContrastiveSkiDataset(Dataset):
     def __init__(self, transform, dataset_dir="datasets", mode="train"):
@@ -167,26 +167,163 @@ class CompleteContrastiveSkiDataset(Dataset):
 
         return sample
 
+class MultiViewSkiDataset(Dataset):
+    def __init__(self, transform, dataset_dir="datasets", mode="train", max_views=6, num_cameras=6, augmentation_degree=45):
+        """
+        Custom Dataset to retrieve multiple camera views for each frame, pad to `max_views` with rotation augmentation if needed,
+        and shuffle the order of images.
 
-def getContrastiveDatasetSki(transform, dataset_dir="datasets", use_complete=True, drop=0.5):
+        Args:
+            transform (torchvision.transforms.Transform): Transformations to apply to the images.
+            dataset_dir (str, optional): Directory where the dataset is stored. Defaults to "datasets".
+            mode (str, optional): Mode of the dataset, either "train" or "test". Defaults to "train".
+            max_views (int, optional): Maximum number of views per data point. Defaults to 5.
+            num_cameras (int, optional): Total number of camera views available. Defaults to 6.
+            augmentation_degree (int, optional): Degree for random rotation augmentation. Defaults to 45.
+        """
+        self.transform = transform
+        self.max_views = max_views
+        self.num_cameras = num_cameras
+        self.augmentation_degree = augmentation_degree
+
+        self.data_path = os.path.join(dataset_dir, "Ski-PosePTZ-CameraDataset-png")
+        self.mode = mode
+
+        self.frames = []  # List of lists, where each sublist contains image paths from different cameras for a frame
+
+        # Define camera names based on the number of cameras
+        self.cameras = [f"cam_{i:02d}" for i in range(self.num_cameras)]
+
+        # Populate self.frames
+        self._prepare_frames()
+
+    def _prepare_frames(self):
+        """
+        Prepare the list of frames, each containing paths to images from different cameras.
+        """
+        if self.mode not in ['train', 'test']:
+            raise ValueError("mode should be 'train' or 'test'")
+
+        dir_mode = 'train' if self.mode == 'train' else 'test'
+        mode_path = os.path.join(self.data_path, dir_mode)
+
+        # Iterate through each sequence in the mode directory
+        for seq in os.listdir(mode_path):
+            seq_path = os.path.join(mode_path, seq)
+            if not os.path.isdir(seq_path):
+                continue  # Skip if not a directory
+
+            # Iterate through each camera in the sequence
+            frame_dict = {}  # key: frame identifier, value: list of image paths from different cameras
+            for cam in self.cameras:
+                cam_path = os.path.join(seq_path, cam)
+                if not os.path.isdir(cam_path):
+                    continue  # Skip if camera directory does not exist
+
+                for img_file in os.listdir(cam_path):
+                    frame_id = img_file  # Assuming the frame identifier is the image filename
+                    img_path = os.path.join(cam_path, img_file).replace('\\', '/')
+                    if frame_id not in frame_dict:
+                        frame_dict[frame_id] = []
+                    frame_dict[frame_id].append(img_path)
+
+            # Add all frames from this sequence to the dataset
+            for frame_images in frame_dict.values():
+                self.frames.append(frame_images)
+
+    def __len__(self):
+        return len(self.frames)
+
+    def __getitem__(self, idx):
+        """
+        Retrieves a data point consisting of a list of images.
+
+        Args:
+            idx (int): Index of the data point.
+
+        Returns:
+            dict: Contains 'images' key with a list of transformed images.
+        """
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        frame_images = self.frames[idx].copy()  # List of image paths for this frame
+
+        # If number of images > max_views, randomly select max_views images
+        if len(frame_images) > self.max_views:
+            frame_images = random.sample(frame_images, self.max_views)
+
+
+        # Shuffle the order of images
+        random.shuffle(frame_images)
+
+        transformed_images = []
+        for img_path in frame_images:
+            image = cv2.imread(img_path)
+            if image is None:
+                raise FileNotFoundError(f"Image not found: {img_path}")
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            image = self.transform(image)
+            transformed_images.append(image)
+
+        # If number of images < max_views, pad with augmented images
+        if len(transformed_images) < self.max_views:
+            num_augmented = self.max_views - len(transformed_images)
+            augmented_images = self._augment_images(frame_images, num_augmented)
+            transformed_images.extend(augmented_images)
+        
+        return {'images': transformed_images}
+
+    def _augment_images(self, existing_image_paths, num_augmented):
+        """
+        Generate augmented images by applying random rotations to existing images.
+
+        Args:
+            existing_image_paths (list): List of existing image paths.
+            num_augmented (int): Number of augmented images to generate.
+
+        Returns:
+            list: List of augmented image tensors.
+        """
+        augmented = []
+        for _ in range(num_augmented):
+            # Select a random image to augment
+            img_path = random.choice(existing_image_paths)
+            image = cv2.imread(img_path)
+            if image is None:
+                raise FileNotFoundError(f"Image not found for augmentation: {img_path}")
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            # Apply random rotation
+            rotated_image = self.transform(image)
+            rotated_image = T.RandomRotation(self.augmentation_degree)(rotated_image)
+            augmented.append(rotated_image)
+        return augmented
+
+def getContrastiveDatasetSki(transform, dataset_dir="datasets", mode="complete", drop=0.5):
     """
     Returns a tuple of train and test datasets for contrastive learning using Ski data.
 
     Args:
         transform (torchvision.transforms.Transform): The data transformation to be applied to the dataset.
         dataset_dir (str, optional): The directory where the datasets are stored. Defaults to "datasets".
-        use_complete (bool, optional): Whether to use complete pairs. Defaults to True.
+        mode (str, optional): The mode of the dataset. "simple" for simple contrastive learning, "complete" for all pairs "multi" for multiple views. Defaults to "complete".
         drop (float, optional): The percentage of pairs to drop. Defaults to 0.5.
 
     Returns:
         tuple: A tuple containing the train and test datasets.
     """
-    if use_complete:
+    generator.manual_seed(0)
+    if mode == "complete":
         dataset = CompleteContrastiveSkiDataset(transform, dataset_dir, mode="train", drop=drop)
         test = CompleteContrastiveSkiDataset(transform, dataset_dir, mode="test", drop=drop)
-    else:
+    elif mode == "simple":
         dataset = ContrastiveSkiDataset(transform, dataset_dir, mode="train")
         test = ContrastiveSkiDataset(transform, dataset_dir, mode="test")
+    elif mode == "multi":
+        dataset = MultiViewSkiDataset(transform, dataset_dir, mode="train")
+        test = MultiViewSkiDataset(transform, dataset_dir, mode="test")
+    else:
+        raise ValueError("Invalid mode. Choose 'simple', 'complete', or 'multi'.")
 
     num_samples = len(dataset)
 
@@ -349,6 +486,7 @@ def getPoseDatasetSki(transform, dataset_dir="datasets", use_cluster="NONE"):
     Returns:
         tuple: A tuple containing the train and test datasets.
     """
+    generator.manual_seed(0)
     train = PoseSkiDataset(transform, dataset_dir, mode="train", use_cluster=use_cluster)
     
     num_samples = len(train)

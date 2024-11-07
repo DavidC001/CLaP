@@ -1,4 +1,6 @@
-import os
+import numpy as np
+import torch
+import random
 import json
 import sys
 sys.path.append(".")
@@ -9,6 +11,12 @@ from contrastive_training.utils import load_datasets
 models = ["simsiam", "simclr", "moco", "lascon"]
 
 def check_arguments_contrastive(args):
+    """
+    Check if the arguments for contrastive training are valid and add default values if not present
+
+    Parameters:
+        args (dict): Arguments for contrastive training
+    """
     #name is required
     assert 'model' in args, 'model not found in args (simsiam, simclr, moco, lascon)'
 
@@ -29,13 +37,22 @@ def check_arguments_contrastive(args):
     return args
 
 def contrastive_pretraining(args, device='cuda', models_dir="trained_models", datasets_dir="datasets"):
+    """
+    finetune the models on the given datasets using contrastive training
+
+    Parameters:
+        args (dict): Arguments for contrastive training
+        device (str): Device to train on
+        models_dir (str): Directory to save the model
+        datasets_dir (str): Directory where the datasets are stored
+    """
     assert "datasets" in args, 'datasets argument is required'
     if 'drop_pairs' in args:
         assert len(args['datasets']) == len(args['drop_pairs']), "Number of datasets and drop pairs should be the same"
 
     default_args = {
         "skip": False,
-        "use_complete_pairs": True,
+        "mode": "simple",
         "drop_pairs": [0],
         "experiments": {}
     }
@@ -57,22 +74,26 @@ def contrastive_pretraining(args, device='cuda', models_dir="trained_models", da
     for exp_name in experiments:
         params = check_arguments_contrastive(experiments[exp_name])
         print(f"training {exp_name}")
-            
+        
         try:
+            np.random.seed(0)
+            torch.manual_seed(0)
+            random.seed(0)
+            
             load_datasets(datasets, dataset_dir=datasets_dir, base_model=params["base_model"], 
-                            use_complete=args['use_complete_pairs'], drop=args['drop_pairs'])
+                            mode=args['mode'], drop=args['drop_pairs'])
             
             #save parameters to file
             with open(f"{models_dir}/{exp_name}_params.json", 'w') as f:
                 json.dump(params, f)
             
-            contrastive_train(params=params, 
+            contrastive_train(params=params, mode=args['mode'],
                               name=exp_name, datasets=datasets, 
                               models_dir=models_dir, datasets_dir=datasets_dir, 
                               device=device)
         except Exception as e:
-            print(f"Error in training {exp_name}: {e}") 
-        
+            print(f"Error in {exp_name}: {e}")
+            
         print(f"Finished {exp_name}")
         print("---------------------------")
             

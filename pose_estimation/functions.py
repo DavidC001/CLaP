@@ -8,11 +8,11 @@ def find_rotation_mat(points1, points2):
     Function to find the rotation matrix between two sets of ordered 3D points.
 
     Parameters:
-    - points1: input containing a set of ordered 3D points
-    - points2: target containing the reference set of ordered 3D points
+        points1: input containing a set of ordered 3D points
+        points2: target containing the reference set of ordered 3D points
 
     Returns:
-    - transformation_matrix: torch.Tensor, 3x3 transformation matrix
+        transformation_matrix: torch.Tensor, 3x3 transformation matrix
     """
 
     # Calculate the covariance matrix 
@@ -37,11 +37,11 @@ def find_scaling(points1, points2):
     Function to find the scaling factor between two sets of centered and ordered 3D points.
 
     Parameters:
-    - points1: input containing a set of ordered 3D points
-    - points2: target containing the reference set of ordered 3D points
+        points1: input containing a set of ordered 3D points
+        points2: target containing the reference set of ordered 3D points
 
     Returns:
-    - scaling_factor: torch.Tensor, 1x1 scaling factor
+        scaling_factor: torch.Tensor, 1x1 scaling factor
     """
     scaling_factor = torch.norm(points1) / torch.norm(points2)
 
@@ -53,14 +53,14 @@ def get_loss(output, pose, weights=None, norm_factor=0.2, device='cuda'):
     Calculate the loss between the predicted and target poses.
 
     Parameters:
-    - output: torch.Tensor, predicted pose
-    - pose: torch.Tensor, target pose
-    - weights: torch.Tensor, weights of the model for L2 normalization, default is None
-    - norm_factor: float, L2 normalization factor, default is 0.2
-    - device: str, device to run the model, default is 'cuda'
+        output: torch.Tensor, predicted pose
+        pose: torch.Tensor, target pose
+        weights: torch.Tensor, weights of the model for L2 normalization, default is None
+        norm_factor: float, L2 normalization factor, default is 0.2
+        device: str, device to run the model, default is 'cuda'
 
     Returns:
-    - loss: torch.Tensor, loss value
+        loss: torch.Tensor, loss value
     """
     batch_size = output.shape[0]
 
@@ -90,21 +90,14 @@ def get_loss(output, pose, weights=None, norm_factor=0.2, device='cuda'):
 
     output = torch.bmm(output, batch_rotation_matrix)
     
-    #find scaling factor for each batch
-
-    # with torch.no_grad():
-    #     for i in range(batch_size):
-    #         scaling_factor[i] = find_scaling(pose[i], output[i])
-        
-    # for i in range(batch_size):
-    #     output[i] = output[i] * scaling_factor[i].item()
+    # rescale to -600, 600
+    output = output * 600
+    pose = pose * 600
     
-    #print ("output\n", output)
-    #print ("pose\n", pose)
-    # mean joint error
-    # breakpoint()
     output = output.view(-1, 1, 3)
     pose = pose.view(-1, 1, 3)
+    
+    # mean joint error
     loss = torch.mean(torch.cdist(output, pose, p=2))
     # breakpoint()
 
@@ -120,13 +113,13 @@ def get_optimizer(net, learning_rate, weight_decay):
     Get the optimizer and scheduler for the network.
 
     Parameters:
-    - net: torch.nn.Module, network model
-    - learning_rate: float, learning rate
-    - weight_decay: float, weight decay
+        net: torch.nn.Module, network model
+        learning_rate: float, learning rate
+        weight_decay: float, weight decay
 
     Returns:
-    - optimizer: torch.optim, optimizer
-    - scheduler: torch.optim.lr_scheduler, scheduler
+        optimizer: torch.optim, optimizer
+        scheduler: torch.optim.lr_scheduler, scheduler
     """
     final_layer_weights = []
     rest_of_the_net_weights = []
@@ -149,6 +142,16 @@ def get_optimizer(net, learning_rate, weight_decay):
     return optimizer, scheduler
 
 def project_points( points_3d, camera_parameters_str):
+    """
+    Project 3D points to 2D using camera parameters.
+
+    Parameters:
+        points_3d: numpy.array, 3D points
+        camera_parameters_str: str, camera parameters
+
+    Returns:
+        points_2d: numpy.array, 2D points
+    """
     # Load camera parameters
     camera_params = eval(camera_parameters_str)
 

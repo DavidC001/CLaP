@@ -11,6 +11,20 @@ from copy import deepcopy
 
 #wrap function to get selected images from clusters
 def get_selected_images(trained_model, base_model, dataset, dataset_dir, name_file, n_clusters, percentage, device = 'cuda'):
+    """
+    Get selected images from clusters
+
+    Parameters:
+        trained_model (torch.nn.Module): Trained model
+        base_model (str): Base model used to train the model
+        dataset (str): Name of the dataset
+        dataset_dir (str): Directory where the dataset is stored
+        name_file (str): Name of the file to save the selected images
+        n_clusters (int): Number of clusters
+        percentage (float): Percentage of the dataset to select
+        device (str): Device to run the model on
+    """
+    np.random.seed(0)
     model = deepcopy(trained_model)
     model.module.fc = torch.nn.Identity()
 

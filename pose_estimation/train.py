@@ -14,11 +14,14 @@ def training_step(net, data_loader, optimizer, cost_function, device='cuda'):
     Make a training step for the pose estimation model.
 
     Parameters:
-    - net: torch.nn.Module, network model
-    - data_loader: torch.utils.data.DataLoader, data loader
-    - optimizer: torch.optim.Optimizer, optimizer
-    - cost_function: function, cost function
-    - device: str, device, default is 'cuda'
+        net: torch.nn.Module, network model
+        data_loader: torch.utils.data.DataLoader, data loader
+        optimizer: torch.optim.Optimizer, optimizer
+        cost_function: function, cost function
+        device: str, device, default is 'cuda'
+
+    Returns:
+        loss: float, mean loss of the training step
     """
     cumulative_loss = 0.0
     samples = 0.0
@@ -45,7 +48,7 @@ def training_step(net, data_loader, optimizer, cost_function, device='cuda'):
 
         optimizer.zero_grad()
 
-        samples += images.shape[0]
+        samples += 1
 
         
 
@@ -57,10 +60,13 @@ def test_step(net, data_loader, cost_function, device='cuda'):
     Make a test step for the pose estimation model.
 
     Parameters:
-    - net: torch.nn.Module, network model
-    - data_loader: torch.utils.data.DataLoader, data loader
-    - cost_function: function, cost function
-    - device: str, device, default is 'cuda'
+        net: torch.nn.Module, network model
+        data_loader: torch.utils.data.DataLoader, data loader
+        cost_function: function, cost function
+        device: str, device, default is 'cuda'
+
+    Returns:
+        loss: float, mean loss of the test step
     """
     cumulative_loss = 0.
     samples = 0.
@@ -80,42 +86,12 @@ def test_step(net, data_loader, cost_function, device='cuda'):
             loss = cost_function(output, poses, device=device)
             cumulative_loss += loss.item()
 
-            # #show the two poses
-            # from matplotlib import pyplot as plt
-            # import cv2
-            # from pose_estimation.functions import find_rotation_mat
-            # cv2.imshow("image", images[0].cpu().numpy().transpose(1,2,0))
-            # poses = poses[0].view(-1,3)
-            # poses = poses - poses.mean(dim=0)
-            # output = output[0].view(-1,3)
-            # output = output - output.mean(dim=0)
-            # rotation_matrix = find_rotation_mat(output, poses)
-            # # print (rotation_matrix)
-            # output = torch.mm(output, rotation_matrix)
-            # fig = plt.figure()
-            # ax = fig.add_subplot(111, projection='3d')
-            # ax.scatter(poses[:,0].cpu().numpy(), poses[:,1].cpu().numpy(), poses[:,2].cpu().numpy(), c='r')
-            # #write numbers
-            # for i in range(poses.shape[0]):
-            #     ax.text(poses[i,0].cpu().numpy(), poses[i,1].cpu().numpy(), poses[i,2].cpu().numpy(), "T"+str(i))
-            # #connect the 17 joints
-            # connections = [ [0,1], [1,2], [2,3], [0,4], [4,5], [5,6], [8,9], [9,10], [8,11], [11,12], [12,13], [0,7], [14,15], [15,16],[7,8], [14,8]]
-            # for connection in connections:
-            #     ax.plot([poses[connection[0],0].cpu().numpy(), poses[connection[1],0].cpu().numpy()], [poses[connection[0],1].cpu().numpy(), poses[connection[1],1].cpu().numpy()], [poses[connection[0],2].cpu().numpy(), poses[connection[1],2].cpu().numpy()], c='r')
-            # ax.scatter(output[:,0].cpu().numpy(), output[:,1].cpu().numpy(), output[:,2].cpu().numpy(), c='b')
-            # for i in range(output.shape[0]):
-            #     ax.text(output[i,0].cpu().numpy(), output[i,1].cpu().numpy(), output[i,2].cpu().numpy(), "P"+str(i))
-            # for connection in connections:
-            #     ax.plot([output[connection[0],0].cpu().numpy(), output[connection[1],0].cpu().numpy()], [output[connection[0],1].cpu().numpy(), output[connection[1],1].cpu().numpy()], [output[connection[0],2].cpu().numpy(), output[connection[1],2].cpu().numpy()], c='b')
-            # plt.show()
-
-
-            samples += images.shape[0]
+            samples += 1
 
     return cumulative_loss / samples
 
 
-def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, epochs, save_every=10, device='cuda', model_dir="trained_models", name="model", patience = 3):
+def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, epochs, save_every=10, device='cuda', model_dir="trained_models", name="model", patience = 2):
     """
     Train the pose estimation model.
 
@@ -217,7 +193,7 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
                 min_val_loss = val_loss
                 best_model = deepcopy(net)
         
-        if patience_counter >= patience:
+        if patience_counter > patience:
             print("Early stopping")
             break
     
