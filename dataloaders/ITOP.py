@@ -69,7 +69,7 @@ def getContrastiveDatasetKinect(transform, dataset_dir="datasets", mode="simple"
     Returns:
         tuple: A tuple containing the train and test datasets.
     """
-    generator.manual_seed(42)
+    generator.manual_seed(0)
     if mode != "simple":
         raise NotImplementedError("Complete pairs not supported for Kinect dataset")
     train = ContrastiveKinectDataset(transform, dataset_dir, mode="train")
@@ -224,7 +224,7 @@ def getPoseDatasetKinect(transform, dataset_dir="datasets", use_cluster="NONE"):
     Returns:
         tuple: A tuple containing the train and test datasets.
     """
-    generator.manual_seed(42)
+    generator.manual_seed(0)
     train = PoseKinectDataset(transform, dataset_dir, mode="train", use_cluster=use_cluster)
     num_samples = len(train)
 

@@ -1,6 +1,9 @@
 import sys
 sys.path.append(".")
 
+import torch
+import numpy as np
+import random
 import os
 import json
 from pose_estimation.models import models, getPoseEstimModel
@@ -71,6 +74,10 @@ def pose_estimation( args, device='cpu', models_dir="trained_models", datasets_d
         print(f"Training {exp_name}")
 
         try:
+            np.random.seed(0)
+            torch.manual_seed(0)
+            random.seed(0)
+
             #save parameters to file
             with open(f"{models_dir}/{exp_name}_params.json", 'w') as f:
                 json.dump(params, f)

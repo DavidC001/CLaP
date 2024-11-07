@@ -13,7 +13,7 @@ import numpy as np
 import math
 
 
-generator = torch.Generator().manual_seed(42)
+generator = torch.Generator()
 
 
 class ContrastivePanopticDataset(Dataset):
@@ -250,6 +250,7 @@ def getContrastiveDatasetPanoptic(transform, dataset_dir="datasets", mode="compl
         training_data (torch.utils.data.Dataset): The training dataset.
         val_data (torch.utils.data.Dataset): The validation dataset.
     """
+    generator.manual_seed(0)
     if mode == "complete":
         dataset = CompleteContrastivePanopticDataset(transform, dataset_dir, drop)
     elif mode == "simple":
@@ -420,6 +421,7 @@ def getPoseDatasetPanoptic(transform, dataset_dir="datasets", use_cluster="NONE"
         training_data (torch.utils.data.Dataset): The training dataset.
         val_data (torch.utils.data.Dataset): The validation dataset.
     """
+    generator.manual_seed(0)
     dataset = PosePanopticDataset(transform, dataset_dir, use_cluster)
 
     num_samples = len(dataset)

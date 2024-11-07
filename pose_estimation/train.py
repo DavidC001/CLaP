@@ -91,7 +91,7 @@ def test_step(net, data_loader, cost_function, device='cuda'):
     return cumulative_loss / samples
 
 
-def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, epochs, save_every=10, device='cuda', model_dir="trained_models", name="model", patience = 3):
+def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, epochs, save_every=10, device='cuda', model_dir="trained_models", name="model", patience = 2):
     """
     Train the pose estimation model.
 
@@ -193,7 +193,7 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
                 min_val_loss = val_loss
                 best_model = deepcopy(net)
         
-        if patience_counter >= patience:
+        if patience_counter > patience:
             print("Early stopping")
             break
     

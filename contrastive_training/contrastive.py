@@ -1,4 +1,6 @@
-import os
+import numpy as np
+import torch
+import random
 import json
 import sys
 sys.path.append(".")
@@ -74,6 +76,10 @@ def contrastive_pretraining(args, device='cuda', models_dir="trained_models", da
         print(f"training {exp_name}")
         
         try:
+            np.random.seed(0)
+            torch.manual_seed(0)
+            random.seed(0)
+            
             load_datasets(datasets, dataset_dir=datasets_dir, base_model=params["base_model"], 
                             mode=args['mode'], drop=args['drop_pairs'])
             

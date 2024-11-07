@@ -16,8 +16,6 @@ from contrastive_training.utils import get_dataLoaders
 
 from torch.utils.tensorboard import SummaryWriter
 
-generator = torch.Generator().manual_seed(42)
-
 def get_optimizer(model, lr_encoder, lr_head, wd, momentum, epochs):
 
     optimizer = SGD([

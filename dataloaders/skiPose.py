@@ -312,7 +312,7 @@ def getContrastiveDatasetSki(transform, dataset_dir="datasets", mode="complete",
     Returns:
         tuple: A tuple containing the train and test datasets.
     """
-    generator.manual_seed(42)
+    generator.manual_seed(0)
     if mode == "complete":
         dataset = CompleteContrastiveSkiDataset(transform, dataset_dir, mode="train", drop=drop)
         test = CompleteContrastiveSkiDataset(transform, dataset_dir, mode="test", drop=drop)
@@ -486,7 +486,7 @@ def getPoseDatasetSki(transform, dataset_dir="datasets", use_cluster="NONE"):
     Returns:
         tuple: A tuple containing the train and test datasets.
     """
-    generator.manual_seed(42)
+    generator.manual_seed(0)
     train = PoseSkiDataset(transform, dataset_dir, mode="train", use_cluster=use_cluster)
     
     num_samples = len(train)
