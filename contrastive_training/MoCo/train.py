@@ -12,6 +12,8 @@ from contrastive_training.utils import get_datasetsMoco
 
 from torch.utils.tensorboard import SummaryWriter
 
+random.seed(42)
+
 def get_loss(q, k_plus, k_negatives, t_plus, t_negative, batch_size):
 
     loss = 0
