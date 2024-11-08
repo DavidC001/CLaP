@@ -4,12 +4,13 @@ sys.path.append(".")
 from contrastive_training.simsiam.train import train_simsiam
 from contrastive_training.simclr.train import train_simclr
 from contrastive_training.LASCon.train import train_LASCon
+from contrastive_training.MoCo.train import train_moco
 
 train_functions = {
     "simclr": train_simclr,
     "simsiam": train_simsiam,
     "lascon": train_LASCon,
-    "moco": lambda **args : NotImplementedError
+    "moco": train_moco
 }
 
 def contrastive_train(params, mode, name, device='cuda', datasets=["panoptic"], models_dir="trained_models", datasets_dir="datasets"):

@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.backends.cudnn as cudnn
 
-from contrastive_training.moco.model import get_moco_net
+from contrastive_training.MoCo.model import get_moco_net
 from contrastive_training.utils import get_datasetsMoco
 
 from torch.utils.tensorboard import SummaryWriter
@@ -140,8 +140,11 @@ def val_step(val_loader, model, optimizer, epoch, device, batch_size):
 
 
 def train_moco(model_dir, dataset_dir, datasets, save_every, batch_size=256, base_model='resnet18', name="moco", device='cuda', lr_encoder=0.03, lr_head=0.1, momentum=0.9, weight_decay=0.0001,
-               epochs=200, dim_out=128, K=65536, m=0.999, T_plus=0.07, T_negative=0.07):
+               epochs=200, dim_out=128, K=65536, m=0.999, T_plus=0.07, T_negative=0.07, mode="multi", **others):
 
+    if mode != "multi":
+        raise ValueError("MoCo only supports multi mode")
+    
     train_loader, val_loader, test_loader = get_datasetsMoco(datasets, batch_size, dataset_dir, base_model)
 
     # Initialize the model
@@ -200,7 +203,7 @@ def train_moco(model_dir, dataset_dir, datasets, save_every, batch_size=256, bas
             torch.save(optimizer.state_dict(), model_dir+'/'+name+'/epoch_{:d}_optimizer.pt'.format(e+1))
             torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pt'.format(e+1))
 
-    test_loss = val_step(val_loader, model, optimizer, epoch, device, batch_size)
+    test_loss = val_step(test_loader, model, optimizer, epoch, device, batch_size)
     print('Test loss {:.5f}'.format(test_loss))
     writer.add_scalar("loss/test", test_loss, 0)
     

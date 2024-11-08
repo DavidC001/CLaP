@@ -438,8 +438,6 @@ def getPoseDatasetPanoptic(transform, dataset_dir="datasets", use_cluster="NONE"
 
 class ContrastivePanopticDatasetMoco(Dataset):
     def __init__(self, transform, dataset_dir="datasets"):
-
-        open green_images.txt
         self.no_files = []
         with open(dataset_dir+"/green_images.txt") as f:
             for line in f:

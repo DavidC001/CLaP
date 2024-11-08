@@ -554,8 +554,11 @@ class ContrastiveSkiDatasetMoco(Dataset):
 
         paths = []
 
-        query = random(0,6);
+        query = random.randint(0, 5)
         query_path = split[0] + '/cam_0' + str(query) + split[1][1:]
+        while not os.path.isfile(query_path):
+          query = random.randint(0, 5)
+          query_path = split[0] + '/cam_0' + str(query) + split[1][1:]
 
         for i in range(0, 6):
           if query != i:

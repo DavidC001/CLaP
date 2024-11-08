@@ -15,7 +15,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 from contrastive_training.contrastive import contrastive_pretraining
 from pose_estimation.pose_estim import pose_estimation
 
-
+import torch.distributed as dist
 
 def main(args):
     #read experiment json file
@@ -34,6 +34,14 @@ def main(args):
     device = data['device']
     models_dir = data['models_dir']
     datasets_dir = data['datasets_dir']
+    
+    # Set environment variables for distributed training
+    os.environ['RANK'] = '0'
+    os.environ['WORLD_SIZE'] = '1'
+    os.environ['MASTER_ADDR'] = 'localhost'
+    os.environ['MASTER_PORT'] = '12355'
+
+    dist.init_process_group(backend='gloo', init_method='env://')
 
     # if it doesn't exist, create the directory to save the models
     if not os.path.exists(models_dir):

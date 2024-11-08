@@ -6,8 +6,8 @@ from torch import nn
 import torch
 from contrastive_training.simclr.model import get_simclr_net
 from contrastive_training.simsiam.model import get_siam_net
+from contrastive_training.MoCo.model import get_moco_net
 
-# from contrastive_training.MoCo.model import get_moco_net
 # from contrastive_training.supervised.model import get_supervised_net
 from torchvision.models import resnet50, resnet18
 from torchvision.models import ResNet50_Weights, ResNet18_Weights
@@ -16,7 +16,7 @@ from torchvision.models import ResNet50_Weights, ResNet18_Weights
 models = {
     "simsiam": get_siam_net,
     "simclr": get_simclr_net,
-    #'MoCo': get_moco_net,
+    'MoCo': get_moco_net,
     "LASCon": get_simclr_net,
     "resnet": None,
 }
@@ -105,8 +105,11 @@ def getPoseEstimModel(
 
     base = base.to(device)
 
-    if model_type == "simsiam" or model_type == "MoCo":
+    if model_type == "simsiam":
         base.module = base.module.base
+    elif model_type == "moco":
+        base.module = base.module.encoder_q
+    
     base.module.fc = Estimator(layers, out_dim, base_model, layer_norm, activation)
 
     return base.to(device)
