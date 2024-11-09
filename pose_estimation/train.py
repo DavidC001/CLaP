@@ -180,8 +180,8 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
         f.write('-----------------------------------------------------\n')
         f.close()
 
-        writer.add_scalar(tensorboard_tag+'/Loss/train', train_loss, e+1)
-        writer.add_scalar(tensorboard_tag+'/Loss/val', val_loss, e+1)
+        writer.add_scalar(tensorboard_tag+'/Loss/train', train_loss*1000, e+1)
+        writer.add_scalar(tensorboard_tag+'/Loss/val', val_loss*1000, e+1)
         writer.add_scalar(tensorboard_tag+'/lr', optimizer.param_groups[0]["lr"] , e+1)
         writer.flush()
 
@@ -207,23 +207,23 @@ def train (model, optimizer, scheduler, train_loader, val_loader, test_loader, e
     val_loss = test_step(best_model, val_loader, cost_function, device)
     test_loss = test_step(best_model, test_loader, cost_function, device)
 
-    print('\tTraining loss {:.5f}'.format(train_loss))
-    print('\tValidation loss {:.5f}'.format(val_loss))
-    print('\tTest loss {:.5f}'.format(test_loss))
+    print('\tTraining loss {:.5f}'.format(train_loss*1000))
+    print('\tValidation loss {:.5f}'.format(val_loss*1000))
+    print('\tTest loss {:.5f}'.format(test_loss*1000))
 
     #write information to file
     f = open(info_file, "a")
     f.write('After training:\n')
-    f.write('\tTraining loss {:.5f}\n'.format(train_loss))
-    f.write('\tValidation loss {:.5f}\n'.format(val_loss))
-    f.write('\tTest loss {:.5f}\n'.format(test_loss))
+    f.write('\tTraining loss {:.5f}\n'.format(train_loss*1000))
+    f.write('\tValidation loss {:.5f}\n'.format(val_loss*1000))
+    f.write('\tTest loss {:.5f}\n'.format(test_loss*1000))
     f.write('-----------------------------------------------------\n')
     f.close()
 
     
-    writer.add_scalar(tensorboard_tag+'/final_train_loss', train_loss, 0)
-    writer.add_scalar(tensorboard_tag+'/final_val_loss', val_loss, 0)
-    writer.add_scalar(tensorboard_tag+'/final_test_loss', test_loss, 0)
+    writer.add_scalar(tensorboard_tag+'/final_train_loss', train_loss*1000, 0)
+    writer.add_scalar(tensorboard_tag+'/final_val_loss', val_loss*1000, 0)
+    writer.add_scalar(tensorboard_tag+'/final_test_loss', test_loss*1000, 0)
     writer.flush()
 
     writer.close()

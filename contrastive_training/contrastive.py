@@ -72,13 +72,13 @@ def contrastive_pretraining(args, device='cuda', models_dir="trained_models", da
     experiments = args["experiments"]
     print("---------------------------")
     for exp_name in experiments:
-            params = check_arguments_contrastive(experiments[exp_name])
-            print(f"training {exp_name}")
+        params = check_arguments_contrastive(experiments[exp_name])
+        print(f"training {exp_name}")
         
+        try:
             np.random.seed(0)
             torch.manual_seed(0)
             random.seed(0)
-            
             load_datasets(datasets, dataset_dir=datasets_dir, base_model=params["base_model"], 
                             mode=args['mode'], drop=args['drop_pairs'])
             
@@ -90,7 +90,9 @@ def contrastive_pretraining(args, device='cuda', models_dir="trained_models", da
                               name=exp_name, datasets=datasets, 
                               models_dir=models_dir, datasets_dir=datasets_dir, 
                               device=device)
+        except Exception as e:
+            print(f"Error in {exp_name}: {e}")
             
-            print(f"Finished {exp_name}")
-            print("---------------------------")
+        print(f"Finished {exp_name}")
+        print("---------------------------")
             

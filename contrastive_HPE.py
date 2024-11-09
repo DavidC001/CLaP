@@ -36,12 +36,14 @@ def main(args):
     datasets_dir = data['datasets_dir']
     
     # Set environment variables for distributed training
-    os.environ['RANK'] = '0'
-    os.environ['WORLD_SIZE'] = '1'
-    os.environ['MASTER_ADDR'] = 'localhost'
-    os.environ['MASTER_PORT'] = '12355'
-
-    dist.init_process_group(backend='gloo', init_method='env://')
+    addr = 'localhost'
+    port = '12355'
+    dist.init_process_group(
+        backend='gloo', 
+        rank=0,
+        world_size=1,
+        init_method=f"tcp://{addr}:{port}?use_libuv=0"
+    )
 
     # if it doesn't exist, create the directory to save the models
     if not os.path.exists(models_dir):

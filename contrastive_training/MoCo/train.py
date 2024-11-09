@@ -139,7 +139,8 @@ def val_step(val_loader, model, optimizer, epoch, device, batch_size):
             return cumulative_loss / samples
 
 
-def train_moco(model_dir, dataset_dir, datasets, save_every, batch_size=256, base_model='resnet18', name="moco", device='cuda', lr_encoder=0.03, lr_head=0.1, momentum=0.9, weight_decay=0.0001,
+def train_moco(model_dir, dataset_dir, datasets, save_every, batch_size=256, base_model='resnet18', name="moco", device='cuda', 
+               learning_rate_encoder=0.03, learning_rate_head=0.1, momentum=0.9, weight_decay=0.0001,
                epochs=200, dim_out=128, K=65536, m=0.999, T_plus=0.07, T_negative=0.07, mode="multi", **others):
 
     if mode != "multi":
@@ -152,7 +153,7 @@ def train_moco(model_dir, dataset_dir, datasets, save_every, batch_size=256, bas
     model = model.to(device)
 
     # define optimizer
-    optimizer, scheduler = get_optimizer(model, lr_encoder=lr_encoder, lr_head=lr_head, wd=weight_decay, momentum=momentum, epochs=epochs)
+    optimizer, scheduler = get_optimizer(model, lr_encoder=learning_rate_encoder, lr_head=learning_rate_head, wd=weight_decay, momentum=momentum, epochs=epochs)
 
     writer = SummaryWriter(log_dir=model_dir+"/tensorboard/"+name)
 
