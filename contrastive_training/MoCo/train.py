@@ -194,9 +194,10 @@ def train_moco(model_dir, dataset_dir, datasets, save_every, batch_size=256, bas
         print('\tTraining loss {:.5f}'.format(train_loss))
         print('\tValidation loss {:.5f}'.format(val_loss))
 
-        writer.add_scalar("loss/train", train_loss, e+1) 
-        writer.add_scalar("lr", scheduler.get_last_lr()[0], e+1) 
-        writer.add_scalar("loss/val", val_loss, e+1)
+        writer.add_scalar("contrastive/moco/loss_train", train_loss, e+1) 
+        writer.add_scalar("contrastive/moco/lr_encoder", optimizer.param_groups[0]['lr'], e+1)
+        writer.add_scalar("contrastive/moco/lr_head", optimizer.param_groups[1]['lr'], e+1)
+        writer.add_scalar("contrastive/moco/loss_val", val_loss, e+1)
         writer.flush()
 
         if (e+1) % save_every == 0:
@@ -206,7 +207,7 @@ def train_moco(model_dir, dataset_dir, datasets, save_every, batch_size=256, bas
 
     test_loss = val_step(test_loader, model, optimizer, epoch, device, batch_size)
     print('Test loss {:.5f}'.format(test_loss))
-    writer.add_scalar("loss/test", test_loss, 0)
+    writer.add_scalar("contrastive/moco/loss_test", test_loss, epoch)
     
     writer.close()
         
