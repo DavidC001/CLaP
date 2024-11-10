@@ -544,7 +544,7 @@ def getContrastiveDatasetPanopticMoco(transform, dataset_dir="datasets"):
         training_data (torch.utils.data.Dataset): The training dataset.
         val_data (torch.utils.data.Dataset): The validation dataset.
     """
-    
+    generator.manual_seed(0)
     dataset = ContrastivePanopticDatasetMoco(transform, dataset_dir)
     
     num_samples = len(dataset)

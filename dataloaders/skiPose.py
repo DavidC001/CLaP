@@ -615,7 +615,7 @@ def getContrastiveDatasetSkiMoco(transform, dataset_dir="datasets"):
     Returns:
         tuple: A tuple containing the train and test datasets.
     """
-
+    generator.manual_seed(0)
     dataset = ContrastiveSkiDatasetMoco(transform, dataset_dir, mode="train")
     test = ContrastiveSkiDatasetMoco(transform, dataset_dir, mode="test")
 
