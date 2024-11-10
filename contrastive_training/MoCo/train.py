@@ -200,7 +200,7 @@ def train_moco(model_dir, dataset_dir, datasets, save_every, batch_size=256, bas
         writer.flush()
 
         if (e+1) % save_every == 0:
-            torch.save(model.module.encoder_q.state_dict(), model_dir+ '/'+name+'/epoch_{:d}.pt'.format(e+1))
+            torch.save(model.state_dict(), model_dir+ '/'+name+'/epoch_{:d}.pt'.format(e+1))
             torch.save(optimizer.state_dict(), model_dir+'/'+name+'/epoch_{:d}_optimizer.pt'.format(e+1))
             torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pt'.format(e+1))
 
@@ -212,7 +212,7 @@ def train_moco(model_dir, dataset_dir, datasets, save_every, batch_size=256, bas
         
     #save final model (if not saved already)
     if epochs % save_every != 0:
-        torch.save(model.module.encoder_q.state_dict(), model_dir+ '/'+name+'/epoch_{:d}.pt'.format(epochs))
+        torch.save(model.state_dict(), model_dir+ '/'+name+'/epoch_{:d}.pt'.format(epochs))
         torch.save(optimizer.state_dict(), model_dir+'/'+name+'/epoch_{:d}_optimizer.pt'.format(epochs))
         torch.save(scheduler.state_dict(), model_dir+'/'+name+'/epoch_{:d}_scheduler.pt'.format(epochs))
 
