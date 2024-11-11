@@ -3,7 +3,7 @@
     "models_dir": "trained_models",
     "datasets_dir": "datasets",
     "contrastive":{
-        "skip": true,
+        "skip": false,
         "datasets": ["skiPose"],
         "mode": "multi",
         "drop_pairs": [0],
