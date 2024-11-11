@@ -16,9 +16,10 @@ from torch.utils.tensorboard import SummaryWriter
 
 random.seed(42)
 
-def get_loss(q, k_plus, k_negatives, t_plus, t_negative, batch_size):
+def get_loss(q, k_plus, k_negatives, t_plus, t_negative):
 
     loss = 0
+    batch_size = q.size(0)
 
     num_view = int(k_plus.size(0) / batch_size)
 
@@ -94,7 +95,7 @@ def train_step(train_loader, model, optimizer, epoch, device, batch_size):
         k_negatives = model.module.queue.clone().detach()
 
         # Compute the loss
-        loss = get_loss(embeddings_q, k_plus, k_negatives, model.module.T_plus, model.module.T_negative, batch_size)
+        loss = get_loss(embeddings_q, k_plus, k_negatives, model.module.T_plus, model.module.T_negative)
 
         # compute gradient and do SGD step
         optimizer.zero_grad()
@@ -133,7 +134,7 @@ def val_step(val_loader, model, optimizer, epoch, device, batch_size):
             k_negatives = model.module.queue.clone().detach()
 
             # Compute the loss using get_loss function
-            loss = get_loss(embeddings_q, k_plus, k_negatives, model.module.T_plus, model.module.T_negative, batch_size)
+            loss = get_loss(embeddings_q, k_plus, k_negatives, model.module.T_plus, model.module.T_negative)
 
             cumulative_loss += loss.item()
             samples += batch_size
