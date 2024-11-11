@@ -158,7 +158,7 @@
                 "LN": true,
                 "activation": "gelu",
                 "use_cluster": "NONE"
-            },
+            }
         }
     }
 }
