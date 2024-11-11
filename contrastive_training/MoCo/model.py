@@ -73,7 +73,7 @@ class MoCo(nn.Module):
             param_k.requires_grad = False  # not update by gradient
 
         # create the queue
-        self.register_buffer("queue", torch.randn(dim_out, K))
+        self.register_buffer("queue", torch.randn(K, dim_out))
         self.queue = nn.functional.normalize(self.queue, dim=0)
 
         self.register_buffer("queue_ptr", torch.zeros(1, dtype=torch.long))
@@ -87,9 +87,9 @@ class MoCo(nn.Module):
             param_k.data = param_k.data * self.m + param_q.data * (1. - self.m)
 
     @torch.no_grad()
-    def _dequeue_and_enqueue(self, keys):
+    def _dequeue_and_enqueue(self, keys_batch):
         # gather keys before updating queue
-        keys = concat_all_gather(keys)
+        keys = concat_all_gather(keys_batch)
 
         batch_size = keys.shape[0]
 
@@ -97,13 +97,16 @@ class MoCo(nn.Module):
 
         # assert self.K % batch_size == 0  # for simplicity
 
-        # replace the keys at ptr (dequeue and enqueue)
-        if ptr + batch_size > self.K:
-            self.queue[:, ptr:] = keys[:self.K - ptr]
-            self.queue[:, :batch_size - (self.K - ptr)] = keys[self.K - ptr:]
-        else:
-            self.queue[:, ptr:ptr + batch_size] = keys
-        
+        try:
+            # replace the keys at ptr (dequeue and enqueue)
+            if ptr + batch_size > self.K:
+                self.queue[ptr:, :] = keys[:self.K - ptr]
+                self.queue[:batch_size - (self.K - ptr), :] = keys[self.K - ptr:]
+            else:
+                self.queue[ptr:ptr + batch_size, :] = keys
+        except Exception as e:
+            breakpoint()
+            
         ptr = (ptr + batch_size) % self.K  # move pointer
 
         self.queue_ptr[0] = ptr
@@ -189,7 +192,8 @@ class MoCo(nn.Module):
       keys = select_random_rows(embeddings_k)
 
       # dequeue and enqueue
-      self._dequeue_and_enqueue(keys)
+      if self.training:
+        self._dequeue_and_enqueue(keys)
 
       # Return embeddings
       return q, embeddings_k
@@ -201,8 +205,7 @@ def concat_all_gather(tensor):
     Performs all_gather operation on the provided tensors.
     *** Warning ***: torch.distributed.all_gather has no gradient.
     """
-    tensors_gather = [torch.ones_like(tensor)
-        for _ in range(torch.distributed.get_world_size())]
+    tensors_gather = [torch.ones_like(tensor) for _ in range(torch.distributed.get_world_size())]
     torch.distributed.all_gather(tensors_gather, tensor, async_op=False)
 
     output = torch.cat(tensors_gather, dim=0)

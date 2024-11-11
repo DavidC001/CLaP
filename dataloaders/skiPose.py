@@ -248,6 +248,7 @@ class MultiViewSkiDataset(Dataset):
             idx = idx.tolist()
 
         frame_images = self.frames[idx].copy()  # List of image paths for this frame
+        breakpoint()
 
         # If number of images > max_views, randomly select max_views images
         if len(frame_images) > self.max_views:
@@ -535,11 +536,16 @@ class ContrastiveSkiDatasetMoco(Dataset):
         else:
           dir = 'test'
 
-        for seq in (os.listdir(os.path.join(self.data_path, dir).replace('\\', '/'))):
-          if os.path.exists(os.path.join(self.data_path, dir, seq, 'cam_00').replace('\\', '/')):
-            image_path = os.path.join(self.data_path, dir, seq, 'cam_00').replace('\\', '/')
+        for seq in os.listdir(os.path.join(self.data_path, dir)):
+          if  not os.path.isdir(os.path.join(self.data_path, dir, seq)):
+            continue
+          images = set()
+          for cam in range(6):
+            image_path = os.path.join(self.data_path, dir, seq, 'cam_0'+str(cam)).replace('\\', '/')
             for lists in (os.listdir(image_path)):
-                paths.append(os.path.join(image_path, lists).replace('\\', '/'))
+                images.add(lists)
+          for image in images:
+            paths.append(os.path.join(self.data_path, dir, seq, 'cam_00', image).replace('\\', '/'))
 
         self.data = {'paths': paths}
 

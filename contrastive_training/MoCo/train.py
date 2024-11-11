@@ -10,6 +10,8 @@ import torch.backends.cudnn as cudnn
 from contrastive_training.MoCo.model import get_moco_net
 from contrastive_training.utils import get_datasetsMoco
 
+from tqdm.auto import tqdm
+
 from torch.utils.tensorboard import SummaryWriter
 
 random.seed(42)
@@ -33,9 +35,9 @@ def get_loss(q, k_plus, k_negatives, t_plus, t_negative, batch_size):
 
           sum_plus += exp_q_dot_k_plus
 
-      for i in range(k_negatives.size(1)):
+      for i in range(k_negatives.size(0)):
           # Calculate the dot products
-          q_dot_k_negatives = torch.dot(q[j], k_negatives[:, i]) / t_negative
+          q_dot_k_negatives = torch.dot(q[j], k_negatives[i,:]) / t_negative
 
           # Calculate the exponentials
           exp_q_dot_k_negatives = torch.exp(q_dot_k_negatives)
@@ -43,7 +45,7 @@ def get_loss(q, k_plus, k_negatives, t_plus, t_negative, batch_size):
           sum_negatives += exp_q_dot_k_negatives
 
       # Compute the loss
-      loss += -torch.log(sum_plus / (sum_negatives + 1e-10))  # avoid division by zero
+      loss += -torch.log(sum_plus / (sum_negatives + sum_plus + 1e-10))  # avoid division by zero
 
     return loss / batch_size
 
@@ -74,7 +76,7 @@ def train_step(train_loader, model, optimizer, epoch, device, batch_size):
     samples = 0.
     cumulative_loss = 0.
 
-    for i, images in enumerate(train_loader):
+    for i, images in tqdm(enumerate(train_loader), total=len(train_loader)):
 
         image_q = torch.tensor(images["query"]).to(device)
 
@@ -102,7 +104,7 @@ def train_step(train_loader, model, optimizer, epoch, device, batch_size):
         cumulative_loss += loss.item()
         samples += batch_size
 
-        return cumulative_loss / samples
+    return cumulative_loss / samples
 
 def val_step(val_loader, model, optimizer, epoch, device, batch_size):
 
@@ -114,7 +116,7 @@ def val_step(val_loader, model, optimizer, epoch, device, batch_size):
 
     with torch.no_grad():
         #end = time.time()
-        for i, images in enumerate(val_loader):
+        for i, images in tqdm(enumerate(val_loader), total=len(val_loader)):
             image_q = torch.tensor(images["query"]).to(device)
 
             images_k = []
@@ -136,7 +138,7 @@ def val_step(val_loader, model, optimizer, epoch, device, batch_size):
             cumulative_loss += loss.item()
             samples += batch_size
 
-            return cumulative_loss / samples
+    return cumulative_loss / samples
 
 
 def train_moco(model_dir, dataset_dir, datasets, save_every, batch_size=256, base_model='resnet18', name="moco", device='cuda', 

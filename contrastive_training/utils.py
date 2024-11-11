@@ -122,7 +122,7 @@ def get_datasetsMoco(datasets, batch_size, dataset_dir="datasets", base_model="r
 
     assert train_data is not None, "Dataset not loaded"
 
-    available_workers = math.ceil(os.cpu_count() / 2)
+    available_workers = 1
 
     train_loader = torch.utils.data.DataLoader(train_data, batch_size, shuffle=True, num_workers=available_workers)
     val_loader = torch.utils.data.DataLoader(val_data, batch_size, shuffle=False, num_workers=available_workers)
