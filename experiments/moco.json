@@ -3,7 +3,7 @@
     "models_dir": "trained_models",
     "datasets_dir": "datasets",
     "contrastive":{
-        "skip": false,
+        "skip": true,
         "datasets": ["skiPose"],
         "mode": "multi",
         "drop_pairs": [0],
@@ -19,7 +19,21 @@
                 "m": 0.999,
                 "T_plus": 0.5,
                 "T_negative": 0.5,
-                "epochs": 30,
+                "epochs": 20,
+                "save_every": 100
+            },
+            "moco_50_ski":{
+                "model": "moco",
+                "base_model": "resnet50",
+                "batch_size": 128,
+                "learning_rate_encoder": 0.1,   
+                "learning_rate_head": 0.5,
+                "momentum": 0.9,
+                "weight_decay": 1e-4,
+                "m": 0.999,
+                "T_plus": 0.5,
+                "T_negative": 0.5,
+                "epochs": 20,
                 "save_every": 100
             }
         }
