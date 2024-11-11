@@ -141,7 +141,7 @@ def val_step(val_loader, model, optimizer, epoch, device, batch_size):
 
 def train_moco(model_dir, dataset_dir, datasets, save_every, batch_size=256, base_model='resnet18', name="moco", device='cuda', 
                learning_rate_encoder=0.03, learning_rate_head=0.1, momentum=0.9, weight_decay=0.0001,
-               epochs=200, dim_out=128, K=65536, m=0.999, T_plus=0.07, T_negative=0.07, mode="multi", **others):
+               epochs=200, dim_out=128, K=512, m=0.999, T_plus=0.07, T_negative=0.07, mode="multi", **others):
 
     if mode != "multi":
         raise ValueError("MoCo only supports multi mode")
