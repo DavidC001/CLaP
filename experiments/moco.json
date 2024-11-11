@@ -16,7 +16,6 @@
                 "learning_rate_head": 0.5,
                 "momentum": 0.9,
                 "weight_decay": 1e-4,
-                "K": 65536,
                 "m": 0.999,
                 "T_plus": 0.5,
                 "T_negative": 0.5,

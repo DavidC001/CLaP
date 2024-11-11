@@ -27,10 +27,10 @@ class MoCo(nn.Module):
     Build a MoCo model with: a query encoder, a key encoder, and a queue
     https://arxiv.org/abs/1911.05722
     """
-    def __init__(self, base_encoder, dim_out=128, K=65536, m=0.999, T_plus=0.07, T_negative=0.07, device='cuda'):
+    def __init__(self, base_encoder, dim_out=128, K=512, m=0.999, T_plus=0.07, T_negative=0.07, device='cuda'):
         """
         dim: feature dimension (default: 128)
-        K: queue size; number of negative keys (default: 65536)
+        K: queue size; number of negative keys (default: 512)
         m: moco momentum of updating key encoder (default: 0.999)
         T_plus: softmax temperature positive keys (default: 0.07)
         T_negative: softmax temperature negative keys (default: 0.07)
@@ -224,7 +224,7 @@ def select_random_rows(matrix):
 
     return selected_rows
 
-def get_moco_net(base_model='resnet18', device='cuda', dim_out=128, K=100, m=0.999, T_plus=0.07, T_negative=0.07):
+def get_moco_net(base_model='resnet18', device='cuda', dim_out=128, K=512, m=0.999, T_plus=0.07, T_negative=0.07):
     """
     Returns a MoCo model.
     """
