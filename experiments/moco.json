@@ -54,6 +54,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "./trained_models/moco_18_ski/skiPose_selected_images_20C_5%.txt"
             },
             "moco18Ski_estim_ski_random5%":{
@@ -67,6 +68,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "RANDOM_5"
             },
             "moco18Ski_estim_ski_10%":{
@@ -80,6 +82,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "./trained_models/moco_18_ski/skiPose_selected_images_20C_10%.txt"
             },
             "moco18Ski_estim_ski_random10%":{
@@ -93,6 +96,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "RANDOM_10"
             },
             "moco18Ski_estim_ski_25%":{
@@ -106,6 +110,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "./trained_models/moco_18_ski/skiPose_selected_images_20C_25%.txt"
             },
             "moco18Ski_estim_ski_random25%":{
@@ -119,6 +124,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "RANDOM_25"
             },
             "moco50Ski_estim_ski_random25%":{
@@ -132,6 +138,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "RANDOM_25"
             },
             "moco18Ski_estim_ski_50%":{
@@ -145,6 +152,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "./trained_models/moco_18_ski/skiPose_selected_images_20C_50%.txt"
             },
             "moco18Ski_estim_ski_random50%":{
@@ -158,6 +166,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "RANDOM_50"
             },
             "moco18Ski_estim_ski_full":{
@@ -171,6 +180,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "NONE"
             }
         }

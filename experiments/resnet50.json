@@ -49,6 +49,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "./trained_models/simsiam_50_ski/skiPose_selected_images_20C_5%.txt"
             },
             "simclr50Ski_estim_ski_5%":{
@@ -62,6 +63,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "./trained_models/simclr_50_ski/skiPose_selected_images_20C_5%.txt"
             },
             "resnet50_estim_ski_5%":{ 
@@ -75,6 +77,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "./trained_models/resnet50/skiPose_selected_images_20C_5%.txt"
             },
             "simsiam50Ski_estim_ski_random5%":{
@@ -88,6 +91,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "RANDOM_5"
             },
             "simclr50Ski_estim_ski_random5%":{
@@ -101,6 +105,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "RANDOM_5"
             },
             "resnet50_estim_ski_random5%":{
@@ -114,6 +119,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "RANDOM_5"
             },
             "simsiam50Ski_estim_ski_10%":{
@@ -127,6 +133,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "./trained_models/simsiam_50_ski/skiPose_selected_images_20C_10%.txt"
             },
             "simclr50Ski_estim_ski_10%":{
@@ -140,6 +147,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "./trained_models/simclr_50_ski/skiPose_selected_images_20C_10%.txt"
             },
             "resnet50_estim_ski_10%":{ 
@@ -153,6 +161,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "./trained_models/resnet50/skiPose_selected_images_20C_10%.txt"
             },
             "simsiam50Ski_estim_ski_random10%":{
@@ -166,6 +175,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "RANDOM_10"
             },
             "simclr50Ski_estim_ski_random10%":{
@@ -179,6 +189,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "RANDOM_10"
             },
             "resnet50_estim_ski_random10%":{
@@ -192,6 +203,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "RANDOM_10"
             },
             "simsiam50Ski_estim_ski_25%":{
@@ -205,6 +217,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "./trained_models/simsiam_50_ski/skiPose_selected_images_20C_25%.txt"
             },
             "simclr50Ski_estim_ski_25%":{
@@ -218,6 +231,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "./trained_models/simclr_50_ski/skiPose_selected_images_20C_25%.txt"
             },
             "resnet50_estim_ski_25%":{ 
@@ -231,6 +245,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "./trained_models/resnet50/skiPose_selected_images_20C_25%.txt"
             },
             "simsiam50Ski_estim_ski_random25%":{
@@ -244,6 +259,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "RANDOM_25"
             },
             "simclr50Ski_estim_ski_random25%":{
@@ -257,6 +273,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "RANDOM_25"
             },
             "resnet50_estim_ski_random25%":{
@@ -270,6 +287,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "RANDOM_25"
             },
             "simsiam50Ski_estim_ski_50%":{
@@ -283,6 +301,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "./trained_models/simsiam_50_ski/skiPose_selected_images_20C_50%.txt"
             },
             "simclr50Ski_estim_ski_50%":{
@@ -296,6 +315,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "./trained_models/simclr_50_ski/skiPose_selected_images_20C_50%.txt"
             },
             "resnet50_estim_ski_50%":{ 
@@ -309,6 +329,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "./trained_models/resnet50/skiPose_selected_images_20C_50%.txt"
             },
             "simsiam50Ski_estim_ski_random50%":{
@@ -322,6 +343,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "RANDOM_50"
             },
             "simclr50Ski_estim_ski_random50%":{
@@ -335,6 +357,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "RANDOM_50"
             },
             "resnet50_estim_ski_random50%":{
@@ -348,6 +371,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "RANDOM_50"
             },
             "simsiam50Ski_estim_ski_full":{
@@ -361,6 +385,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "NONE"
             },
             "simclr50Ski_estim_ski_full":{
@@ -374,6 +399,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "NONE"
             },
             "resnet50_estim_ski_full":{
@@ -387,6 +413,7 @@
                 "save_every": 100,
                 "LN": true,
                 "activation": "gelu",
+				"noise":0.5,
                 "use_cluster": "NONE"
             }
         }

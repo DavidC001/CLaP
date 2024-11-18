@@ -27,7 +27,7 @@ class Estimator(nn.Module):
         Estimation layer for pose estimation.
     """
 
-    def __init__(self, layers, output_dim=48, base_model="resnet18", layer_norm=True, activation="gelu"):
+    def __init__(self, layers, output_dim=48, base_model="resnet18", layer_norm=True, activation="gelu", noise=0.5):
         """
         Initialize the Linear layer.
 
@@ -37,6 +37,7 @@ class Estimator(nn.Module):
             base_model: str, base model, default is 'resnet18'
             layer_norm: bool, whether to use layer normalization, default is True
             activation: str, activation function, ['gelu', 'relu'], default is 'gelu'
+            noise: float, noise level, default is 0.5
         """
         super(Estimator, self).__init__()
         self.layers = nn.Sequential()
@@ -48,6 +49,9 @@ class Estimator(nn.Module):
         else:
             raise ValueError("Invalid base model")
         layers.append(output_dim)
+
+        self.noise = noise
+
         if layer_norm:
             self.LN = nn.LayerNorm(layers[0])
         for i in range(len(layers) - 1):
@@ -58,8 +62,14 @@ class Estimator(nn.Module):
                 self.layers.add_module("gelu" + str(i), nn.GELU() if activation == "gelu" else nn.ReLU())
 
     def forward(self, x):
+
         if hasattr(self, "LN"):
             x = self.LN(x)
+        
+        # if in training mode, add gaussian noise
+        if self.training:
+            x = x + torch.randn_like(x) * self.noise
+
         z = self.layers(x)
         return z
 
@@ -73,6 +83,7 @@ def getPoseEstimModel(
     base_model="resnet18",
     layer_norm=True,
     activation="gelu",
+    noise=0.5,
 ):
     """
     Get the pose estimation model.
@@ -86,6 +97,7 @@ def getPoseEstimModel(
         base_model: str, base model, default is 'resnet18'
         layer_norm: bool, whether to use layer normalization, default is True
         activation: str, activation function, default is 'gelu'
+        noise: float, noise level, default is 0.5
 
     Returns:
         base: torch.nn.Module, pose estimation model with the specified weights
@@ -110,6 +122,6 @@ def getPoseEstimModel(
     elif model_type == "moco":
         base.module = base.module.encoder_q
     
-    base.module.fc = Estimator(layers, out_dim, base_model, layer_norm, activation)
+    base.module.fc = Estimator(layers, out_dim, base_model, layer_norm, activation, noise)
 
     return base.to(device)
