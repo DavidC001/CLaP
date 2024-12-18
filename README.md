@@ -48,12 +48,7 @@ Configuration files in experiments contain hyperparameters and model settings:
 - `moco.json`: MoCo-specific configurations
 
 ## Datasets
-The framework supports multiple datasets:
-- Ski-PTZ: A ski pose estimation dataset
-- ITOP: Indoor human pose dataset
-- CMU Panoptic: Multi-view pose dataset
-
-However the fully supported dataset is Ski-PTZ, used in the paper. The dataset is not publicly available, but can be requested from the authors.
+The SkiPose dataset is not publicly available, but can be requested from the authors.
 
 ## Key Features
 Multiple contrastive learning approaches (SimCLR, SimSiam, MoCo, LASCon)
