@@ -1,3 +1,7 @@
+"""
+Visualize the data using the SimCLR model.
+"""
+
 import os
 import torch
 import torch.nn as nn
