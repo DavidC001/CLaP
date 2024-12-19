@@ -1,4 +1,5 @@
 # CLaP: Contrast Label Predict for Human Pose Estimation
+![image](https://github.com/user-attachments/assets/d8b07e5d-b4c4-4be2-be88-f70f9fcfbe49)
 This repository contains the implementation of CLaP, a framework that leverages contrastive learning for human pose estimation in data-constrained domains.
 
 ## Overview
