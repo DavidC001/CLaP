@@ -7,10 +7,13 @@ import re
 import matplotlib.pyplot as plt
 import torchvision.transforms as T
 
+from torchvision.models import resnet18, resnet50, ResNet18_Weights, ResNet50_Weights
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 dataset = "skiPose"
-path = 'trained_models/simclr_50_skiPan/'
+backbone = "resnet18"  # Options: "resnet18", "resnet50"
+path = 'trained_models/simclr_18_ski/'
 #both_bigger batch huge bias on skin color!
 
 
@@ -28,8 +31,6 @@ class MLP(nn.Module):
 
     def forward(self, x):
         return x, self.layers(x)
-    
-from torchvision.models import resnet50, ResNet50_Weights
 
 
 def get_simclr_net():
@@ -42,9 +43,15 @@ def get_simclr_net():
     Returns:
         model (nn.Module): SimCLR network model.
     """
-    weights = ResNet50_Weights.DEFAULT
-    model = resnet50(weights=weights)
-    model.fc = MLP(2048, 2048, 128)
+    if backbone == "resnet18":
+        weights = ResNet18_Weights.DEFAULT
+        model = resnet18(weights=weights)
+    elif backbone == "resnet50":
+        weights = ResNet50_Weights.DEFAULT
+        model = resnet50(weights=weights)
+    
+    emb_dim = model.fc.in_features
+    model.fc = MLP(emb_dim, emb_dim, 128)
     model = nn.DataParallel(model)
 
     return model
