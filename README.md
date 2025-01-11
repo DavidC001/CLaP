@@ -58,8 +58,13 @@ Multi-view and data augmentation strategies
 TensorBoard integration for training visualization
 Configurable training parameters via JSON files
 
+# Citation
+If you find this work useful, consider citing the paper
+
 
 # Authors
 - [Davide Cavicchini](https://github.com/DavidC001)
 - [Alessia Pivotto](https://github.com/AlessiaPivotto)
 - [Sofia Lorengo](https://github.com/sofy01)
+- Andrea Rosani
+- Nicola Garau
