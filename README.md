@@ -60,7 +60,16 @@ Configurable training parameters via JSON files
 
 # Citation
 If you find this work useful, consider citing the paper
-
+```
+@InProceedings{Cavicchini_2025_WACV,
+    author    = {Cavicchini, Davide and Pivotto, Alessia and Lorengo, Sofia and Rosani, Andrea and Garau, Nicola},
+    title     = {CLaP - Contrast Label Predict: a quest for cheaper labeling in 3D human pose estimation},
+    booktitle = {Proceedings of the Winter Conference on Applications of Computer Vision (WACV) Workshops},
+    month     = {February},
+    year      = {2025},
+    pages     = {1276-1284}
+}
+```
 
 # Authors
 - [Davide Cavicchini](https://github.com/DavidC001)
